@@ -30,6 +30,13 @@ ENV LD_LIBRARY_PATH /usr/bin/snowflake_odbc/lib
 
 # snowflake - charset settings
 ENV LANG en_US.UTF-8
+ENV LC_ALL=C.UTF-8
+
+# install snowsql
+ADD snowsql-linux_x86_64.bash /usr/bin
+RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
+RUN rm /usr/bin/snowsql-linux_x86_64.bash
+RUN snowsql -v
 
 # install composer
 RUN cd \

@@ -5,6 +5,11 @@ use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Snowflake\Connection;
+use Keboola\DbExtractor\Snowflake\Exception;
+use Keboola\StorageApi\Client;
+use Keboola\StorageApi\Options\FileUploadOptions;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Yaml\Yaml;
 
 class Snowflake extends Extractor
 {
@@ -12,21 +17,211 @@ class Snowflake extends Extractor
 
 	private $dbConfig;
 
+	/**
+	 * @var Connection
+	 */
+	protected $db;
+
+	/**
+	 * @var \SplFileInfo
+	 */
+	private $snowSqlConfig;
+
+	private $warehouse;
+	private $database;
+	private $schema;
+
 	public function createConnection($dbParams)
 	{
+		$this->snowSqlConfig = $this->crateSnowSqlConfig($dbParams);
+
 		$connection = new Connection($dbParams);
 		$connection->query(sprintf("ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = %d", self::STATEMENT_TIMEOUT_IN_SECONDS));
+
+		$this->database = $dbParams['database'];
+		$this->schema = $dbParams['schema'];
+
 		return $connection;
 	}
 
-	private function restartConnection()
+	private function quote($value)
 	{
-		$this->db = null;
-		try {
-			$this->db = $this->createConnection($this->dbConfig);
-		} catch (\Exception $e) {
-			throw new UserException(sprintf("Error connecting to DB: %s", $e->getMessage()), 0, $e);
+		return "'" . addslashes($value) . "'";
+	}
+
+
+	/***
+	 * Create stage in snowflake
+	 */
+	private function createStage()
+	{
+		$this->logger->info("Snowflake stage for export prepare: start");
+
+		$sql = sprintf(
+			"
+			CREATE OR REPLACE STAGE %s;
+			",
+			$this->generateStageName()
+		);
+
+		$this->logger->debug($sql);
+		$this->db->query($sql);
+
+		$this->logger->info("Snowflake stage for export prepare: end");
+	}
+
+	/***
+	 * Drop stage in snowflake
+	 */
+	private function dropStage()
+	{
+		$this->logger->info("Snowflake stage for export drop: start");
+
+		$sql = sprintf(
+			"
+			DROP STAGE IF EXISTS %s;
+			",
+			$this->generateStageName()
+		);
+
+		$this->logger->debug($sql);
+		$this->db->query($sql);
+
+		$this->logger->info("Snowflake stage for export drop: end");
+	}
+
+	/**
+	 * @param $output
+	 * @param $path
+	 * @return \SplFileInfo[]
+	 */
+	private function parseFiles($output, $path)
+	{
+		$files = [];
+		$lines = explode("\n", $output);
+
+		foreach ($lines as $line) {
+			$matches = [];
+			if (preg_match('/\| ([a-z0-9\_\-\.]+\.gz) \|/ui', $line, $matches) && preg_match('/ downloaded /ui', $line)) {
+				$file = new \SplFileInfo($path . '/' . $matches[1]);
+				if ($file->isFile()) {
+					$files[] = $file;
+				} else {
+					//@FIXME maybe exception ?
+				}
+			}
 		}
+
+		return $files;
+	}
+
+	private function exportAndDownload(array $table)
+	{
+		$this->logger->info("Snowflake copy data to stage: start");
+
+		$csvOptions = [];
+		$csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
+		$csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
+		$csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
+		$csvOptions[] = sprintf("HEADER = true");
+
+		$sql = sprintf(
+			"
+			COPY INTO @%s/%s
+			FROM (%s)
+			
+			FILE_FORMAT = (TYPE=CSV %s)
+			;
+			",
+			$this->generateStageName(),
+			str_replace('.', '_', $table['outputTable']),
+			$table['query'],
+			implode(' ', $csvOptions)
+		);
+
+		$this->logger->debug($sql);
+		$this->db->query($sql);
+
+		$this->logger->info("Snowflake stage for export drop: end");
+
+		$this->logger->info("Snowflake get data: start");
+
+		@mkdir($this->dataDir . '/out/tables', 0770, true);
+
+		$sql = [];
+		$sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
+		$sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+		$sql[] = sprintf(
+			'GET @%s/%s file://%s;',
+			$this->generateStageName(),
+			str_replace('.', '_', $table['outputTable']),
+			$this->dataDir . '/out/tables/'
+		);
+
+		$snowSql = new \SplFileInfo($this->dataDir . '/snowsql.sql');
+		file_put_contents($snowSql, implode("\n", $sql));
+
+		$this->logger->debug(implode("\n", $sql));
+
+		// execute external
+		$command = sprintf(
+			"snowsql --noup --config %s -c keboola -f %s", //@FIXME parse account from host
+			$this->snowSqlConfig,
+			$snowSql
+		);
+
+		$this->logger->debug($command);
+
+
+		$process = new Process($command, null, null, null, self::STATEMENT_TIMEOUT_IN_SECONDS);
+		$process->run();
+
+		if (!$process->isSuccessful()) {
+			throw new \Exception("File download error occured");
+		}
+
+		$csvFiles = $this->parseFiles($process->getOutput(), $this->dataDir . '/out/tables');
+		foreach ($csvFiles AS $csvFile) {
+			$manifestData = [
+				'destination' => $table['outputTable'],
+				'delimiter' => CsvFile::DEFAULT_DELIMITER,
+				'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
+				'primary_key' => $table['primaryKey'],
+				'incremental' => $table['incremental'],
+
+			];
+
+			file_put_contents($csvFile . '.manifest', Yaml::dump($manifestData));
+		}
+	}
+
+	private function generateStageName()
+	{
+		return 'snowExRunId_' . str_replace('.', '_', getenv('KBC_RUNID'));
+	}
+
+	/**
+	 * @param $dbParams
+	 * @return \SplFileInfo
+	 */
+	private function crateSnowSqlConfig($dbParams)
+	{
+		$cliConfig[] = '';
+		$cliConfig[] = '[options]';
+		$cliConfig[] = 'exit_on_error = true';
+		$cliConfig[] = '';
+		$cliConfig[] = '[connections.keboola]'; //@FIXME parse account from host
+		$cliConfig[] = sprintf('accountname = %s', 'keboola'); //@FIXME parse account from host
+		$cliConfig[] = sprintf('username = %s', $dbParams['user']);
+		$cliConfig[] = sprintf('password = %s', $dbParams['password']);
+		$cliConfig[] = sprintf('dbname = %s', $dbParams['database']);
+		$cliConfig[] = sprintf('schemaname = %s', $dbParams['schema']);
+		//$cliConfig[] = sprintf('warehousename = %s', $dbParams['user']);
+
+		$file = new \SplFileInfo($this->dataDir . '/snowsql.config');
+
+		file_put_contents($file, implode("\n", $cliConfig));
+		return $file;
 	}
 
 	public function export(array $table)
@@ -35,111 +230,27 @@ class Snowflake extends Extractor
 
 		$this->logger->info("Exporting to " . $outputTable);
 
-		$query = $table['query'];
 
-		$tries = 0;
-		$exception = null;
+		$this->createStage(); //@FIXME for all
 
-		$csvCreated = false;
-		while ($tries < 5) {
-			$exception = null;
-			try {
-				if ($tries > 0) {
-					$this->logger->info("Retrying query");
-					$this->restartConnection();
-				}
-				$csvCreated = $this->executeQuery($query, $this->createOutputCsv($outputTable));
-				break;
-			} catch (\PDOException $e) {
-				$exception = new UserException("DB query failed: " . $e->getMessage(), 0, $e);
-			}
 
-			sleep(pow($tries, 2));
-			$tries++;
-		}
+		$this->exportAndDownload($table);
 
-		if ($exception) {
-			throw $exception;
-		}
+		$this->dropStage(); //@FIXME for all
 
-		if ($csvCreated) {
-			if ($this->createManifest($table) === false) {
-				throw new ApplicationException("Unable to create manifest", 0, null, [
-					'table' => $table
-				]);
-			}
-		}
+//		if ($csvCreated) {
+//			if ($this->createManifest($table) === false) {
+//				throw new ApplicationException("Unable to create manifest", 0, null, [
+//					'table' => $table
+//				]);
+//			}
+//		}
 
 		return $outputTable;
 	}
 
 	protected function executeQuery($query, CsvFile $csv)
 	{
-		$cursorName = 'exdbcursor' . intval(microtime(true));
-
-		$curSql = "DECLARE $cursorName CURSOR FOR $query";
-
-		try {
-			$this->db->beginTransaction(); // cursors require a transaction.
-			$stmt = $this->db->prepare($curSql);
-			$stmt->execute();
-			$innerStatement = $this->db->prepare("FETCH 1 FROM $cursorName");
-			$innerStatement->execute();
-
-			// write header and first line
-			$resultRow = $innerStatement->fetch(\PDO::FETCH_ASSOC);
-
-			if (is_array($resultRow) && !empty($resultRow)) {
-				$csv->writeRow(array_keys($resultRow));
-
-				if (isset($this->dbConfig['replaceNull'])) {
-					$resultRow = $this->replaceNull($resultRow, $this->dbConfig['replaceNull']);
-				}
-				$csv->writeRow($resultRow);
-
-				// write the rest
-				$innerStatement = $this->db->prepare("FETCH 5000 FROM $cursorName");
-
-				while ($innerStatement->execute() && count($resultRows = $innerStatement->fetchAll(\PDO::FETCH_ASSOC)) > 0) {
-					foreach ($resultRows as $resultRow) {
-						if (isset($this->dbConfig['replaceNull'])) {
-							$resultRow = $this->replaceNull($resultRow, $this->dbConfig['replaceNull']);
-						}
-						$csv->writeRow($resultRow);
-					}
-				}
-
-				// close the cursor
-				$this->db->exec("CLOSE $cursorName");
-				$this->db->commit();
-
-				return true;
-			} else {
-				$this->logger->warning("Query returned empty result. Nothing was imported.");
-
-				return false;
-			}
-		} catch (\PDOException $e) {
-			try {
-				$this->db->rollBack();
-			} catch (\Exception $e2) {
-
-			}
-			$innerStatement = null;
-			$stmt = null;
-			throw $e;
-		}
-	}
-
-	private function replaceNull($row, $value)
-	{
-		foreach ($row as $k => $v) {
-			if ($v === null) {
-				$row[$k] = $value;
-			}
-		}
-
-		return $row;
 	}
 
 	public function testConnection()
