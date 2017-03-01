@@ -123,7 +123,6 @@ class Snowflake extends Extractor
 		$csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
 		$csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
 		$csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
-		$csvOptions[] = sprintf("HEADER = true");
 
 		$sql = sprintf(
 			"
@@ -131,6 +130,7 @@ class Snowflake extends Extractor
 			FROM (%s)
 			
 			FILE_FORMAT = (TYPE=CSV %s)
+			HEADER = true
 			;
 			",
 			$this->generateStageName(),
