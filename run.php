@@ -17,57 +17,53 @@ require_once(dirname(__FILE__) . "/vendor/keboola/db-extractor-common/bootstrap.
 $logger = new \Keboola\DbExtractor\Logger(APP_NAME);
 
 try {
-	$runAction = true;
+    $runAction = true;
 
-	$arguments = getopt("d::", ["data::"]);
-	if (!isset($arguments["data"])) {
-		throw new UserException('Data folder not set.');
-	}
+    $arguments = getopt("d::", ["data::"]);
+    if (!isset($arguments["data"])) {
+        throw new UserException('Data folder not set.');
+    }
 
-	$app = new SnowflakeApplication(
-		Yaml::parse(
-			file_get_contents($arguments["data"] . "/config.yml")
-		),
-		$arguments["data"]
-	);
+    $app = new SnowflakeApplication(
+        Yaml::parse(
+            file_get_contents($arguments["data"] . "/config.yml")
+        ),
+        $arguments["data"]
+    );
 
-	if ($app['action'] !== 'run') {
-		$app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));
-		$runAction = false;
-	}
+    if ($app['action'] !== 'run') {
+        $app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));
+        $runAction = false;
+    }
 
-	$result = $app->run();
+    $result = $app->run();
 
-	if (!$runAction) {
-		echo json_encode($result);
-	}
+    if (!$runAction) {
+        echo json_encode($result);
+    }
 
-	$app['logger']->log('info', "Extractor finished successfully.");
-	exit(0);
-} catch(UserException $e) {
+    $app['logger']->log('info', "Extractor finished successfully.");
+    exit(0);
+} catch (UserException $e) {
+    $logger->log('error', $e->getMessage(), (array) $e->getData());
 
-	$logger->log('error', $e->getMessage(), (array) $e->getData());
+    if (!$runAction) {
+        echo $e->getMessage();
+    }
 
-	if (!$runAction) {
-		echo $e->getMessage();
-	}
+    exit(1);
+} catch (ApplicationException $e) {
+    $logger->log('error', $e->getMessage(), (array) $e->getData());
+    exit(2);
+} catch (\Exception $e) {
+//    $logger->log('error', $e->getMessage(), [
+//        'errFile' => $e->getFile(),
+//        'errLine' => $e->getLine(),
+//        'trace' => $e->getTrace()
+//    ]);
 
-	exit(1);
-} catch(ApplicationException $e) {
+    print $e->getMessage();
+    print $e->getTraceAsString();
 
-	$logger->log('error', $e->getMessage(), (array) $e->getData());
-	exit(2);
-
-} catch(\Exception $e) {
-
-//	$logger->log('error', $e->getMessage(), [
-//		'errFile' => $e->getFile(),
-//		'errLine' => $e->getLine(),
-//		'trace' => $e->getTrace()
-//	]);
-
-	print $e->getMessage();
-	print $e->getTraceAsString();
-
-	exit(2);
+    exit(2);
 }

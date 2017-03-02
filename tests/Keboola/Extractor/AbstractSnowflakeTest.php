@@ -150,8 +150,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     protected function countTable(CsvFile $file)
     {
         $linesCount = 0;
-        foreach ($file AS $i => $line)
-        {
+        foreach ($file as $i => $line) {
             // skip header
             if (!$i) {
                 continue;

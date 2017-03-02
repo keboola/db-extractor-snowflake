@@ -104,7 +104,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $this->assertCount($expectedFiles, $files);
 
-        foreach ($files AS $file) {
+        foreach ($files as $file) {
             // manifest validation
             $params = Yaml::parse(file_get_contents($file));
 

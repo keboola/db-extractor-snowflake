@@ -192,7 +192,7 @@ class Snowflake extends Extractor
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $this->dataDir . '/out/tables');
-        foreach ($csvFiles AS $csvFile) {
+        foreach ($csvFiles as $csvFile) {
             $manifestData = [
                 'destination' => $table['outputTable'],
                 'delimiter' => CsvFile::DEFAULT_DELIMITER,
@@ -231,7 +231,7 @@ class Snowflake extends Extractor
         $cliConfig[] = sprintf('schemaname = %s', $dbParams['schema']);
         //$cliConfig[] = sprintf('warehousename = %s', $dbParams['user']);
 
-        $file = $this->temp->createFile('snowsql.config');;
+        $file = $this->temp->createFile('snowsql.config');
         file_put_contents($file, implode("\n", $cliConfig));
 
         return $file;
@@ -273,5 +273,4 @@ class Snowflake extends Extractor
     {
         return preg_replace("/(AWS_[A-Z_]*\\s=\\s.)[0-9A-Za-z\\/\\+=]*./", '${1}...\'', $query);
     }
-
 }
