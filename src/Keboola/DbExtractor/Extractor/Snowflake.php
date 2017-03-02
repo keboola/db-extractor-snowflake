@@ -2,12 +2,10 @@
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractor\Logger;
 use Keboola\DbExtractor\Snowflake\Connection;
-use Keboola\DbExtractor\Snowflake\Exception;
-use Keboola\StorageApi\Client;
-use Keboola\StorageApi\Options\FileUploadOptions;
+use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
@@ -30,6 +28,18 @@ class Snowflake extends Extractor
 	private $warehouse;
 	private $database;
 	private $schema;
+
+	/**
+	 * @var Temp
+	 */
+	private $temp;
+
+	public function __construct($parameters, Logger $logger)
+	{
+		$this->temp = new Temp('ex-snowflake');
+
+		parent::__construct($parameters, $logger);
+	}
 
 	public function createConnection($dbParams)
 	{
@@ -64,7 +74,7 @@ class Snowflake extends Extractor
 			$this->generateStageName()
 		);
 
-		$this->logger->debug($sql);
+		$this->logger->debug(trim($sql));
 		$this->db->query($sql);
 
 		$this->logger->info("Snowflake stage for export prepare: end");
@@ -84,7 +94,7 @@ class Snowflake extends Extractor
 			$this->generateStageName()
 		);
 
-		$this->logger->debug($sql);
+		$this->logger->debug(trim($sql));
 		$this->db->query($sql);
 
 		$this->logger->info("Snowflake stage for export drop: end");
@@ -139,7 +149,7 @@ class Snowflake extends Extractor
 			implode(' ', $csvOptions)
 		);
 
-		$this->logger->debug($sql);
+		$this->logger->debug(trim($sql));
 		$this->db->query($sql);
 
 		$this->logger->info("Snowflake stage for export drop: end");
@@ -158,19 +168,20 @@ class Snowflake extends Extractor
 			$this->dataDir . '/out/tables/'
 		);
 
-		$snowSql = new \SplFileInfo($this->dataDir . '/snowsql.sql');
+
+		$snowSql = $this->temp->createTmpFile('snowsql.sql');
 		file_put_contents($snowSql, implode("\n", $sql));
 
-		$this->logger->debug(implode("\n", $sql));
+		$this->logger->debug(trim(implode("\n", $sql)));
 
 		// execute external
 		$command = sprintf(
-			"snowsql --noup --config %s -c keboola -f %s", //@FIXME parse account from host
+			"snowsql --noup --config %s -c downloader -f %s",
 			$this->snowSqlConfig,
 			$snowSql
 		);
 
-		$this->logger->debug($command);
+		$this->logger->debug(trim($command));
 
 
 		$process = new Process($command, null, null, null, self::STATEMENT_TIMEOUT_IN_SECONDS);
@@ -206,21 +217,23 @@ class Snowflake extends Extractor
 	 */
 	private function crateSnowSqlConfig($dbParams)
 	{
+		$hostParts = explode('.', $dbParams['host']);
+
 		$cliConfig[] = '';
 		$cliConfig[] = '[options]';
 		$cliConfig[] = 'exit_on_error = true';
 		$cliConfig[] = '';
-		$cliConfig[] = '[connections.keboola]'; //@FIXME parse account from host
-		$cliConfig[] = sprintf('accountname = %s', 'keboola'); //@FIXME parse account from host
+		$cliConfig[] = '[connections.downloader]';
+		$cliConfig[] = sprintf('accountname = %s', reset($hostParts));
 		$cliConfig[] = sprintf('username = %s', $dbParams['user']);
 		$cliConfig[] = sprintf('password = %s', $dbParams['password']);
 		$cliConfig[] = sprintf('dbname = %s', $dbParams['database']);
 		$cliConfig[] = sprintf('schemaname = %s', $dbParams['schema']);
 		//$cliConfig[] = sprintf('warehousename = %s', $dbParams['user']);
 
-		$file = new \SplFileInfo($this->dataDir . '/snowsql.config');
-
+		$file = $this->temp->createFile('snowsql.config');;
 		file_put_contents($file, implode("\n", $cliConfig));
+
 		return $file;
 	}
 

@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "50b9482ff1d66e837c2fea7c177b949f",
-    "content-hash": "304356ec83bb8e3a9c49fc962b769faf",
+    "hash": "ad8d8f8101efc4f2dd37b8088cc8687c",
+    "content-hash": "b5528c6d7a45aff903edd55968256e70",
     "packages": [
         {
             "name": "keboola/csv",
@@ -79,6 +79,55 @@
                 }
             ],
             "time": "2017-01-27 11:19:43"
+        },
+        {
+            "name": "keboola/php-temp",
+            "version": "0.1.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/keboola/php-temp.git",
+                "reference": "ffe345e78ba0d35d970fc26fe2c1a36f7d20ca8c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/keboola/php-temp/zipball/ffe345e78ba0d35d970fc26fe2c1a36f7d20ca8c",
+                "reference": "ffe345e78ba0d35d970fc26fe2c1a36f7d20ca8c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "symfony/filesystem": ">2.1.0"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "dev-master",
+                "phpunit/phpunit": "^5.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Keboola\\Temp": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Miro Cillik",
+                    "email": "miro@keboola.cz"
+                },
+                {
+                    "name": "Ondrej Vana",
+                    "email": "kachna@keboola.cz"
+                }
+            ],
+            "description": "Temp service - handles application's temporary files",
+            "keywords": [
+                "filesystem",
+                "temp"
+            ],
+            "time": "2016-03-23 17:48:01"
         },
         {
             "name": "keboola/ssh-tunnel",
