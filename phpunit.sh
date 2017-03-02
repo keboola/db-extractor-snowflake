@@ -38,4 +38,8 @@ export SNOWFLAKE_DB_SSH_KEY_PUBLIC="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC2tGpP
 export ROOT_PATH="/code"
 
 rm -rf ./tests/data/out
+rm -f ./tests/data/runAction/config.yml
+rm -rf ./tests/data/runAction/out
+rm -f ./tests/data/connectionAction/config.yml
+rm -rf ./tests/data/connectionAction/out
 ./vendor/bin/phpunit

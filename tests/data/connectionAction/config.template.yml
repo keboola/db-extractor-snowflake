@@ -1,0 +1,29 @@
+action: testConnection
+parameters:
+    tables:
+        -
+            id: 1
+            name: sales
+            query: SELECT * FROM "sales"
+            outputTable: in.c-main.sales
+            incremental: false
+            primaryKey: null
+            enabled: true
+        -
+            id: 2
+            name: escaping
+            query: SELECT * FROM "escaping"
+            outputTable: in.c-main.escaping
+            incremental: false
+            primaryKey:
+              -  col1
+            enabled: true
+        -
+            id: 3
+            name: somedata
+            query: SELECT * FROM "somedata"
+            outputTable: in.c-main.somedata
+            incremental: true
+            primaryKey:
+              -  somedataId
+            enabled: false
