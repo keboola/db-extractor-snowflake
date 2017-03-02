@@ -13,8 +13,6 @@ class Snowflake extends Extractor
 {
 	const STATEMENT_TIMEOUT_IN_SECONDS = 900; //@FIXME why?
 
-	private $dbConfig;
-
 	/**
 	 * @var Connection
 	 */
@@ -133,6 +131,8 @@ class Snowflake extends Extractor
 		$csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
 		$csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
 		$csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
+		$csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
+		$csvOptions[] = sprintf("NULL_IF=()");
 
 		$sql = sprintf(
 			"
@@ -243,21 +243,9 @@ class Snowflake extends Extractor
 
 		$this->logger->info("Exporting to " . $outputTable);
 
-
 		$this->createStage(); //@FIXME for all
-
-
 		$this->exportAndDownload($table);
-
 		$this->dropStage(); //@FIXME for all
-
-//		if ($csvCreated) {
-//			if ($this->createManifest($table) === false) {
-//				throw new ApplicationException("Unable to create manifest", 0, null, [
-//					'table' => $table
-//				]);
-//			}
-//		}
 
 		return $outputTable;
 	}
@@ -268,7 +256,7 @@ class Snowflake extends Extractor
 
 	public function testConnection()
 	{
-		$this->execQuery('SELECT current_date;');
+		$this->db->query('SELECT current_date;');
 	}
 
 	private function execQuery($query)
