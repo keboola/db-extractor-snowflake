@@ -152,7 +152,7 @@ class Snowflake extends Extractor
         $this->logger->debug(trim($sql));
         $this->db->query($sql);
 
-        $this->logger->info("Snowflake stage for export drop: end");
+        $this->logger->info("Snowflake copy data to stage: end");
 
         $this->logger->info("Snowflake get data: start");
 
@@ -203,6 +203,7 @@ class Snowflake extends Extractor
             ];
 
             file_put_contents($csvFile . '.manifest', Yaml::dump($manifestData));
+            file_put_contents($csvFile->getPath() . '/' . $csvFile->getBasename('.gz') . '.manifest', Yaml::dump($manifestData));
         }
     }
 
