@@ -202,7 +202,11 @@ class Snowflake extends Extractor
 
             ];
 
-            file_put_contents($csvFile . '.manifest', Yaml::dump($manifestData));
+            exec("gunzip -d " . escapeshellarg($csvFile), $output, $return);
+            if ($return !== 0) {
+                throw new \Exception("Cannot unzip file:" . $csvFile);
+            }
+
             file_put_contents($csvFile->getPath() . '/' . $csvFile->getBasename('.gz') . '.manifest', Yaml::dump($manifestData));
         }
     }
