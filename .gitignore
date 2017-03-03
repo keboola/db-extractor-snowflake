@@ -6,3 +6,9 @@ composer.phar
 runtests.sh
 test.php
 tests/data/out/
+tests/data/connectionAction/config.yml
+tests/data/connectionAction/out/
+tests/data/runAction/config.yml
+tests/data/runAction/out/
+snowflake_linux_x8664_odbc.tgz
+snowsql-linux_x86_64.bash
