@@ -60,7 +60,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertCount(2, $result['imported']);
 
         foreach ($config['parameters']['tables'] as $table) {
-            $this->validateExtraction($table, $table['enabled'] ? 1 : 0);
+            $this->validateExtraction($table, $table['enabled'] ? 2 : 0);
         }
 
         $outCsv1 = new CsvFile($this->dataDir . '/out/tables/in_c-main_sales_0_0_0.csv');
@@ -136,6 +136,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
             clearstatcache();
             $this->assertTrue($csvFile->isFile());
+            break;
         }
     }
 }
