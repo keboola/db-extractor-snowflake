@@ -141,6 +141,7 @@ class Snowflake extends Extractor
             
             FILE_FORMAT = (TYPE=CSV %s)
             HEADER = true
+            MAX_FILE_SIZE=50000000
             ;
             ",
             $this->generateStageName(),
@@ -202,12 +203,7 @@ class Snowflake extends Extractor
 
             ];
 
-            exec("gunzip -d " . escapeshellarg($csvFile), $output, $return);
-            if ($return !== 0) {
-                throw new \Exception("Cannot unzip file:" . $csvFile);
-            }
-
-            file_put_contents($csvFile->getPath() . '/' . $csvFile->getBasename('.gz') . '.manifest', Yaml::dump($manifestData));
+            file_put_contents($csvFile . '.manifest', Yaml::dump($manifestData));
         }
     }
 

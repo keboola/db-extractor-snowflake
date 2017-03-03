@@ -125,7 +125,14 @@ class SnowflakeTest extends AbstractSnowflakeTest
             }
 
             // archive validation
-            $csvFile = new \SplFileInfo(str_replace('.manifest', '', $file));
+            $archiveFile = new \SplFileInfo(str_replace('.manifest', '', $file));
+            $csvFile = new \SplFileInfo(str_replace('.gz', '', $archiveFile));
+
+            clearstatcache();
+            $this->assertFalse($csvFile->isFile());
+
+            exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
+            $this->assertEquals(0, $return);
 
             clearstatcache();
             $this->assertTrue($csvFile->isFile());
