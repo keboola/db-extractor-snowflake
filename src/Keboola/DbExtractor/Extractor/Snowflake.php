@@ -63,8 +63,6 @@ class Snowflake extends Extractor
      */
     private function createStage()
     {
-        $this->logger->info("Snowflake stage for export prepare: start");
-
         $sql = sprintf(
             "
             CREATE OR REPLACE STAGE %s;
@@ -72,10 +70,7 @@ class Snowflake extends Extractor
             $this->generateStageName()
         );
 
-        $this->logger->debug(trim($sql));
-        $this->db->query($sql);
-
-        $this->logger->info("Snowflake stage for export prepare: end");
+        $this->execQuery($sql);
     }
 
     /***
@@ -83,8 +78,6 @@ class Snowflake extends Extractor
      */
     private function dropStage()
     {
-        $this->logger->info("Snowflake stage for export drop: start");
-
         $sql = sprintf(
             "
             DROP STAGE IF EXISTS %s;
@@ -92,10 +85,7 @@ class Snowflake extends Extractor
             $this->generateStageName()
         );
 
-        $this->logger->debug(trim($sql));
-        $this->db->query($sql);
-
-        $this->logger->info("Snowflake stage for export drop: end");
+        $this->execQuery($sql);
     }
 
     /**
@@ -125,8 +115,6 @@ class Snowflake extends Extractor
 
     private function exportAndDownload(array $table)
     {
-        $this->logger->info("Snowflake copy data to stage: start");
-
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
@@ -150,10 +138,7 @@ class Snowflake extends Extractor
             implode(' ', $csvOptions)
         );
 
-        $this->logger->debug(trim($sql));
-        $this->db->query($sql);
-
-        $this->logger->info("Snowflake copy data to stage: end");
+        $this->execQuery($sql);
 
         $this->logger->info("Snowflake get data: start");
 
@@ -262,7 +247,10 @@ class Snowflake extends Extractor
 
     private function execQuery($query)
     {
-        $this->logger->info(sprintf("Executing query '%s'", $this->hideCredentialsInQuery($query)));
+        $logQuery = $this->hideCredentialsInQuery($query);
+        $logQuery = trim(preg_replace('/\s+/', ' ', $logQuery));
+
+        $this->logger->info(sprintf("Executing query '%s'", $logQuery));
         try {
             $this->db->query($query);
         } catch (\Exception $e) {
