@@ -63,9 +63,10 @@ class Snowflake extends Extractor
      */
     private function createStage()
     {
+        return;
         $sql = sprintf(
             "
-            CREATE OR REPLACE STAGE %s;
+            CREATE TEMPORARY STAGE %s;
             ",
             $this->generateStageName()
         );
@@ -78,6 +79,7 @@ class Snowflake extends Extractor
      */
     private function dropStage()
     {
+        return;
         $sql = sprintf(
             "
             DROP STAGE IF EXISTS %s;
@@ -130,6 +132,7 @@ class Snowflake extends Extractor
             FILE_FORMAT = (TYPE=CSV %s)
             HEADER = true
             MAX_FILE_SIZE=50000000
+            OVERWRITE = TRUE
             ;
             ",
             $this->generateStageName(),
@@ -194,6 +197,7 @@ class Snowflake extends Extractor
 
     private function generateStageName()
     {
+        return '~';
         return 'snowExRunId_' . str_replace('.', '_', getenv('KBC_RUNID'));
     }
 
