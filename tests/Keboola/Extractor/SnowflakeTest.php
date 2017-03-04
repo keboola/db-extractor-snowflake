@@ -18,6 +18,69 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->connection = new Connection($config['parameters']['db']);
     }
 
+    private function getUserDefaultWarehouse($user)
+    {
+        $sql = sprintf(
+            "DESC USER %s;",
+            $this->connection->quoteIdentifier($user)
+        );
+
+        $config = $this->connection->fetchAll($sql);
+
+        foreach ($config as $item) {
+            if ($item['property'] === 'DEFAULT_WAREHOUSE') {
+                return $item['value'] === 'null' ? null : $item['value'];
+            }
+        }
+
+        return null;
+    }
+
+    public function testDefaultWarehouse()
+    {
+        $config = $this->getConfig();
+        $user = $config['parameters']['db']['user'];
+        $warehouse = $config['parameters']['db']['warehouse'];
+
+        // reset warehouse
+        $sql = sprintf(
+            "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
+            $this->connection->quoteIdentifier($user)
+        );
+        $this->connection->query($sql);
+
+        $this->assertEmpty($this->getUserDefaultWarehouse($user));
+
+        $this->connection->query($sql);
+
+        // run without warehouse param
+        unset($config['parameters']['db']['warehouse']);
+        $app = $this->createApplication($config);
+
+        try {
+            $app->run();
+            $this->fail('Run extractor without warehouse should fail');
+        } catch (\Exception $e) {
+            $this->assertRegExp('/No active warehouse/ui', $e->getMessage());
+        }
+
+        // run with warehouse param
+        $config = $this->getConfig();
+        $app = $this->createApplication($config);
+
+        $result = $app->run();
+        $this->assertEquals('success', $result['status']);
+        $this->assertCount(2, $result['imported']);
+
+        // restore default warehouse
+        $sql = sprintf(
+            "ALTER USER %s SET DEFAULT_WAREHOUSE = %s;",
+            $this->connection->quoteIdentifier($user),
+            $this->connection->quoteIdentifier($warehouse)
+        );
+        $this->connection->query($sql);
+    }
+
     public function testCredentials()
     {
         $config = $this->getConfig();

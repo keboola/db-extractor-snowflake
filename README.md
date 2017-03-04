@@ -7,6 +7,7 @@
         "port": "PORT",
         "database": "DATABASE",
         "database": "SCHEMA",
+        "warehouse": "WAREHOUSE",
         "user": "USERNAME",
         "#password": "PASSWORD"
       },

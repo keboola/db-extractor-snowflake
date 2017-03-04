@@ -24,6 +24,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $config = parent::getConfig($driver);
 
         $config['parameters']['db']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+        $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
 
         if (!empty($config['parameters']['db']['#password'])) {
             $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];

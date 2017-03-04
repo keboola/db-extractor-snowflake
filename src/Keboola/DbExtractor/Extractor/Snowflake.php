@@ -11,7 +11,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class Snowflake extends Extractor
 {
-    const STATEMENT_TIMEOUT_IN_SECONDS = 900; //@FIXME why?
+    const STATEMENT_TIMEOUT_IN_SECONDS = 900;
 
     /**
      * @var Connection
@@ -49,45 +49,16 @@ class Snowflake extends Extractor
         $this->database = $dbParams['database'];
         $this->schema = $dbParams['schema'];
 
+        if (!empty($dbParams['warehouse'])) {
+            $this->warehouse = $dbParams['warehouse'];
+        }
+
         return $connection;
     }
 
     private function quote($value)
     {
         return "'" . addslashes($value) . "'";
-    }
-
-
-    /***
-     * Create stage in snowflake
-     */
-    private function createStage()
-    {
-        return;
-        $sql = sprintf(
-            "
-            CREATE TEMPORARY STAGE %s;
-            ",
-            $this->generateStageName()
-        );
-
-        $this->execQuery($sql);
-    }
-
-    /***
-     * Drop stage in snowflake
-     */
-    private function dropStage()
-    {
-        return;
-        $sql = sprintf(
-            "
-            DROP STAGE IF EXISTS %s;
-            ",
-            $this->generateStageName()
-        );
-
-        $this->execQuery($sql);
     }
 
     /**
@@ -150,13 +121,17 @@ class Snowflake extends Extractor
         $sql = [];
         $sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
         $sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+
+        if ($this->warehouse) {
+            $sql[] = sprintf('USE WAREHOUSE %s;', $this->db->quoteIdentifier($this->warehouse));
+        }
+
         $sql[] = sprintf(
             'GET @%s/%s file://%s;',
             $this->generateStageName(),
             str_replace('.', '_', $table['outputTable']),
             $this->dataDir . '/out/tables/'
         );
-
 
         $snowSql = $this->temp->createTmpFile('snowsql.sql');
         file_put_contents($snowSql, implode("\n", $sql));
@@ -198,7 +173,6 @@ class Snowflake extends Extractor
     private function generateStageName()
     {
         return '~';
-        return 'snowExRunId_' . str_replace('.', '_', getenv('KBC_RUNID'));
     }
 
     /**
@@ -219,7 +193,7 @@ class Snowflake extends Extractor
         $cliConfig[] = sprintf('password = %s', $dbParams['password']);
         $cliConfig[] = sprintf('dbname = %s', $dbParams['database']);
         $cliConfig[] = sprintf('schemaname = %s', $dbParams['schema']);
-        //$cliConfig[] = sprintf('warehousename = %s', $dbParams['user']);
+        $cliConfig[] = sprintf('warehousename = %s', $dbParams['user']);
 
         $file = $this->temp->createFile('snowsql.config');
         file_put_contents($file, implode("\n", $cliConfig));
@@ -233,9 +207,7 @@ class Snowflake extends Extractor
 
         $this->logger->info("Exporting to " . $outputTable);
 
-        $this->createStage(); //@FIXME for all
         $this->exportAndDownload($table);
-        $this->dropStage(); //@FIXME for all
 
         return $outputTable;
     }
