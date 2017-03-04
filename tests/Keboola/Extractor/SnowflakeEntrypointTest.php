@@ -30,6 +30,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $config['parameters']['db']['host'] = $this->getEnv($driver, 'DB_HOST');
         $config['parameters']['db']['port'] = $this->getEnv($driver, 'DB_PORT');
         $config['parameters']['db']['database'] = $this->getEnv($driver, 'DB_DATABASE');
+        $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
 
         file_put_contents($rootPath . '/config.yml', Yaml::dump($config));
 
