@@ -99,7 +99,7 @@ class Snowflake extends Extractor
             "
             COPY INTO @%s/%s
             FROM (%s)
-            
+
             FILE_FORMAT = (TYPE=CSV %s)
             HEADER = true
             MAX_FILE_SIZE=50000000
@@ -108,7 +108,7 @@ class Snowflake extends Extractor
             ",
             $this->generateStageName(),
             str_replace('.', '_', $table['outputTable']),
-            $table['query'],
+            rtrim(trim($table['query']), ';'),
             implode(' ', $csvOptions)
         );
 
