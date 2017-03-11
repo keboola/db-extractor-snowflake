@@ -65,21 +65,37 @@ class Snowflake extends Extractor
      * @param $output
      * @param $path
      * @return \SplFileInfo[]
+     * @throws \Exception
      */
     private function parseFiles($output, $path)
     {
         $files = [];
         $lines = explode("\n", $output);
 
-        foreach ($lines as $line) {
-            $matches = [];
-            if (preg_match('/\| ([a-z0-9\_\-\.]+\.gz) \|/ui', $line, $matches) && preg_match('/ downloaded /ui', $line)) {
-                $file = new \SplFileInfo($path . '/' . $matches[1]);
-                if ($file->isFile()) {
-                    $files[] = $file;
-                } else {
-                    //@FIXME maybe exception ?
+        $lines = array_map(
+            function($item) {
+                $item = trim($item, '|');
+                return array_map('trim', explode('|', $item));
+            },
+            array_filter(
+                $lines,
+                function($item) {
+                    $item = trim($item);
+                    return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([a-z0-9\_\-\.]+\.gz)/ui', $item);
                 }
+            )
+        );
+
+        foreach ($lines as $line) {
+            if (!preg_match('/^downloaded$/ui', $line[2])) {
+                throw new \Exception("Cannot download file: " . $line[0]);
+            }
+
+            $file = new \SplFileInfo($path . '/' . $line[0]);
+            if ($file->isFile()) {
+                $files[] = $file;
+            } else {
+                throw new \Exception("Missing file: " . $line[0]);
             }
         }
 
@@ -88,6 +104,9 @@ class Snowflake extends Extractor
 
     private function exportAndDownload(array $table)
     {
+        $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
+        $this->execQuery($sql);
+
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
@@ -114,7 +133,7 @@ class Snowflake extends Extractor
 
         $this->execQuery($sql);
 
-        $this->logger->info("Snowflake get data: start");
+        $this->logger->info("Downloading data from Snowflake");
 
         @mkdir($this->dataDir . '/out/tables', 0770, true);
 
@@ -152,11 +171,14 @@ class Snowflake extends Extractor
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw new \Exception("File download error occured");
+            throw new \Exception("File download error occurred");
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $this->dataDir . '/out/tables');
+        $bytes = 0;
         foreach ($csvFiles as $csvFile) {
+            $bytes += $csvFile->getSize();
+
             $manifestData = [
                 'destination' => $table['outputTable'],
                 'delimiter' => CsvFile::DEFAULT_DELIMITER,
@@ -168,6 +190,11 @@ class Snowflake extends Extractor
 
             file_put_contents($csvFile . '.manifest', Yaml::dump($manifestData));
         }
+
+        $base = log($bytes) / log(1024);
+        $suffixes = array(' B', ' KB', ' MB', ' GB', ' TB');
+        $bytes =  round(pow(1024, $base - floor($base)), 2) . $suffixes[floor($base)];
+        $this->logger->info(sprintf("%d files (%s) downloaded", count($csvFiles), $bytes));
     }
 
     private function generateStageName()
