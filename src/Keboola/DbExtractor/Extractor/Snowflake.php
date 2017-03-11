@@ -73,13 +73,13 @@ class Snowflake extends Extractor
         $lines = explode("\n", $output);
 
         $lines = array_map(
-            function($item) {
+            function ($item) {
                 $item = trim($item, '|');
                 return array_map('trim', explode('|', $item));
             },
             array_filter(
                 $lines,
-                function($item) {
+                function ($item) {
                     $item = trim($item);
                     return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([a-z0-9\_\-\.]+\.gz)/ui', $item);
                 }
