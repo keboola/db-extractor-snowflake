@@ -5,6 +5,9 @@
 
 Docker application for exporting data from Snowflake Data Warehouse 
 
+![extraction flow](https://github.com/keboola/db-extractor-snowflake/blob/master/docs/snowflake-ex-flow.png)
+
+
 ## Configuration
 
     {
