@@ -26,6 +26,7 @@ class Snowflake extends Extractor
     private $warehouse;
     private $database;
     private $schema;
+    private $user;
 
     /**
      * @var Temp
@@ -45,6 +46,8 @@ class Snowflake extends Extractor
 
         $connection = new Connection($dbParams);
         $connection->query(sprintf("ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = %d", self::STATEMENT_TIMEOUT_IN_SECONDS));
+
+        $this->user = $dbParams['user'];
 
         $this->database = $dbParams['database'];
         $this->schema = $dbParams['schema'];
@@ -243,9 +246,50 @@ class Snowflake extends Extractor
     {
     }
 
+    private function getUserDefaultWarehouse()
+    {
+        $sql = sprintf(
+            "DESC USER %s;",
+            $this->db->quoteIdentifier($this->user)
+        );
+
+        $config = $this->db->fetchAll($sql);
+
+        foreach ($config as $item) {
+            if ($item['property'] === 'DEFAULT_WAREHOUSE') {
+                return $item['value'] === 'null' ? null : $item['value'];
+            }
+        }
+
+        return null;
+    }
+
     public function testConnection()
     {
         $this->db->query('SELECT current_date;');
+
+        $defaultWarehouse = $this->getUserDefaultWarehouse();
+        if (!$defaultWarehouse && !$this->warehouse) {
+            throw new UserException('Specify "warehouse" parameter');
+        }
+
+        $warehouse = $defaultWarehouse;
+        if ($this->warehouse) {
+            $warehouse = $this->warehouse;
+        }
+
+        try {
+            $this->db->query(sprintf(
+                'USE WAREHOUSE %s;',
+                $this->db->quoteIdentifier($warehouse)
+            ));
+        } catch (\Exception $e) {
+            if (preg_match('/Object does not exist/ui', $e->getMessage())) {
+                throw new UserException(sprintf('Invalid warehouse "%s" specified', $warehouse));
+            } else {
+                throw $e;
+            }
+        }
     }
 
     private function execQuery($query)
