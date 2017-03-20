@@ -48,7 +48,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
             $this->connection->query($sql);
 
             $this->assertEquals($warehouse, $this->getUserDefaultWarehouse($user));
-
         } else {
             $sql = sprintf(
                 "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
