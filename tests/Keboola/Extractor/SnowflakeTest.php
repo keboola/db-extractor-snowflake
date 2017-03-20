@@ -2,6 +2,7 @@
 namespace Keboola\DbExtractor;
 
 use Keboola\Csv\CsvFile;
+use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Snowflake\Connection;
 use Symfony\Component\Yaml\Yaml;
 
@@ -36,22 +37,36 @@ class SnowflakeTest extends AbstractSnowflakeTest
         return null;
     }
 
+    private function setUserDefaultWarehouse($user, $warehouse = null)
+    {
+        if ($warehouse) {
+            $sql = sprintf(
+                "ALTER USER %s SET DEFAULT_WAREHOUSE = %s;",
+                $this->connection->quoteIdentifier($user),
+                $this->connection->quoteIdentifier($warehouse)
+            );
+            $this->connection->query($sql);
+
+            $this->assertEquals($warehouse, $this->getUserDefaultWarehouse($user));
+
+        } else {
+            $sql = sprintf(
+                "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
+                $this->connection->quoteIdentifier($user)
+            );
+            $this->connection->query($sql);
+
+            $this->assertEmpty($this->getUserDefaultWarehouse($user));
+        }
+    }
+
     public function testDefaultWarehouse()
     {
         $config = $this->getConfig();
         $user = $config['parameters']['db']['user'];
         $warehouse = $config['parameters']['db']['warehouse'];
 
-        // reset warehouse
-        $sql = sprintf(
-            "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
-            $this->connection->quoteIdentifier($user)
-        );
-        $this->connection->query($sql);
-
-        $this->assertEmpty($this->getUserDefaultWarehouse($user));
-
-        $this->connection->query($sql);
+        $this->setUserDefaultWarehouse($user);
 
         // run without warehouse param
         unset($config['parameters']['db']['warehouse']);
@@ -72,13 +87,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
         $this->assertCount(2, $result['imported']);
 
-        // restore default warehouse
-        $sql = sprintf(
-            "ALTER USER %s SET DEFAULT_WAREHOUSE = %s;",
-            $this->connection->quoteIdentifier($user),
-            $this->connection->quoteIdentifier($warehouse)
-        );
-        $this->connection->query($sql);
+        $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
     public function testCredentials()
@@ -92,6 +101,49 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
+    }
+
+    public function testCredentialsDefaultWarehouse()
+    {
+        $config = $this->getConfig();
+        $config['action'] = 'testConnection';
+        unset($config['parameters']['tables']);
+
+        $user = $config['parameters']['db']['user'];
+        $warehouse = $config['parameters']['db']['warehouse'];
+
+        // empty default warehouse, specified in config
+        $this->setUserDefaultWarehouse($user, null);
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertArrayHasKey('status', $result);
+        $this->assertEquals('success', $result['status']);
+
+        // empty default warehouse and not specified in config
+        unset($config['parameters']['db']['warehouse']);
+        $app = $this->createApplication($config);
+
+        try {
+            $app->run();
+            $this->fail('Test connection without warehouse and default warehouse should fail');
+        } catch (UserException $e) {
+            $this->assertRegExp('/Specify \"warehouse\" parameter/ui', $e->getMessage());
+        }
+
+        // bad warehouse
+        $config['parameters']['db']['warehouse'] = uniqid('test');
+        $app = $this->createApplication($config);
+
+        try {
+            $app->run();
+            $this->fail('Test connection with invalid warehouse ID should fail');
+        } catch (UserException $e) {
+            $this->assertRegExp('/Invalid warehouse/ui', $e->getMessage());
+        }
+
+        $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
     public function testRunWithoutTables()
