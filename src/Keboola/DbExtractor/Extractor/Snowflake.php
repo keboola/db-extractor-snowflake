@@ -11,8 +11,6 @@ use Symfony\Component\Yaml\Yaml;
 
 class Snowflake extends Extractor
 {
-    const STATEMENT_TIMEOUT_IN_SECONDS = 900;
-
     /**
      * @var Connection
      */
@@ -45,7 +43,6 @@ class Snowflake extends Extractor
         $this->snowSqlConfig = $this->crateSnowSqlConfig($dbParams);
 
         $connection = new Connection($dbParams);
-        $connection->query(sprintf("ALTER SESSION SET STATEMENT_TIMEOUT_IN_SECONDS = %d", self::STATEMENT_TIMEOUT_IN_SECONDS));
 
         $this->user = $dbParams['user'];
 
@@ -170,7 +167,7 @@ class Snowflake extends Extractor
         $this->logger->debug(trim($command));
 
 
-        $process = new Process($command, null, null, null, self::STATEMENT_TIMEOUT_IN_SECONDS);
+        $process = new Process($command, null, null, null, null);
         $process->run();
 
         if (!$process->isSuccessful()) {
