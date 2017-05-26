@@ -189,15 +189,15 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $dirPath = $this->dataDir . '/out/tables';
         $outputTable = $query['outputTable'];
 
-        $files = array_map(
-            function ($fileName) use ($dirPath) {
-                return $dirPath . '/' . $fileName;
+        $manifestFiles = array_map(
+            function ($manifestFileName) use ($dirPath) {
+                return $dirPath . '/' . $manifestFileName;
             },
             array_filter(
                 scandir($dirPath),
                 function ($fileName) use ($dirPath, $outputTable) {
                     $filePath = $dirPath . '/' . $fileName;
-                    if (!is_file($filePath)) {
+                    if (is_dir($filePath)) {
                         return false;
                     }
 
@@ -216,15 +216,16 @@ class SnowflakeTest extends AbstractSnowflakeTest
             return;
         }
 
-        $this->assertCount($expectedFiles, $files);
+        $this->assertCount($expectedFiles, $manifestFiles);
 
-        foreach ($files as $file) {
+        foreach ($manifestFiles as $file) {
             // manifest validation
             $params = Yaml::parse(file_get_contents($file));
 
             $this->assertArrayHasKey('destination', $params);
             $this->assertArrayHasKey('incremental', $params);
             $this->assertArrayHasKey('primary_key', $params);
+            $this->assertArrayHasKey('columns', $params);
 
             if ($query['primaryKey']) {
                 $this->assertEquals($query['primaryKey'], $params['primary_key']);
@@ -238,18 +239,25 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 $this->assertEquals($query['outputTable'], $params['destination']);
             }
 
-            // archive validation
-            $archiveFile = new \SplFileInfo(str_replace('.manifest', '', $file));
-            $csvFile = new \SplFileInfo(str_replace('.gz', '', $archiveFile));
+            $csvDir = new \SplFileInfo(str_replace('.manifest', '', $file));
 
-            clearstatcache();
-            $this->assertFalse($csvFile->isFile());
+            $this->assertTrue(is_dir($csvDir));
 
-            exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
-            $this->assertEquals(0, $return);
+            foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
 
-            clearstatcache();
-            $this->assertTrue($csvFile->isFile());
+                // archive validation
+                $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
+                $rawFile = new \SplFileInfo(str_replace('.gz', '', $archiveFile));
+
+                clearstatcache();
+                $this->assertFalse($rawFile->isFile());
+
+                exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
+                $this->assertEquals(0, $return);
+
+                clearstatcache();
+                $this->assertTrue($rawFile->isFile());
+            }
         }
     }
 }
