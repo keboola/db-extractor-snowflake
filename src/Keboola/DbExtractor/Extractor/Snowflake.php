@@ -123,7 +123,6 @@ class Snowflake extends Extractor
             HEADER = true
             MAX_FILE_SIZE=50000000
             OVERWRITE = TRUE
-            SINGLE = TRUE
             ;
             ",
             $this->generateStageName(),
