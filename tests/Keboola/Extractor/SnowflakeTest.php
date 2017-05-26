@@ -186,6 +186,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
     private function validateExtraction(array $query, $expectedFiles = 1)
     {
+
         $dirPath = $this->dataDir . '/out/tables';
         $outputTable = $query['outputTable'];
 
@@ -244,7 +245,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
             $this->assertTrue(is_dir($csvDir));
 
             foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
-
                 // archive validation
                 $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
                 $rawFile = new \SplFileInfo(str_replace('.gz', '', $archiveFile));
