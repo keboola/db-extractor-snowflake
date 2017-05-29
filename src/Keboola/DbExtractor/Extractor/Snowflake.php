@@ -107,6 +107,9 @@ class Snowflake extends Extractor
         $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
         $this->execQuery($sql);
 
+        $viewName = str_replace('.', '_', $table['outputTable']);
+        $this->dropView($viewName);
+
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
@@ -114,28 +117,42 @@ class Snowflake extends Extractor
         $csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
         $csvOptions[] = sprintf("NULL_IF=()");
 
+        // Create temporary view from the supplied query
+        $sql = sprintf(
+            "CREATE VIEW %s AS %s;",
+            $this->db->quoteIdentifier($viewName),
+            rtrim(trim($table['query']), ';')
+        );
+        $this->execQuery($sql);
+
         $sql = sprintf(
             "
-            COPY INTO @%s/%s
+            COPY INTO @%s/%s/part
             FROM (%s)
 
             FILE_FORMAT = (TYPE=CSV %s)
-            HEADER = true
+            HEADER = false
             MAX_FILE_SIZE=50000000
             OVERWRITE = TRUE
             ;
             ",
             $this->generateStageName(),
-            str_replace('.', '_', $table['outputTable']),
-            rtrim(trim($table['query']), ';'),
+            $viewName,
+            sprintf("SELECT * FROM %s", $this->db->quoteIdentifier($viewName)),
             implode(' ', $csvOptions)
         );
-
         $this->execQuery($sql);
+
+        $columns = $this->db->getTableColumns($this->schema, $viewName);
+
+        // We don't need that view anymore
+        $this->dropView($viewName);
 
         $this->logger->info("Downloading data from Snowflake");
 
-        @mkdir($this->dataDir . '/out/tables', 0770, true);
+        $outputDataDir = $this->dataDir . '/out/tables/' . $viewName . ".csv.gz";
+
+        @mkdir($outputDataDir, 0770, true);
 
         $sql = [];
         $sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
@@ -148,8 +165,8 @@ class Snowflake extends Extractor
         $sql[] = sprintf(
             'GET @%s/%s file://%s;',
             $this->generateStageName(),
-            str_replace('.', '_', $table['outputTable']),
-            $this->dataDir . '/out/tables/'
+            $viewName,
+            $outputDataDir
         );
 
         $snowSql = $this->temp->createTmpFile('snowsql.sql');
@@ -171,10 +188,11 @@ class Snowflake extends Extractor
         $process->run();
 
         if (!$process->isSuccessful()) {
+            $this->logger->error($process->getErrorOutput());
             throw new \Exception("File download error occurred");
         }
 
-        $csvFiles = $this->parseFiles($process->getOutput(), $this->dataDir . '/out/tables');
+        $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
         $bytes = 0;
         foreach ($csvFiles as $csvFile) {
             $bytes += $csvFile->getSize();
@@ -185,10 +203,10 @@ class Snowflake extends Extractor
                 'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
                 'primary_key' => $table['primaryKey'],
                 'incremental' => $table['incremental'],
-
+                'columns' => $columns
             ];
 
-            file_put_contents($csvFile . '.manifest', Yaml::dump($manifestData));
+            file_put_contents($outputDataDir . '.manifest', Yaml::dump($manifestData));
         }
 
         $base = log($bytes) / log(1024);
@@ -305,5 +323,13 @@ class Snowflake extends Extractor
     private function hideCredentialsInQuery($query)
     {
         return preg_replace("/(AWS_[A-Z_]*\\s=\\s.)[0-9A-Za-z\\/\\+=]*./", '${1}...\'', $query);
+    }
+
+    private function dropView($viewName)
+    {
+        $this->db->query(sprintf(
+            "DROP VIEW IF EXISTS %s;",
+            $this->db->quoteIdentifier($viewName)
+        ));
     }
 }
