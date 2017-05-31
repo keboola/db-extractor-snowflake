@@ -121,13 +121,13 @@ class Snowflake extends Extractor
         );
         $this->db->query($sql);
 
-		$columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
+        $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
         $columns = [];
         foreach ($columnDefinitions as $column) {
-        	$columns[] = $column['name'];
-		}
+            $columns[] = $column['name'];
+        }
 
-		$tmpTableName = str_replace('.', '_', $table['outputTable']);
+        $tmpTableName = str_replace('.', '_', $table['outputTable']);
 
         $sql = sprintf(
             "
@@ -141,7 +141,7 @@ class Snowflake extends Extractor
             ;
             ",
             $this->generateStageName(),
-			$tmpTableName,
+            $tmpTableName,
             sprintf(rtrim(trim($table['query']), ';')),
             implode(' ', $csvOptions)
         );
