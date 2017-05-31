@@ -107,9 +107,6 @@ class Snowflake extends Extractor
         $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
         $this->execQuery($sql);
 
-        $viewName = str_replace('.', '_', $table['outputTable']);
-        $this->dropView($viewName);
-
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
@@ -119,11 +116,18 @@ class Snowflake extends Extractor
 
         // Create temporary view from the supplied query
         $sql = sprintf(
-            "CREATE VIEW %s AS %s;",
-            $this->db->quoteIdentifier($viewName),
+            "SELECT * FROM (%s) LIMIT 0;",
             rtrim(trim($table['query']), ';')
         );
-        $this->execQuery($sql);
+        $this->db->query($sql);
+
+        $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
+        $columns = [];
+        foreach ($columnDefinitions as $column) {
+            $columns[] = $column['name'];
+        }
+
+        $tmpTableName = str_replace('.', '_', $table['outputTable']);
 
         $sql = sprintf(
             "
@@ -137,20 +141,15 @@ class Snowflake extends Extractor
             ;
             ",
             $this->generateStageName(),
-            $viewName,
-            sprintf("SELECT * FROM %s", $this->db->quoteIdentifier($viewName)),
+            $tmpTableName,
+            sprintf(rtrim(trim($table['query']), ';')),
             implode(' ', $csvOptions)
         );
         $this->execQuery($sql);
 
-        $columns = $this->db->getTableColumns($this->schema, $viewName);
-
-        // We don't need that view anymore
-        $this->dropView($viewName);
-
         $this->logger->info("Downloading data from Snowflake");
 
-        $outputDataDir = $this->dataDir . '/out/tables/' . $viewName . ".csv.gz";
+        $outputDataDir = $this->dataDir . '/out/tables/' . $tmpTableName . ".csv.gz";
 
         @mkdir($outputDataDir, 0770, true);
 
@@ -165,7 +164,7 @@ class Snowflake extends Extractor
         $sql[] = sprintf(
             'GET @%s/%s file://%s;',
             $this->generateStageName(),
-            $viewName,
+            $tmpTableName,
             $outputDataDir
         );
 
@@ -323,13 +322,5 @@ class Snowflake extends Extractor
     private function hideCredentialsInQuery($query)
     {
         return preg_replace("/(AWS_[A-Z_]*\\s=\\s.)[0-9A-Za-z\\/\\+=]*./", '${1}...\'', $query);
-    }
-
-    private function dropView($viewName)
-    {
-        $this->db->query(sprintf(
-            "DROP VIEW IF EXISTS %s;",
-            $this->db->quoteIdentifier($viewName)
-        ));
     }
 }
