@@ -5,6 +5,7 @@ use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Keboola\DbExtractor\Snowflake\Connection;
+use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -225,14 +226,12 @@ class Snowflake extends Extractor
      */
     private function crateSnowSqlConfig($dbParams)
     {
-        $hostParts = explode('.', $dbParams['host']);
-
         $cliConfig[] = '';
         $cliConfig[] = '[options]';
         $cliConfig[] = 'exit_on_error = true';
         $cliConfig[] = '';
         $cliConfig[] = '[connections.downloader]';
-        $cliConfig[] = sprintf('accountname = %s', reset($hostParts));
+        $cliConfig[] = sprintf('accountname = %s', AccountUrlParser::parse($dbParams['host']));
         $cliConfig[] = sprintf('username = %s', $dbParams['user']);
         $cliConfig[] = sprintf('password = %s', $dbParams['password']);
         $cliConfig[] = sprintf('dbname = %s', $dbParams['database']);
