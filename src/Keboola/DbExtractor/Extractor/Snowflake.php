@@ -2,10 +2,10 @@
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\AccountUrlParser;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Keboola\DbExtractor\Snowflake\Connection;
+use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
