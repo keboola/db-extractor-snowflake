@@ -51,5 +51,6 @@ GRANT SELECT ON ALL TABLES IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_ex
 GRANT SELECT ON ALL VIEWS IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
 CREATE USER "snowflake_extractor" PASSWORD = 'password' DEFAULT_ROLE = "snowflake_extractor" DEFAULT_WAREHOUSE = 'snowflake_extractor' DEFAULT_NAMESPACE = 'snowflake_extractor' MUST_CHANGE_PASSWORD = FALSE;
 GRANT ROLE "snowflake_extractor" TO USER "snowflake_extractor";
-
 ```
+
+Note that `GRANT SELECT ON ALL *` queries will grant permissions to objects existing at the execution time only. New objects will need to be granted to the role as they are created.  
