@@ -33,3 +33,23 @@ Docker application for exporting data from Snowflake Data Warehouse
         ]
       }
     }
+
+## Snowflake Privileges Templates
+
+### Extractor
+
+```
+CREATE DATABASE "snowflake_extractor";
+USE DATABASE "snowflake_extractor";
+CREATE SCHEMA "snowflake_extractor";
+CREATE WAREHOUSE "snowflake_extractor" WITH WAREHOUSE_SIZE = 'XSMALL' WAREHOUSE_TYPE = 'STANDARD' AUTO_SUSPEND = 900 AUTO_RESUME = TRUE;
+CREATE ROLE "snowflake_extractor";
+GRANT USAGE ON WAREHOUSE "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT USAGE ON DATABASE "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT USAGE ON SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT SELECT ON ALL TABLES IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT SELECT ON ALL VIEWS IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
+CREATE USER "snowflake_extractor" PASSWORD = 'password' DEFAULT_ROLE = "snowflake_extractor" DEFAULT_WAREHOUSE = 'snowflake_extractor' DEFAULT_NAMESPACE = 'snowflake_extractor' MUST_CHANGE_PASSWORD = FALSE;
+GRANT ROLE "snowflake_extractor" TO USER "snowflake_extractor";
+
+```
