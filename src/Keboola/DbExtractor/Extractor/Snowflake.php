@@ -126,10 +126,9 @@ class Snowflake extends Extractor
         try {
             $this->db->query($sql);
         } catch (\Exception $e) {
-            if (preg_match("/Object \'.*\' does not exist/", $e->getMessage())) {
-                throw new UserException($e->getMessage());
-            }
-            throw $e;
+            $message = sprintf('DB query failed: %s', $e->getMessage());
+            $exception = new UserException($message, 0, $e);
+            throw $exception;
         }
 
         $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
@@ -264,6 +263,7 @@ class Snowflake extends Extractor
         $outputTable = $table['outputTable'];
 
         $this->logger->info("Exporting to " . $outputTable);
+
 
         $this->exportAndDownload($table);
 
