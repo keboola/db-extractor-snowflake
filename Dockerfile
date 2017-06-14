@@ -1,4 +1,4 @@
-FROM php:5.6.21
+FROM php:7.1
 MAINTAINER Erik Zigo <erik.zigo@keboola.com>
 ENV DEBIAN_FRONTEND noninteractive
 
