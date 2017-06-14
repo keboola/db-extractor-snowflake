@@ -10,13 +10,15 @@ RUN docker-php-ext-install pdo_pgsql pdo_mysql
 RUN pecl install xdebug \
   && docker-php-ext-enable xdebug
 
-# snowflake odbc - https://github.com/docker-library/php/issues/103
+# Install PHP odbc extension
 RUN set -x \
-&& cd /usr/src/php/ext/odbc \
-&& phpize \
-&& sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
-&& ./configure --with-unixODBC=shared,/usr \
-&& docker-php-ext-install odbc
+    && docker-php-source extract \
+    && cd /usr/src/php/ext/odbc \
+    && phpize \
+    && sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
+    && ./configure --with-unixODBC=shared,/usr \
+    && docker-php-ext-install odbc \
+    && docker-php-source delete
 
 ## install snowflake drivers
 ADD snowflake_linux_x8664_odbc.tgz /usr/bin
