@@ -72,4 +72,20 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertArrayHasKey('status', $data);
         $this->assertEquals('success', $data['status']);
     }
+
+    public function testNonexistingTable()
+    {
+        $config = $this->getConfig();
+        $config['parameters']['tables'][0]['query'] = "SELECT * FROM non_existing_table";
+        @unlink($this->dataDir . '/config.yml');
+        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->run();
+
+        var_dump($process->getOutput());
+        var_dump($process->getErrorOutput());
+
+        $this->assertEquals(1, $process->getExitCode());
+    }
 }

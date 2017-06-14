@@ -122,7 +122,15 @@ class Snowflake extends Extractor
             "SELECT * FROM (%s) LIMIT 0;",
             rtrim(trim($table['query']), ';')
         );
-        $this->db->query($sql);
+
+        try {
+            $this->db->query($sql);
+        } catch (\Exception $e) {
+            if (preg_match("/Object \'.*\' does not exist/", $e->getMessage())) {
+                throw new UserException($e->getMessage());
+            }
+            throw $e;
+        }
 
         $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
         $columns = [];
