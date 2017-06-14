@@ -3,22 +3,11 @@ namespace Keboola\DbWriter\Writer;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\AbstractSnowflakeTest;
-use Keboola\DbExtractor\Snowflake\Connection;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 {
-    public function setUp()
-    {
-        if (!defined('APP_NAME')) {
-            define('APP_NAME', 'ex-db-snowflake');
-        }
-
-        $config = $this->getConfig();
-
-        $this->connection = new Connection($config['parameters']['db']);
-    }
-
     private function createConfigFile($rootPath)
     {
         $driver = 'snowflake';
@@ -44,16 +33,24 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $csv1 = new CsvFile($this->dataDir . '/snowflake/sales.csv');
         $this->createTextTable($csv1);
+        @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz");
+        @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz.manifest");
 
         $csv2 = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
         $this->createTextTable($csv2);
+        @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz");
+        @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz.manifest");
 
         $this->createConfigFile($dataPath);
 
-        $lastOutput = exec('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1', $output, $returnCode);
+        $process = new Process('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process->run();
 
-        $this->assertEquals(0, $returnCode);
-        $this->assertGreaterThan(1, count($output));
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
+        $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
+        $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz");
+        $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz.manifest");
     }
 
     public function testConnectionAction()
@@ -63,15 +60,32 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->createConfigFile($dataPath);
 
-        $lastOutput = exec('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1', $output, $returnCode);
+        $process = new Process('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process->run();
 
-        $this->assertEquals(0, $returnCode);
+        $output = $process->getOutput();
 
-        $this->assertCount(1, $output);
-        $this->assertEquals($lastOutput, reset($output));
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertJson($output);
 
-        $data = json_decode($lastOutput, true);
+        $data = json_decode($output, true);
         $this->assertArrayHasKey('status', $data);
         $this->assertEquals('success', $data['status']);
+    }
+
+    public function testNonexistingTable()
+    {
+        $config = $this->getConfig();
+        $config['parameters']['tables'][0]['query'] = "SELECT * FROM non_existing_table";
+        @unlink($this->dataDir . '/config.yml');
+        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->run();
+
+        var_dump($process->getOutput());
+        var_dump($process->getErrorOutput());
+
+        $this->assertEquals(1, $process->getExitCode());
     }
 }

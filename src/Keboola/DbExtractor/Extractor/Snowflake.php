@@ -4,7 +4,7 @@ namespace Keboola\DbExtractor\Extractor;
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
-use Keboola\DbExtractor\Snowflake\Connection;
+use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
@@ -53,6 +53,8 @@ class Snowflake extends Extractor
         if (!empty($dbParams['warehouse'])) {
             $this->warehouse = $dbParams['warehouse'];
         }
+
+        $connection->query(sprintf("USE SCHEMA %s", $connection->quoteIdentifier($this->schema)));
 
         return $connection;
     }
@@ -120,7 +122,14 @@ class Snowflake extends Extractor
             "SELECT * FROM (%s) LIMIT 0;",
             rtrim(trim($table['query']), ';')
         );
-        $this->db->query($sql);
+
+        try {
+            $this->db->query($sql);
+        } catch (\Exception $e) {
+            $message = sprintf('DB query failed: %s', $e->getMessage());
+            $exception = new UserException($message, 0, $e);
+            throw $exception;
+        }
 
         $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
         $columns = [];
@@ -146,7 +155,12 @@ class Snowflake extends Extractor
             sprintf(rtrim(trim($table['query']), ';')),
             implode(' ', $csvOptions)
         );
-        $this->execQuery($sql);
+        $res = $this->db->fetchAll($sql);
+
+        if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
+            // query resulted in no rows, nothing left to do
+            return;
+        }
 
         $this->logger->info("Downloading data from Snowflake");
 
@@ -250,13 +264,10 @@ class Snowflake extends Extractor
 
         $this->logger->info("Exporting to " . $outputTable);
 
+
         $this->exportAndDownload($table);
 
         return $outputTable;
-    }
-
-    protected function executeQuery($query, CsvFile $csv)
-    {
     }
 
     private function getUserDefaultWarehouse()

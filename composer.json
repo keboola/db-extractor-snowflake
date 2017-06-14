@@ -14,6 +14,7 @@
         "php": ">=5.6",
         "keboola/db-extractor-common": "*",
         "keboola/php-temp": "^0.1.6",
+        "keboola/php-db-import": "^2.4.4",
         "squizlabs/php_codesniffer": "^2.6"
     },
     "require-dev": {
