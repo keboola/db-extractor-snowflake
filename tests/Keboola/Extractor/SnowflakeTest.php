@@ -264,4 +264,25 @@ class SnowflakeTest extends AbstractSnowflakeTest
         }
         return $columns;
     }
+
+    public function testRunEmptyQuery()
+    {
+        $csv = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
+        $this->createTextTable($csv);
+
+        $outputCsvFolder = $this->dataDir . '/out/tables/in.c-main.escaping.csv';
+        $outputManifestFile = $this->dataDir . '/out/tables/in.c-main.escaping.csv.manifest';
+        @unlink($outputCsvFolder);
+        @unlink($outputManifestFile);
+
+        $config = $this->getConfig();
+        $config['parameters']['tables'][0]['query'] = "SELECT * FROM \"escaping\" WHERE col1 = '123'";
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertEquals('success', $result['status']);
+        $this->assertFileNotExists($outputCsvFolder);
+        $this->assertFileNotExists($outputManifestFile);
+    }
 }

@@ -148,7 +148,12 @@ class Snowflake extends Extractor
             sprintf(rtrim(trim($table['query']), ';')),
             implode(' ', $csvOptions)
         );
-        $this->execQuery($sql);
+        $res = $this->db->fetchAll($sql);
+
+        if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
+            // query resulted in no rows, nothing left to do
+            return;
+        }
 
         $this->logger->info("Downloading data from Snowflake");
 
