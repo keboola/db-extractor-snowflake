@@ -12,3 +12,4 @@ tests/data/runAction/config.yml
 tests/data/runAction/out/
 snowflake_linux_x8664_odbc.tgz
 snowsql-linux_x86_64.bash
+.env

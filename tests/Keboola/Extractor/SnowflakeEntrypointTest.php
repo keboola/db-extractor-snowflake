@@ -3,22 +3,10 @@ namespace Keboola\DbWriter\Writer;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\AbstractSnowflakeTest;
-use Keboola\DbExtractor\Snowflake\Connection;
 use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 {
-    public function setUp()
-    {
-        if (!defined('APP_NAME')) {
-            define('APP_NAME', 'ex-db-snowflake');
-        }
-
-        $config = $this->getConfig();
-
-        $this->connection = new Connection($config['parameters']['db']);
-    }
-
     private function createConfigFile($rootPath)
     {
         $driver = 'snowflake';

@@ -4,7 +4,7 @@ namespace Keboola\DbExtractor\Extractor;
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
-use Keboola\DbExtractor\Snowflake\Connection;
+use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
@@ -53,6 +53,8 @@ class Snowflake extends Extractor
         if (!empty($dbParams['warehouse'])) {
             $this->warehouse = $dbParams['warehouse'];
         }
+
+        $connection->query(sprintf("USE SCHEMA %s", $connection->quoteIdentifier($this->schema)));
 
         return $connection;
     }
@@ -253,10 +255,6 @@ class Snowflake extends Extractor
         $this->exportAndDownload($table);
 
         return $outputTable;
-    }
-
-    protected function executeQuery($query, CsvFile $csv)
-    {
     }
 
     private function getUserDefaultWarehouse()

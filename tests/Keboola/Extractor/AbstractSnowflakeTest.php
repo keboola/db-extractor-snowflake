@@ -2,7 +2,7 @@
 namespace Keboola\DbExtractor;
 
 use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\Snowflake\Connection;
+use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Test\ExtractorTest;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Options\FileUploadOptions;
@@ -14,6 +14,23 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * @var Connection
      */
     protected $connection;
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        if (!defined('APP_NAME')) {
+            define('APP_NAME', 'ex-db-snowflake');
+        }
+
+        $config = $this->getConfig();
+
+        $this->connection = new Connection($config['parameters']['db']);
+
+        $this->connection->query(
+            sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
+        );
+    }
 
     /**
      * @param string $driver
