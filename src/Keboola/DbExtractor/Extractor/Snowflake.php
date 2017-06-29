@@ -333,4 +333,29 @@ class Snowflake extends Extractor
     {
         return preg_replace("/(AWS_[A-Z_]*\\s=\\s.)[0-9A-Za-z\\/\\+=]*./", '${1}...\'', $query);
     }
+
+    public function getTables(array $tables = null)
+    {
+        $sql = "SHOW TABLES";
+        $arr = $this->db->fetchAll($sql);
+        $output = [];
+        foreach ($arr as $table) {
+            if (is_null($tables) || (is_array($tables) && in_array($table['name'], $tables))) {
+                $output[] = $this->describeTable($table);
+            }
+        }
+        return $output;
+    }
+
+    public function describeTable(array $table) {
+        $tabledef = [
+            'name' => $table['name'],
+            'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
+            'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
+            'type' => (isset($table['type'])) ? $table['type'] : null,
+            'rowCount' => (isset($table['rows'])) ? $table['rows'] : null,
+        ];
+        $tabledef['columns'] = $this->db->describeTableColumns($table["schema_name"], $table["name"]);
+        return $tabledef;
+    }
 }

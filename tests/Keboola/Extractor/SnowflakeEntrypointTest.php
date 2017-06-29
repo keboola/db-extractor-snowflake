@@ -88,4 +88,23 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->assertEquals(1, $process->getExitCode());
     }
+
+    public function testGetTablesAction()
+    {
+        $config = $this->getConfig();
+        @unlink($this->dataDir . '/config.yml');
+        $config['action'] = 'getTables';
+        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
+        $process->run();
+
+        var_dump($process->getErrorOutput());
+        var_dump($process->getOutput());
+
+        $this->assertJson($process->getOutput());
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertEquals("", $process->getErrorOutput());
+    }
 }

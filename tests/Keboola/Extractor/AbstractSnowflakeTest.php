@@ -114,9 +114,13 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      *
      * @param CsvFile $file
      */
-    protected function createTextTable(CsvFile $file)
+    protected function createTextTable(CsvFile $file, $primaryKey = null, $overrideTableName = null)
     {
-        $tableName = $this->generateTableName($file);
+        if (!$overrideTableName) {
+            $tableName = $this->generateTableName($file);
+        } else {
+            $tableName = $overrideTableName;
+        }
 
         $this->connection->query(sprintf(
             'DROP TABLE IF EXISTS %s',
@@ -130,11 +134,27 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
                 ', ',
                 array_map(function ($column) {
                     $q = '"';
-                    return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR NOT NULL';
+                    return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR(200) NOT NULL';
                 }, $file->getHeader())
             ),
             $tableName
         ));
+
+        // create the primary key if supplied
+        if ($primaryKey && is_array($primaryKey) && !empty($primaryKey)) {
+
+            foreach ($primaryKey as $pk) {
+                $sql = sprintf("ALTER TABLE %s ALTER COLUMN %s varchar(64) NOT NULL", $tableName, $pk);
+                $this->connection->query($sql);
+            }
+
+            $sql = sprintf(
+                'ALTER TABLE %s ADD PRIMARY KEY (%s)',
+                $tableName,
+                implode(',', $primaryKey)
+            );
+            $this->connection->query($sql);
+        }
 
         $storageApi = new Client([
             'token' => getenv('STORAGE_API_TOKEN')

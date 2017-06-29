@@ -285,4 +285,77 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputCsvFolder);
         $this->assertFileNotExists($outputManifestFile);
     }
+
+    public function testGetTablesPlease()
+    {
+        $config = $this->getConfig();
+        $config['action'] = 'getTables';
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertArrayHasKey('status', $result);
+        $this->assertArrayHasKey('tables', $result);
+        $this->assertEquals('success', $result['status']);
+        $this->assertCount(2, $result['tables']);
+        foreach ($result['tables'] as $table) {
+            $this->assertArrayHasKey('name', $table);
+            $this->assertArrayHasKey('schema', $table);
+            $this->assertArrayHasKey('type', $table);
+            $this->assertArrayHasKey('columns', $table);
+            if ($table['name'] === "escaping") {
+                continue;
+            }
+            $this->assertEquals('test', $table['catalog']);
+            $this->assertEquals('dbo', $table['schema']);
+            $this->assertEquals('BASE TABLE', $table['type']);
+            $this->assertCount(12, $table['columns']);
+            foreach ($table['columns'] as $i => $column) {
+                $this->assertArrayHasKey('name', $column);
+                $this->assertArrayHasKey('type', $column);
+                $this->assertArrayHasKey('length', $column);
+                $this->assertArrayHasKey('default', $column);
+                $this->assertArrayHasKey('nullable', $column);
+                $this->assertArrayHasKey('primaryKey', $column);
+                $this->assertArrayHasKey('foreignKey', $column);
+                $this->assertArrayHasKey('uniqueKey', $column);
+                $this->assertArrayHasKey('ordinalPosition', $column);
+                // values
+                $this->assertEquals("varchar", $column['type']);
+                $this->assertEquals($i + 1, $column['ordinalPosition']);
+                if ($column['name'] === 'createdat') {
+                    $this->assertArrayHasKey('constraintName', $column);
+                    $this->assertEquals(64, $column['length']);
+                    $this->assertFalse($column['nullable']);
+                    if ($table['name'] === 'sales') {
+                        $this->assertTrue($column['primaryKey']);
+                        $this->assertFalse($column['foreignKey']);
+                        $this->assertFalse($column['uniqueKey']);
+                    } else {
+                        $this->assertFalse($column['primaryKey']);
+                        $this->assertTrue($column['foreignKey']);
+                        $this->assertFalse($column['uniqueKey']);
+                        $this->assertArrayHasKey('foreignKeyRefSchema', $column);
+                        $this->assertArrayHasKey('foreignKeyRefSchema', $column);
+                        $this->assertArrayHasKey('foreignKeyRefSchema', $column);
+                        $this->assertEquals($column['foreignKeyRefSchema'], "dbo");
+                        $this->assertEquals($column['foreignKeyRefTable'], "sales");
+                        $this->assertEquals($column['foreignKeyRefColumn'], "createdat");
+                    }
+                } else {
+                    $this->assertEquals(255, $column['length']);
+                    $this->assertTrue($column['nullable']);
+                    $this->assertNull($column['default']);
+                    $this->assertFalse($column['primaryKey']);
+                    $this->assertFalse($column['foreignKey']);
+                    $this->assertFalse($column['uniqueKey']);
+                }
+            }
+        }
+    }
+
+    public function testManifestMetadata()
+    {
+
+    }
 }
