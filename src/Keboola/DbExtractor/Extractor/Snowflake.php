@@ -6,6 +6,7 @@ use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
+use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -166,7 +167,7 @@ class Snowflake extends Extractor
 
         $outputDataDir = $this->dataDir . '/out/tables/' . $tmpTableName . ".csv.gz";
 
-        @mkdir($outputDataDir, 0770, true);
+        @mkdir($outputDataDir, 0755, true);
 
         $sql = [];
         $sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
@@ -219,6 +220,39 @@ class Snowflake extends Extractor
                 'incremental' => $table['incremental'],
                 'columns' => $columns
             ];
+
+            if (isset($table['table']) && !is_null($table['table']) && !empty($table['columns'])) {
+                $tableDetails = $this->getTables([$table['table']])[0];
+                $columnMetadata = [];
+                foreach ($tableDetails['columns'] as $column) {
+                    if (!in_array($column['name'], $table['columns'])) {
+                        continue;
+                    }
+                    $datatypeKeys = ['length', 'nullable', 'default'];
+                    $datatype = new SnowflakeDatatype(
+                        $column['type'],
+                        array_intersect_key($column, array_flip($datatypeKeys))
+                    );
+                    $columnMetadata[$column['name']] = $datatype->toMetadata();
+                    $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
+                    foreach ($nonDatatypeKeys as $key => $value) {
+                        if ($key !== 'name') {
+                            $columnMetadata[$column['name']][] = [
+                                'key' => "KBC." . $key,
+                                'value'=> $value
+                            ];
+                        }
+                    }
+                }
+                unset($tableDetails['columns']);
+                foreach ($tableDetails as $key => $value) {
+                    $manifestData['metadata'][] = [
+                        "key" => "KBC." . $key,
+                        "value" => $value
+                    ];
+                }
+                $manifestData['column_metadata'] = $columnMetadata;
+            }
 
             file_put_contents($outputDataDir . '.manifest', Yaml::dump($manifestData));
         }
@@ -352,10 +386,39 @@ class Snowflake extends Extractor
             'name' => $table['name'],
             'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
             'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
-            'type' => (isset($table['type'])) ? $table['type'] : null,
+            'type' => (isset($table['kind'])) ? $table['kind'] : null,
             'rowCount' => (isset($table['rows'])) ? $table['rows'] : null,
+            'byteCount' => (isset($table['bytes'])) ? $table['bytes'] : null
         ];
-        $tabledef['columns'] = $this->db->describeTableColumns($table["schema_name"], $table["name"]);
+
+        $sql = sprintf(
+            "SELECT * FROM information_schema.columns 
+             WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s' 
+             ORDER BY ORDINAL_POSITION",
+            $table['schema_name'],
+            $table['name']
+        );
+        $columns = $this->db->fetchAll($sql);
+
+        foreach ($columns as $i => $column) {
+            $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
+            if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
+                if ($column['NUMERIC_SCALE'] > 0) {
+                    $length = $column['NUMERIC_PRECISION'] . "," . $column['NUMERIC_SCALE'];
+                } else {
+                    $length = $column['NUMERIC_PRECISION'];
+                }
+            }
+
+            $tabledef['columns'][] = [
+                "name" => $column['COLUMN_NAME'],
+                "default" => $column['COLUMN_DEFAULT'],
+                "length" => $length,
+                "nullable" => (trim($column['IS_NULLABLE']) === "NO") ? false : true,
+                "type" => $column['DATA_TYPE'],
+                "ordinalPosition" => $column['ORDINAL_POSITION']
+            ];
+        }
         return $tabledef;
     }
 }

@@ -1,7 +1,6 @@
 <?php
 namespace Keboola\DbWriter\Writer;
 
-use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\AbstractSnowflakeTest;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -31,13 +30,9 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $rootPath = __DIR__ . '/../../..';
         $dataPath = __DIR__ . '/../../data/runAction';
 
-        $csv1 = new CsvFile($this->dataDir . '/snowflake/sales.csv');
-        $this->createTextTable($csv1);
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz.manifest");
 
-        $csv2 = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
-        $this->createTextTable($csv2);
         @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz.manifest");
 

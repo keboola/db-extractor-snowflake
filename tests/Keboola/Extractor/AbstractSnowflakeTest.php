@@ -30,6 +30,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection->query(
             sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
         );
+
+        $this->setupTables();
     }
 
     /**
@@ -76,17 +78,25 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $tableName;
     }
 
-    private function quote($value)
+    private function setupTables()
     {
+        $salescsv = new CsvFile($this->dataDir . '/snowflake/sales.csv');
+        $this->createTextTable($salescsv);
+
+        $escaping = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
+        $this->createTextTable($escaping);
+    }
+
+    private function quote($value) {
         return "'" . addslashes($value) . "'";
     }
 
-    private function generateCreateCommand(CsvFile $csv, $fileInfo)
+    private function generateCreateCommand($tableName, CsvFile $csv, $fileInfo)
     {
         $csvOptions = [];
-        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote($csv->getDelimiter()));
+        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote($csv->getEnclosure()));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
+        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->connection->quoteIdentifier("\\"));
 
         if (!$fileInfo['isSliced']) {
             $csvOptions[] = "SKIP_HEADER = 1";
@@ -99,7 +109,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
              FILE_FORMAT = (TYPE=CSV %s)
              CREDENTIALS = (AWS_KEY_ID = %s AWS_SECRET_KEY = %s  AWS_TOKEN = %s)
             ",
-            $this->connection->quoteIdentifier($this->generateTableName($csv)),
+            $this->connection->quoteIdentifier($tableName),
             $fileInfo['s3Path']['bucket'],
             $fileInfo['s3Path']['key'],
             implode(' ', $csvOptions),
@@ -114,13 +124,9 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      *
      * @param CsvFile $file
      */
-    protected function createTextTable(CsvFile $file, $primaryKey = null, $overrideTableName = null)
+    protected function createTextTable(CsvFile $file)
     {
-        if (!$overrideTableName) {
-            $tableName = $this->generateTableName($file);
-        } else {
-            $tableName = $overrideTableName;
-        }
+        $tableName = $this->generateTableName($file);
 
         $this->connection->query(sprintf(
             'DROP TABLE IF EXISTS %s',
@@ -140,22 +146,6 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             $tableName
         ));
 
-        // create the primary key if supplied
-        if ($primaryKey && is_array($primaryKey) && !empty($primaryKey)) {
-
-            foreach ($primaryKey as $pk) {
-                $sql = sprintf("ALTER TABLE %s ALTER COLUMN %s varchar(64) NOT NULL", $tableName, $pk);
-                $this->connection->query($sql);
-            }
-
-            $sql = sprintf(
-                'ALTER TABLE %s ADD PRIMARY KEY (%s)',
-                $tableName,
-                implode(',', $primaryKey)
-            );
-            $this->connection->query($sql);
-        }
-
         $storageApi = new Client([
             'token' => getenv('STORAGE_API_TOKEN')
         ]);
@@ -168,15 +158,15 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             (new GetFileOptions())->setFederationToken(true)
         );
 
-        $this->connection->query($this->generateCreateCommand($file, $storageFileInfo));
+        $sql = $this->generateCreateCommand($tableName, $file, $storageFileInfo);
+        $this->connection->query($sql);
 
-        $result = $this->connection->fetchAll(sprintf(
-            'SELECT COUNT(*) AS %s FROM %s',
-            $this->connection->quoteIdentifier('itemsCount'),
+        $sql = sprintf(
+            'SELECT COUNT(*) AS ROWCOUNT FROM %s',
             $this->connection->quoteIdentifier($tableName)
-        ));
-
-        $this->assertEquals($this->countTable($file), (int) $result[0]['itemsCount']);
+        );
+        $result = $this->connection->fetchAll($sql);
+        $this->assertEquals($this->countTable($file), (int) $result[0]['ROWCOUNT']);
     }
 
     /**

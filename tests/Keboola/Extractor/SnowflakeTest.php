@@ -306,9 +306,11 @@ class SnowflakeTest extends AbstractSnowflakeTest
             if ($table['name'] === "escaping") {
                 continue;
             }
-            $this->assertEquals('test', $table['catalog']);
-            $this->assertEquals('dbo', $table['schema']);
-            $this->assertEquals('BASE TABLE', $table['type']);
+            $this->assertEquals($config['parameters']['db']['database'], $table['catalog']);
+            $this->assertEquals($config['parameters']['db']['schema'], $table['schema']);
+            $this->assertEquals('TRANSIENT', $table['type']);
+            $this->assertEquals(100, $table['rowCount']);
+            $this->assertEquals(11264, $table['byteCount']);
             $this->assertCount(12, $table['columns']);
             foreach ($table['columns'] as $i => $column) {
                 $this->assertArrayHasKey('name', $column);
@@ -316,46 +318,90 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 $this->assertArrayHasKey('length', $column);
                 $this->assertArrayHasKey('default', $column);
                 $this->assertArrayHasKey('nullable', $column);
-                $this->assertArrayHasKey('primaryKey', $column);
-                $this->assertArrayHasKey('foreignKey', $column);
-                $this->assertArrayHasKey('uniqueKey', $column);
-                $this->assertArrayHasKey('ordinalPosition', $column);
                 // values
-                $this->assertEquals("varchar", $column['type']);
-                $this->assertEquals($i + 1, $column['ordinalPosition']);
-                if ($column['name'] === 'createdat') {
-                    $this->assertArrayHasKey('constraintName', $column);
-                    $this->assertEquals(64, $column['length']);
-                    $this->assertFalse($column['nullable']);
-                    if ($table['name'] === 'sales') {
-                        $this->assertTrue($column['primaryKey']);
-                        $this->assertFalse($column['foreignKey']);
-                        $this->assertFalse($column['uniqueKey']);
-                    } else {
-                        $this->assertFalse($column['primaryKey']);
-                        $this->assertTrue($column['foreignKey']);
-                        $this->assertFalse($column['uniqueKey']);
-                        $this->assertArrayHasKey('foreignKeyRefSchema', $column);
-                        $this->assertArrayHasKey('foreignKeyRefSchema', $column);
-                        $this->assertArrayHasKey('foreignKeyRefSchema', $column);
-                        $this->assertEquals($column['foreignKeyRefSchema'], "dbo");
-                        $this->assertEquals($column['foreignKeyRefTable'], "sales");
-                        $this->assertEquals($column['foreignKeyRefColumn'], "createdat");
-                    }
-                } else {
-                    $this->assertEquals(255, $column['length']);
-                    $this->assertTrue($column['nullable']);
-                    $this->assertNull($column['default']);
-                    $this->assertFalse($column['primaryKey']);
-                    $this->assertFalse($column['foreignKey']);
-                    $this->assertFalse($column['uniqueKey']);
-                }
+                $this->assertEquals("TEXT", $column['type']);
+                $this->assertEquals(200, $column['length']);
+                $this->assertFalse($column['nullable']);
+                $this->assertNull($column['default']);
             }
         }
     }
 
     public function testManifestMetadata()
     {
+        $config = $this->getConfig();
 
+        $config['parameters']['tables'][0]['columns'] = ["usergender","usercity","usersentiment","zipcode", "createdat"];
+        $config['parameters']['tables'][0]['table'] = 'sales';
+        $config['parameters']['tables'][0]['query'] = "SELECT \"usergender\", \"usercity\", \"usersentiment\", \"zipcode\", \"createdat\" FROM \"sales\"";
+        // use just 1 table
+        unset($config['parameters']['tables'][1]);
+        unset($config['parameters']['tables'][2]);
+
+        $app = $this->createApplication($config);
+
+        $result = $app->run();
+
+        $outputManifest = Yaml::parse(
+            file_get_contents($this->dataDir . '/out/tables/in_c-main_sales.csv.gz.manifest')
+        );
+
+        $this->assertArrayHasKey('destination', $outputManifest);
+        $this->assertArrayHasKey('incremental', $outputManifest);
+        $this->assertArrayHasKey('metadata', $outputManifest);
+        foreach ($outputManifest['metadata'] as $i => $metadata) {
+            $this->assertArrayHasKey('key', $metadata);
+            $this->assertArrayHasKey('value', $metadata);
+            switch ($metadata['key']) {
+                case 'KBC.name':
+                    $this->assertEquals('sales', $metadata['value']);
+                    break;
+                case 'KBC.catalog':
+                    $this->assertEquals($config['parameters']['db']['database'], $metadata['value']);
+                    break;
+                case 'KBC.schema':
+                    $this->assertEquals($config['parameters']['db']['schema'], $metadata['value']);
+                    break;
+                case 'KBC.type':
+                    $this->assertEquals('TRANSIENT', $metadata['value']);
+                    break;
+                case 'KBC.rowCount':
+                    $this->assertEquals('100', $metadata['value']);
+                    break;
+                case 'KBC.byteCount':
+                    $this->assertEquals('11264', $metadata['value']);
+                    break;
+                default:
+                    $this->fail('Unknown table metadata key: ' . $metadata['key']);
+            }
+        }
+        $this->assertArrayHasKey('column_metadata', $outputManifest);
+        $this->assertCount(5, $outputManifest['column_metadata']);
+        foreach ($outputManifest['column_metadata']['createdat'] as $metadata) {
+            $this->assertArrayHasKey('key', $metadata);
+            $this->assertArrayHasKey('value', $metadata);
+            switch ($metadata['key']) {
+                case 'KBC.datatype.type':
+                    $this->assertEquals('TEXT', $metadata['value']);
+                    break;
+                case 'KBC.datatype.basetype':
+                    $this->assertEquals('STRING', $metadata['value']);
+                    break;
+                case 'KBC.datatype.nullable':
+                    $this->assertFalse($metadata['value']);
+                    break;
+                case 'KBC.datatype.default':
+                    $this->assertNull($metadata['value']);
+                    break;
+                case 'KBC.datatype.length':
+                    $this->assertEquals('200', $metadata['value']);
+                    break;
+                case 'KBC.ordinalPosition':
+                    $this->assertGreaterThan(1, $metadata['value']);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
