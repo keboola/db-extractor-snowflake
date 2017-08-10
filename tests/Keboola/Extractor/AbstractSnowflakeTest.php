@@ -87,7 +87,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->createTextTable($escaping);
     }
 
-    private function quote($value) {
+    private function quote($value)
+    {
         return "'" . addslashes($value) . "'";
     }
 

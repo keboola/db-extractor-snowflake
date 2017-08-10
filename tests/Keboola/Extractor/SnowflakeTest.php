@@ -313,7 +313,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             0 =>
                                 array (
                                     'name' => 'col1',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -322,7 +322,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             1 =>
                                 array (
                                     'name' => 'col2',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -343,7 +343,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             0 =>
                                 array (
                                     'name' => 'usergender',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -352,7 +352,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             1 =>
                                 array (
                                     'name' => 'usercity',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -361,7 +361,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             2 =>
                                 array (
                                     'name' => 'usersentiment',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -370,7 +370,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             3 =>
                                 array (
                                     'name' => 'zipcode',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -379,7 +379,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             4 =>
                                 array (
                                     'name' => 'sku',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -388,7 +388,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             5 =>
                                 array (
                                     'name' => 'createdat',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -397,7 +397,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             6 =>
                                 array (
                                     'name' => 'category',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -406,7 +406,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             7 =>
                                 array (
                                     'name' => 'price',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -415,7 +415,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             8 =>
                                 array (
                                     'name' => 'county',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -424,7 +424,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             9 =>
                                 array (
                                     'name' => 'countycode',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -433,7 +433,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             10 =>
                                 array (
                                     'name' => 'userstate',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
@@ -442,7 +442,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             11 =>
                                 array (
                                     'name' => 'categorygroup',
-                                    'default' => NULL,
+                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',

@@ -381,7 +381,8 @@ class Snowflake extends Extractor
         return $output;
     }
 
-    public function describeTable(array $table) {
+    public function describeTable(array $table)
+    {
         $tabledef = [
             'name' => $table['name'],
             'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
