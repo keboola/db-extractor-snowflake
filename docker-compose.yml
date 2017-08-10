@@ -2,9 +2,7 @@ version: '2'
 services:
   app:
     build: .
-    image: keboola/db-extractor-snowflake
-    volumes:
-      - .:/code
+    image: keboola/ex-db-snowflake
     working_dir: /code
     command: "./phpunit.sh"
     tty: true

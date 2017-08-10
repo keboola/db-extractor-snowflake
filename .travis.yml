@@ -16,10 +16,26 @@ install:
 
 script:
   - docker-compose run --rm app
+  - docker pull quay.io/keboola/developer-portal-cli-v2:latest
+  - export REPOSITORY=`docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD
+    -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-repository
+    keboola keboola.ex-db-snowflake`
+  - docker tag keboola/ex-db-snowflake:latest $REPOSITORY:master
+  - eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD
+    -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login
+    keboola keboola.ex-db-snowflake)
+  - docker push $REPOSITORY:master
+  - docker pull quay.io/keboola/syrup-cli:latest
+  - docker run --rm -e KBC_STORAGE_TOKEN quay.io/keboola/syrup-cli:latest run-job keboola.ex-db-snowflake
+    288409174 master
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: ./deploy.sh
+  script: "./deploy.sh"
   on:
     tags: true
+
+notifications:
+  slack:
+    secure: PZFieppkTxGlitPWh5HHWctg+12nb+ihDnwehH+B4LEATLxjVZhlZXRVMwp2p003eX7IgPP3v001x/2uV2aJtNEGxYAQKy0r4WpDed0fv+rjDU2WVEbwClOvPnjvPZtttWZA9BniL6/pm9nN0qSuHYSJsKt8Noqhd1ZThIxPeMWE0oRwayHFXFmRPYO72GS5S4zU7dTuL/NTLwRhkaAFBMrg68BmY/NZK+EgVEOJsbO0J5k/vVMQ37UPp9RFJNxCZKGJMNYW8zD9QpAPJ/yvVDZ3zLwUi3dlGX+wGCTj62t6bw0ep2YiUeNoF0MbIt63uVZCcgm6aJmnumnxqpUDILsaZnZihj2j5HD54i98G/fDts/V/82BZznazG3be6XUncYeZ6kkidLf2zvzmDYkRms9A/GHZDuGlSnzPLzik5s8vms8BMAmhiIBrtLc9rW9uXWC/w4Yt/mcJtYfYl6vUcUK/zdsg+KtacghQOrDAPcyCpGtamcf0ftqnh2fdKvWzSRKJ0MlVS/nH8Qo06bP1Fjd3N26Vy2GcwxGlxA1V9toq4T+9MNxszTmVFQoRaz9hZgX5uHOpDYY/7K7H+MxAQnpofmjJR+Xx5dWkskMe86VaaOf64vtWA82x8cgsXsZy358wjdMOzHMdQTEq5uB7TOTQEomM7vJJtv366gvmRA=
