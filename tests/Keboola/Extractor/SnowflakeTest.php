@@ -285,4 +285,403 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputCsvFolder);
         $this->assertFileNotExists($outputManifestFile);
     }
+
+    public function testGetTablesPlease()
+    {
+        $config = $this->getConfig();
+        $config['action'] = 'getTables';
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertArrayHasKey('status', $result);
+        $this->assertArrayHasKey('tables', $result);
+        $this->assertEquals('success', $result['status']);
+        $this->assertCount(2, $result['tables']);
+
+        $expectedData = array (
+            0 =>
+                array (
+                    'name' => 'escaping',
+                    'catalog' => 'COMPONENT_TESTING',
+                    'schema' => 'COMPONENT_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '7',
+                    'byteCount' => '2048',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'col1',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'col2',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
+            1 =>
+                array (
+                    'name' => 'sales',
+                    'catalog' => 'COMPONENT_TESTING',
+                    'schema' => 'COMPONENT_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '100',
+                    'byteCount' => '11264',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'usergender',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'usercity',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'usersentiment',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '3',
+                                ),
+                            3 =>
+                                array (
+                                    'name' => 'zipcode',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '4',
+                                ),
+                            4 =>
+                                array (
+                                    'name' => 'sku',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '5',
+                                ),
+                            5 =>
+                                array (
+                                    'name' => 'createdat',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '6',
+                                ),
+                            6 =>
+                                array (
+                                    'name' => 'category',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '7',
+                                ),
+                            7 =>
+                                array (
+                                    'name' => 'price',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '8',
+                                ),
+                            8 =>
+                                array (
+                                    'name' => 'county',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '9',
+                                ),
+                            9 =>
+                                array (
+                                    'name' => 'countycode',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '10',
+                                ),
+                            10 =>
+                                array (
+                                    'name' => 'userstate',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '11',
+                                ),
+                            11 =>
+                                array (
+                                    'name' => 'categorygroup',
+                                    'default' => null,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '12',
+                                ),
+                        ),
+                ),
+        );
+
+        $this->assertEquals($expectedData, $result['tables']);
+    }
+
+    public function testManifestMetadata()
+    {
+        $config = $this->getConfig();
+
+        $config['parameters']['tables'][0]['columns'] = ["usergender","usercity","usersentiment","zipcode", "createdat"];
+        $config['parameters']['tables'][0]['table'] = 'sales';
+        $config['parameters']['tables'][0]['query'] = "SELECT \"usergender\", \"usercity\", \"usersentiment\", \"zipcode\", \"createdat\" FROM \"sales\"";
+        // use just 1 table
+        unset($config['parameters']['tables'][1]);
+        unset($config['parameters']['tables'][2]);
+
+        $app = $this->createApplication($config);
+
+        $result = $app->run();
+
+        $outputManifest = Yaml::parse(
+            file_get_contents($this->dataDir . '/out/tables/in_c-main_sales.csv.gz.manifest')
+        );
+
+        $this->assertArrayHasKey('destination', $outputManifest);
+        $this->assertArrayHasKey('incremental', $outputManifest);
+        $this->assertArrayHasKey('metadata', $outputManifest);
+
+        $expectedTableMetadata = array (
+            0 =>
+                array (
+                    'key' => 'KBC.name',
+                    'value' => 'sales',
+                ),
+            1 =>
+                array (
+                    'key' => 'KBC.catalog',
+                    'value' => 'COMPONENT_TESTING',
+                ),
+            2 =>
+                array (
+                    'key' => 'KBC.schema',
+                    'value' => 'COMPONENT_TEST',
+                ),
+            3 =>
+                array (
+                    'key' => 'KBC.type',
+                    'value' => 'TABLE',
+                ),
+            4 =>
+                array (
+                    'key' => 'KBC.rowCount',
+                    'value' => '100',
+                ),
+            5 =>
+                array (
+                    'key' => 'KBC.byteCount',
+                    'value' => '11264',
+                ),
+        );
+        $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
+
+        $this->assertArrayHasKey('column_metadata', $outputManifest);
+        $this->assertCount(5, $outputManifest['column_metadata']);
+
+        $expectedColumnMetadata = array (
+            'usergender' =>
+                array (
+                    0 =>
+                        array (
+                            'key' => 'KBC.datatype.type',
+                            'value' => 'TEXT',
+                        ),
+                    1 =>
+                        array (
+                            'key' => 'KBC.datatype.nullable',
+                            'value' => false,
+                        ),
+                    2 =>
+                        array (
+                            'key' => 'KBC.datatype.basetype',
+                            'value' => 'STRING',
+                        ),
+                    3 =>
+                        array (
+                            'key' => 'KBC.datatype.length',
+                            'value' => '200',
+                        ),
+                    4 =>
+                        array (
+                            'key' => 'KBC.type',
+                            'value' => 'TEXT',
+                        ),
+                    5 =>
+                        array (
+                            'key' => 'KBC.ordinalPosition',
+                            'value' => '1',
+                        ),
+                ),
+            'usercity' =>
+                array (
+                    0 =>
+                        array (
+                            'key' => 'KBC.datatype.type',
+                            'value' => 'TEXT',
+                        ),
+                    1 =>
+                        array (
+                            'key' => 'KBC.datatype.nullable',
+                            'value' => false,
+                        ),
+                    2 =>
+                        array (
+                            'key' => 'KBC.datatype.basetype',
+                            'value' => 'STRING',
+                        ),
+                    3 =>
+                        array (
+                            'key' => 'KBC.datatype.length',
+                            'value' => '200',
+                        ),
+                    4 =>
+                        array (
+                            'key' => 'KBC.type',
+                            'value' => 'TEXT',
+                        ),
+                    5 =>
+                        array (
+                            'key' => 'KBC.ordinalPosition',
+                            'value' => '2',
+                        ),
+                ),
+            'usersentiment' =>
+                array (
+                    0 =>
+                        array (
+                            'key' => 'KBC.datatype.type',
+                            'value' => 'TEXT',
+                        ),
+                    1 =>
+                        array (
+                            'key' => 'KBC.datatype.nullable',
+                            'value' => false,
+                        ),
+                    2 =>
+                        array (
+                            'key' => 'KBC.datatype.basetype',
+                            'value' => 'STRING',
+                        ),
+                    3 =>
+                        array (
+                            'key' => 'KBC.datatype.length',
+                            'value' => '200',
+                        ),
+                    4 =>
+                        array (
+                            'key' => 'KBC.type',
+                            'value' => 'TEXT',
+                        ),
+                    5 =>
+                        array (
+                            'key' => 'KBC.ordinalPosition',
+                            'value' => '3',
+                        ),
+                ),
+            'zipcode' =>
+                array (
+                    0 =>
+                        array (
+                            'key' => 'KBC.datatype.type',
+                            'value' => 'TEXT',
+                        ),
+                    1 =>
+                        array (
+                            'key' => 'KBC.datatype.nullable',
+                            'value' => false,
+                        ),
+                    2 =>
+                        array (
+                            'key' => 'KBC.datatype.basetype',
+                            'value' => 'STRING',
+                        ),
+                    3 =>
+                        array (
+                            'key' => 'KBC.datatype.length',
+                            'value' => '200',
+                        ),
+                    4 =>
+                        array (
+                            'key' => 'KBC.type',
+                            'value' => 'TEXT',
+                        ),
+                    5 =>
+                        array (
+                            'key' => 'KBC.ordinalPosition',
+                            'value' => '4',
+                        ),
+                ),
+            'createdat' =>
+                array (
+                    0 =>
+                        array (
+                            'key' => 'KBC.datatype.type',
+                            'value' => 'TEXT',
+                        ),
+                    1 =>
+                        array (
+                            'key' => 'KBC.datatype.nullable',
+                            'value' => false,
+                        ),
+                    2 =>
+                        array (
+                            'key' => 'KBC.datatype.basetype',
+                            'value' => 'STRING',
+                        ),
+                    3 =>
+                        array (
+                            'key' => 'KBC.datatype.length',
+                            'value' => '200',
+                        ),
+                    4 =>
+                        array (
+                            'key' => 'KBC.type',
+                            'value' => 'TEXT',
+                        ),
+                    5 =>
+                        array (
+                            'key' => 'KBC.ordinalPosition',
+                            'value' => '6',
+                        ),
+                ),
+        );
+        $this->assertEquals($expectedColumnMetadata, $outputManifest['column_metadata']);
+    }
 }

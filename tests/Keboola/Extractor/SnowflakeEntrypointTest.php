@@ -1,7 +1,6 @@
 <?php
 namespace Keboola\DbWriter\Writer;
 
-use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\AbstractSnowflakeTest;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -31,13 +30,9 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $rootPath = __DIR__ . '/../../..';
         $dataPath = __DIR__ . '/../../data/runAction';
 
-        $csv1 = new CsvFile($this->dataDir . '/snowflake/sales.csv');
-        $this->createTextTable($csv1);
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz.manifest");
 
-        $csv2 = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
-        $this->createTextTable($csv2);
         @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz.manifest");
 
@@ -87,5 +82,24 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         var_dump($process->getErrorOutput());
 
         $this->assertEquals(1, $process->getExitCode());
+    }
+
+    public function testGetTablesAction()
+    {
+        $config = $this->getConfig();
+        @unlink($this->dataDir . '/config.yml');
+        $config['action'] = 'getTables';
+        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
+        $process->run();
+
+        var_dump($process->getErrorOutput());
+        var_dump($process->getOutput());
+
+        $this->assertJson($process->getOutput());
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertEquals("", $process->getErrorOutput());
     }
 }
