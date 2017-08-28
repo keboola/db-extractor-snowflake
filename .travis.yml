@@ -10,7 +10,7 @@ before_install:
 
 install:
   - docker-compose run --rm drivers-download composer install
-  - docker-compose run --rm drivers-download php docker/downloadDriver.php
+  - docker-compose run --rm drivers-download php driver/downloadDriver.php
   - docker-compose build app
 
 script:
