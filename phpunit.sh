@@ -42,4 +42,7 @@ rm -f ./tests/data/runAction/config.yml
 rm -rf ./tests/data/runAction/out
 rm -f ./tests/data/connectionAction/config.yml
 rm -rf ./tests/data/connectionAction/out
+
+php ./vendor/bin/phpcs --standard=psr2 --ignore=vendor -n .
+
 ./vendor/bin/phpunit
