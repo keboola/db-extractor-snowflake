@@ -9,8 +9,9 @@ before_install:
   - docker-compose -v
 
 install:
-  - docker-compose build php app
-  - docker-compose run --rm -e AWS_ACCESS_KEY=$AWS_ODBC_KEY -e AWS_SECRET_KEY=$AWS_ODBC_SECRET php php driver/downloadDriver.php
+  - docker-compose run --rm drivers-download composer install
+  - docker-compose run --rm drivers-download php docker/downloadOdbcDriver.php
+  - docker-compose build app
 
 script:
   - docker-compose run --rm app

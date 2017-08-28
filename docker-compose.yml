@@ -17,13 +17,16 @@ services:
       - SNOWFLAKE_DB_SCHEMA
       - SNOWFLAKE_DB_WAREHOUSE
 
-  php:
-    image: keboola/docker-php56-all-db
-    volumes:
+  drivers-download:
+      build:
+        context: .
+        dockerfile: ./driver/Dockerfile
+      working_dir: /code
+      volumes:
         - .:/code
-    working_dir: /code
-    environment:
-      - AWS_ACCESS_KEY
-      - AWS_SECRET_KEY
-      - AWS_S3_BUCKET
-      - AWS_REGION
+      environment:
+        - AWS_ACCESS_KEY
+        - AWS_SECRET_KEY
+        - AWS_S3_BUCKET
+        - AWS_REGION
+
