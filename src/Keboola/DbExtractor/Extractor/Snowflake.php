@@ -422,4 +422,18 @@ class Snowflake extends Extractor
         }
         return $tabledef;
     }
+
+    public function simpleQuery($table, $columns = array())
+    {
+        if (count($columns) > 0) {
+            return sprintf("SELECT %s FROM %s",
+                implode(', ', array_map(function ($column) {
+                    return $this->db->quoteIdentifier($column);
+                }, $columns)),
+                $this->db->quoteIdentifier($table)
+            );
+        } else {
+            return sprintf("SELECT * FROM %s", $this->db->quoteIdentifier($table));
+        }
+    }
 }
