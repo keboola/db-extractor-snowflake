@@ -114,6 +114,7 @@ class Snowflake extends Extractor
             $query = $table['query'];
         }
 
+        var_dump($query);
         $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
         $this->execQuery($sql);
 
@@ -432,7 +433,8 @@ class Snowflake extends Extractor
     public function simpleQuery($table, $columns = array())
     {
         if (count($columns) > 0) {
-            return sprintf("SELECT %s FROM %s",
+            return sprintf(
+                "SELECT %s FROM %s",
                 implode(', ', array_map(function ($column) {
                     return $this->db->quoteIdentifier($column);
                 }, $columns)),

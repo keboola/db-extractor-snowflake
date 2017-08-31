@@ -25,9 +25,9 @@ parameters:
             id: 3
             name: tableColumns
             outputTable: in.c-main.tableColumns
-            incremental: true
-            primaryKey: ~
-            enabled: false
+            incremental: false
+            primaryKey: null
+            enabled: true
             table: sales
             columns:
               -

@@ -73,7 +73,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $result = $app->run();
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(2, $result['imported']);
+        $this->assertCount(3, $result['imported']);
 
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
@@ -160,9 +160,12 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->createTextTable($csv2);
         $header2 = $csv2->getHeader();
 
+        $csv3 = new CsvFile($this->dataDir . '/snowflake/tableColumns.csv');
+        $header3 = $csv3->getHeader();
+
         $result = $app->run();
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(2, $result['imported']);
+        $this->assertCount(3, $result['imported']);
 
         $columns = [];
         foreach ($config['parameters']['tables'] as $table) {
@@ -172,6 +175,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // validate columns with file header
         $this->assertEquals($header1, $columns[0]);
         $this->assertEquals($header2, $columns[1]);
+        $this->assertEquals($header3, $columns[2]);
 
         // remove header
         $csv1arr = iterator_to_array($csv1);
@@ -183,6 +187,11 @@ class SnowflakeTest extends AbstractSnowflakeTest
         array_shift($csv2arr);
         $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv2arr, iterator_to_array($outCsv2));
+
+        $csv3arr = iterator_to_array($csv3);
+        array_shift($csv3arr);
+        $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/part_0_0_0.csv');
+        $this->assertEquals($csv3arr, iterator_to_array($outCsv3));
     }
 
     private function validateExtraction(array $query, $expectedFiles = 1)
