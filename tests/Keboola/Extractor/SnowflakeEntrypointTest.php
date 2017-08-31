@@ -36,9 +36,13 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz.manifest");
 
+        @unlink($dataPath . "/out/tables/in.c-main_tableColumns.csv.gz");
+        @unlink($dataPath . "/out/tables/in.c-main_tableColumns.csv.gz.manifest");
+
         $this->createConfigFile($dataPath);
 
         $process = new Process('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process->setTimeout(300);
         $process->run();
 
         $this->assertEquals(0, $process->getExitCode());
@@ -46,6 +50,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz.manifest");
+        $this->assertFileExists($dataPath . "/out/tables/in_c-main_tableColumns.csv.gz");
+        $this->assertFileExists($dataPath . "/out/tables/in_c-main_tableColumns.csv.gz.manifest");
     }
 
     public function testConnectionAction()
@@ -76,6 +82,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
 
         $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
         $process->run();
 
         var_dump($process->getOutput());

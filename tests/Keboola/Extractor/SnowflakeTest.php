@@ -73,7 +73,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $result = $app->run();
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(2, $result['imported']);
+        $this->assertCount(3, $result['imported']);
 
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
@@ -160,9 +160,12 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->createTextTable($csv2);
         $header2 = $csv2->getHeader();
 
+        $csv3 = new CsvFile($this->dataDir . '/snowflake/tableColumns.csv');
+        $header3 = $csv3->getHeader();
+
         $result = $app->run();
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(2, $result['imported']);
+        $this->assertCount(3, $result['imported']);
 
         $columns = [];
         foreach ($config['parameters']['tables'] as $table) {
@@ -172,6 +175,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // validate columns with file header
         $this->assertEquals($header1, $columns[0]);
         $this->assertEquals($header2, $columns[1]);
+        $this->assertEquals($header3, $columns[2]);
 
         // remove header
         $csv1arr = iterator_to_array($csv1);
@@ -183,6 +187,11 @@ class SnowflakeTest extends AbstractSnowflakeTest
         array_shift($csv2arr);
         $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv2arr, iterator_to_array($outCsv2));
+
+        $csv3arr = iterator_to_array($csv3);
+        array_shift($csv3arr);
+        $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/part_0_0_0.csv');
+        $this->assertEquals($csv3arr, iterator_to_array($outCsv3));
     }
 
     private function validateExtraction(array $query, $expectedFiles = 1)
@@ -276,7 +285,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         @unlink($outputManifestFile);
 
         $config = $this->getConfig();
-        $config['parameters']['tables'][0]['query'] = "SELECT * FROM \"escaping\" WHERE col1 = '123'";
+        $config['parameters']['tables'][1]['query'] = "SELECT * FROM \"escaping\" WHERE \"col1\" = '123'";
 
         $app = $this->createApplication($config);
         $result = $app->run();
@@ -459,19 +468,16 @@ class SnowflakeTest extends AbstractSnowflakeTest
     {
         $config = $this->getConfig();
 
-        $config['parameters']['tables'][0]['columns'] = ["usergender","usercity","usersentiment","zipcode", "createdat"];
-        $config['parameters']['tables'][0]['table'] = 'sales';
-        $config['parameters']['tables'][0]['query'] = "SELECT \"usergender\", \"usercity\", \"usersentiment\", \"zipcode\", \"createdat\" FROM \"sales\"";
         // use just 1 table
+        unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
-        unset($config['parameters']['tables'][2]);
 
         $app = $this->createApplication($config);
 
         $result = $app->run();
 
         $outputManifest = Yaml::parse(
-            file_get_contents($this->dataDir . '/out/tables/in_c-main_sales.csv.gz.manifest')
+            file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
         );
 
         $this->assertArrayHasKey('destination', $outputManifest);
@@ -513,7 +519,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
 
         $this->assertArrayHasKey('column_metadata', $outputManifest);
-        $this->assertCount(5, $outputManifest['column_metadata']);
+        $this->assertCount(4, $outputManifest['column_metadata']);
 
         $expectedColumnMetadata = array (
             'usergender' =>
@@ -646,39 +652,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                         array (
                             'key' => 'KBC.ordinalPosition',
                             'value' => '4',
-                        ),
-                ),
-            'createdat' =>
-                array (
-                    0 =>
-                        array (
-                            'key' => 'KBC.datatype.type',
-                            'value' => 'TEXT',
-                        ),
-                    1 =>
-                        array (
-                            'key' => 'KBC.datatype.nullable',
-                            'value' => false,
-                        ),
-                    2 =>
-                        array (
-                            'key' => 'KBC.datatype.basetype',
-                            'value' => 'STRING',
-                        ),
-                    3 =>
-                        array (
-                            'key' => 'KBC.datatype.length',
-                            'value' => '200',
-                        ),
-                    4 =>
-                        array (
-                            'key' => 'KBC.type',
-                            'value' => 'TEXT',
-                        ),
-                    5 =>
-                        array (
-                            'key' => 'KBC.ordinalPosition',
-                            'value' => '6',
                         ),
                 ),
         );
