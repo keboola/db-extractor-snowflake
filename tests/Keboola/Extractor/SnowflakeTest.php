@@ -459,12 +459,9 @@ class SnowflakeTest extends AbstractSnowflakeTest
     {
         $config = $this->getConfig();
 
-        $config['parameters']['tables'][0]['columns'] = ["usergender","usercity","usersentiment","zipcode", "createdat"];
-        $config['parameters']['tables'][0]['table'] = 'sales';
-        $config['parameters']['tables'][0]['query'] = "SELECT \"usergender\", \"usercity\", \"usersentiment\", \"zipcode\", \"createdat\" FROM \"sales\"";
         // use just 1 table
+        unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
-        unset($config['parameters']['tables'][2]);
 
         $app = $this->createApplication($config);
 

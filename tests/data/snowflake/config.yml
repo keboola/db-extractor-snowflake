@@ -23,10 +23,18 @@ parameters:
             enabled: true
         -
             id: 3
-            name: somedata
-            query: SELECT * FROM "somedata"
-            outputTable: in.c-main.somedata
+            name: tableColumns
+            outputTable: in.c-main.tableColumns
             incremental: true
-            primaryKey:
-              -  somedataId
+            primaryKey: ~
             enabled: false
+            table: sales
+            columns:
+              -
+                usergender
+              -
+                usercity
+              -
+                usersentiment
+              -
+                zipcode

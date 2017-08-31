@@ -102,4 +102,25 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertEquals(0, $process->getExitCode());
         $this->assertEquals("", $process->getErrorOutput());
     }
+
+    public function testTableColumnsQuery()
+    {
+        $config = $this->getConfig();
+        @unlink($this->dataDir . '/config.yml');
+        unset($config['tables'][0]);
+        unset($config['tables'][1]);
+
+        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
+        $process->run();
+
+        var_dump($process->getErrorOutput());
+        var_dump($process->getOutput());
+
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertFileExists($this->dataDir . "/out/tables/in_c-main_tableColumns.csv.gz");
+        $this->assertFileExists($this->dataDir . "/out/tables/in_c-main_tableColumns.csv.gz.manifest");
+    }
 }
