@@ -108,6 +108,12 @@ class Snowflake extends Extractor
 
     private function exportAndDownload(array $table)
     {
+        if (!isset($table['query']) || $table['query'] === '') {
+            $query = $this->simpleQuery($table['table'], $table['columns']);
+        } else {
+            $query = $table['query'];
+        }
+
         $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
         $this->execQuery($sql);
 
@@ -121,7 +127,7 @@ class Snowflake extends Extractor
         // Create temporary view from the supplied query
         $sql = sprintf(
             "SELECT * FROM (%s) LIMIT 0;",
-            rtrim(trim($table['query']), ';')
+            rtrim(trim($query), ';')
         );
 
         try {
@@ -153,7 +159,7 @@ class Snowflake extends Extractor
             ",
             $this->generateStageName(),
             $tmpTableName,
-            sprintf(rtrim(trim($table['query']), ';')),
+            sprintf(rtrim(trim($query), ';')),
             implode(' ', $csvOptions)
         );
         $res = $this->db->fetchAll($sql);
