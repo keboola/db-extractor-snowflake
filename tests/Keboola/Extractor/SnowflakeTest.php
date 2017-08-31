@@ -285,7 +285,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         @unlink($outputManifestFile);
 
         $config = $this->getConfig();
-        $config['parameters']['tables'][0]['query'] = "SELECT * FROM \"escaping\" WHERE col1 = '123'";
+        $config['parameters']['tables'][1]['query'] = "SELECT * FROM \"escaping\" WHERE \"col1\" = '123'";
 
         $app = $this->createApplication($config);
         $result = $app->run();
@@ -477,7 +477,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $result = $app->run();
 
         $outputManifest = Yaml::parse(
-            file_get_contents($this->dataDir . '/out/tables/in_c-main_sales.csv.gz.manifest')
+            file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
         );
 
         $this->assertArrayHasKey('destination', $outputManifest);
@@ -519,7 +519,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
 
         $this->assertArrayHasKey('column_metadata', $outputManifest);
-        $this->assertCount(5, $outputManifest['column_metadata']);
+        $this->assertCount(4, $outputManifest['column_metadata']);
 
         $expectedColumnMetadata = array (
             'usergender' =>
@@ -652,39 +652,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                         array (
                             'key' => 'KBC.ordinalPosition',
                             'value' => '4',
-                        ),
-                ),
-            'createdat' =>
-                array (
-                    0 =>
-                        array (
-                            'key' => 'KBC.datatype.type',
-                            'value' => 'TEXT',
-                        ),
-                    1 =>
-                        array (
-                            'key' => 'KBC.datatype.nullable',
-                            'value' => false,
-                        ),
-                    2 =>
-                        array (
-                            'key' => 'KBC.datatype.basetype',
-                            'value' => 'STRING',
-                        ),
-                    3 =>
-                        array (
-                            'key' => 'KBC.datatype.length',
-                            'value' => '200',
-                        ),
-                    4 =>
-                        array (
-                            'key' => 'KBC.type',
-                            'value' => 'TEXT',
-                        ),
-                    5 =>
-                        array (
-                            'key' => 'KBC.ordinalPosition',
-                            'value' => '6',
                         ),
                 ),
         );
