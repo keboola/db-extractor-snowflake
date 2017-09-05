@@ -24,7 +24,9 @@ parameters:
             incremental: false
             primaryKey: null
             enabled: true
-            table: sales
+            table:
+              schema: COMPONENT_TEST
+              tableName: sales
             columns:
               -
                 usergender

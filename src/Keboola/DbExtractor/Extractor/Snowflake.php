@@ -2,6 +2,7 @@
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
+use Keboola\Db\Import\Exception;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
@@ -114,7 +115,6 @@ class Snowflake extends Extractor
             $query = $table['query'];
         }
 
-        var_dump($query);
         $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
         $this->execQuery($sql);
 
@@ -228,11 +228,11 @@ class Snowflake extends Extractor
                 'columns' => $columns
             ];
 
-            if (isset($table['table']) && !is_null($table['table']) && !empty($table['columns'])) {
+            if (isset($table['table']) && isset($table['table']['tableName'])) {
                 $tableDetails = $this->getTables([$table['table']])[0];
                 $columnMetadata = [];
                 foreach ($tableDetails['columns'] as $column) {
-                    if (!in_array($column['name'], $table['columns'])) {
+                    if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
                         continue;
                     }
                     $datatypeKeys = ['length', 'nullable', 'default'];
@@ -380,8 +380,9 @@ class Snowflake extends Extractor
         $sql = "SHOW TABLES";
         $arr = $this->db->fetchAll($sql);
         $output = [];
+
         foreach ($arr as $table) {
-            if (is_null($tables) || (is_array($tables) && in_array($table['name'], $tables))) {
+            if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
                 $output[] = $this->describeTable($table);
             }
         }
@@ -430,18 +431,23 @@ class Snowflake extends Extractor
         return $tabledef;
     }
 
-    public function simpleQuery($table, $columns = array())
+    public function simpleQuery(array $table, array $columns = array())
     {
         if (count($columns) > 0) {
             return sprintf(
-                "SELECT %s FROM %s",
+                "SELECT %s FROM %s.%s",
                 implode(', ', array_map(function ($column) {
                     return $this->db->quoteIdentifier($column);
                 }, $columns)),
-                $this->db->quoteIdentifier($table)
+                $this->db->quoteIdentifier($table['schema']),
+                $this->db->quoteIdentifier($table['tableName'])
             );
         } else {
-            return sprintf("SELECT * FROM %s", $this->db->quoteIdentifier($table));
+            return sprintf(
+                "SELECT * FROM %s.%s",
+                $this->db->quoteIdentifier($table['schema']),
+                $this->db->quoteIdentifier($table['tableName'])
+            );
         }
     }
 }

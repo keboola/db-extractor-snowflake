@@ -1,5 +1,5 @@
 parameters:
-    tables: [{ id: 1, name: sales, query: 'SELECT * FROM "sales"', outputTable: in.c-main.sales, incremental: false, primaryKey: null, enabled: true }, { id: 2, name: escaping, query: "SELECT * FROM \"escaping\" ;\n", outputTable: in.c-main.escaping, incremental: false, primaryKey: [col1], enabled: true }, { id: 3, name: tableColumns, outputTable: in.c-main.tableColumns, incremental: false, primaryKey: null, enabled: true, table: sales, columns: [usergender, usercity, usersentiment, zipcode] }]
+    tables: [{ id: 1, name: sales, query: 'SELECT * FROM "sales"', outputTable: in.c-main.sales, incremental: false, primaryKey: null, enabled: true }, { id: 2, name: escaping, query: "SELECT * FROM \"escaping\" ;\n", outputTable: in.c-main.escaping, incremental: false, primaryKey: [col1], enabled: true }, { id: 3, name: tableColumns, outputTable: in.c-main.tableColumns, incremental: false, primaryKey: null, enabled: true, table: { schema: COMPONENT_TEST, tableName: sales }, columns: [usergender, usercity, usersentiment, zipcode] }]
     data_dir: .//tests/data
     db: { user: COMPONENT_TESTER, '#password': 7Qk3WKbKebGvccFx6u, host: kebooladev.snowflakecomputing.com, port: '443', database: COMPONENT_TESTING, schema: COMPONENT_TEST, warehouse: DEV, password: 7Qk3WKbKebGvccFx6u }
     extractor_class: Snowflake
