@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.36.0",
+            "version": "3.36.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "69321675769dd3e3d00a94bfdc747bd3a5b75b3b"
+                "reference": "104d1895fa8c661d0ac5f99567b6831b1436ec90"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/69321675769dd3e3d00a94bfdc747bd3a5b75b3b",
-                "reference": "69321675769dd3e3d00a94bfdc747bd3a5b75b3b",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/104d1895fa8c661d0ac5f99567b6831b1436ec90",
+                "reference": "104d1895fa8c661d0ac5f99567b6831b1436ec90",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2017-09-01T22:52:38+00:00"
+            "time": "2017-09-05T19:05:30+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -300,16 +300,16 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "5.2.0",
+            "version": "5.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "e03ff5e4500f5604d235e7dce8f2f444fe3bbd22"
+                "reference": "4334fce3c6c21d4642527604b32e458c16361443"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/e03ff5e4500f5604d235e7dce8f2f444fe3bbd22",
-                "reference": "e03ff5e4500f5604d235e7dce8f2f444fe3bbd22",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/4334fce3c6c21d4642527604b32e458c16361443",
+                "reference": "4334fce3c6c21d4642527604b32e458c16361443",
                 "shasum": ""
             },
             "require": {
@@ -339,7 +339,7 @@
                     "email": "miro@keboola.com"
                 }
             ],
-            "time": "2017-09-04T12:12:26+00:00"
+            "time": "2017-09-06T15:17:25+00:00"
         },
         {
             "name": "keboola/php-csv-db-import",
