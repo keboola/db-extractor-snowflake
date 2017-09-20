@@ -160,7 +160,7 @@ class Snowflake extends Extractor
             ",
             $this->generateStageName(),
             $tmpTableName,
-            sprintf(rtrim(trim($query), ';')),
+            rtrim(trim($query), ';'),
             implode(' ', $csvOptions)
         );
         $res = $this->db->fetchAll($sql);
