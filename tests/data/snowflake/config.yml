@@ -3,7 +3,7 @@ parameters:
         -
             id: 1
             name: sales
-            query: SELECT * FROM "sales"
+            query: SELECT * FROM "sales" WHERE "categorygroup" NOT LIKE '%stupidsprintf'
             outputTable: in.c-main.sales
             incremental: false
             primaryKey: null
