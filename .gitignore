@@ -5,6 +5,7 @@ vendor/
 composer.phar
 runtests.sh
 test.php
+tests/data/config.yml
 tests/data/out/
 tests/data/connectionAction/config.yml
 tests/data/connectionAction/out/
