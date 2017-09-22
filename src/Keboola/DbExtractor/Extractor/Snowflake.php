@@ -292,7 +292,7 @@ class Snowflake extends Extractor
         $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
         $cliConfig[] = sprintf('schemaname = "%s"', $dbParams['schema']);
 
-        if (!isset($dbParams['warehouse'])) {
+        if (isset($dbParams['warehouse'])) {
             $cliConfig[] = sprintf('warehousename = "%s"', $dbParams['warehouse']);
         }
 
