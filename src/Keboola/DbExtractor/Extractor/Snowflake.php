@@ -291,7 +291,11 @@ class Snowflake extends Extractor
         $cliConfig[] = sprintf('password = "%s"', $dbParams['password']);
         $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
         $cliConfig[] = sprintf('schemaname = "%s"', $dbParams['schema']);
-        $cliConfig[] = sprintf('warehousename = "%s"', $dbParams['warehouse']);
+
+        if (!isset($dbParams['warehouse']) {
+            $cliConfig[] = sprintf('warehousename = "%s"', $dbParams['warehouse']);
+        }
+
 
         $file = $this->temp->createFile('snowsql.config');
         file_put_contents($file, implode("\n", $cliConfig));
