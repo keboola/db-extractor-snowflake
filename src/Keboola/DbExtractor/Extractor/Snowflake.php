@@ -286,12 +286,12 @@ class Snowflake extends Extractor
         $cliConfig[] = 'exit_on_error = true';
         $cliConfig[] = '';
         $cliConfig[] = '[connections.downloader]';
-        $cliConfig[] = sprintf('accountname = %s', AccountUrlParser::parse($dbParams['host']));
-        $cliConfig[] = sprintf('username = %s', $dbParams['user']);
-        $cliConfig[] = sprintf('password = %s', $dbParams['password']);
-        $cliConfig[] = sprintf('dbname = %s', $dbParams['database']);
-        $cliConfig[] = sprintf('schemaname = %s', $dbParams['schema']);
-        $cliConfig[] = sprintf('warehousename = %s', $dbParams['user']);
+        $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($dbParams['host']));
+        $cliConfig[] = sprintf('username = "%s"', $dbParams['user']);
+        $cliConfig[] = sprintf('password = "%s"', $dbParams['password']);
+        $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
+        $cliConfig[] = sprintf('schemaname = "%s"', $dbParams['schema']);
+        $cliConfig[] = sprintf('warehousename = "%s"', $dbParams['warehouse']);
 
         $file = $this->temp->createFile('snowsql.config');
         file_put_contents($file, implode("\n", $cliConfig));
