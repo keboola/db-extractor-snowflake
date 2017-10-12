@@ -44,7 +44,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process = new Process('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->setTimeout(300);
         $process->run();
-        var_dump($process->getOutput());
         var_dump($process->getErrorOutput());
         $this->assertEquals(0, $process->getExitCode());
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
@@ -86,7 +85,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->setTimeout(300);
         $process->run();
 
-        var_dump($process->getOutput());
         var_dump($process->getErrorOutput());
 
         $this->assertEquals(1, $process->getExitCode());
@@ -104,7 +102,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->run();
 
         var_dump($process->getErrorOutput());
-        var_dump($process->getOutput());
 
         $this->assertJson($process->getOutput());
         $this->assertEquals(0, $process->getExitCode());
