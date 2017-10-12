@@ -383,37 +383,35 @@ class Snowflake extends Extractor
     {
         $sql = "SHOW TABLES";
         $arr = $this->db->fetchAll($sql);
-        $output = [];
 
+        $tableNameArray = [];
+        $tableDefs = [];
         foreach ($arr as $table) {
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
-                $output[] = $this->describeTable($table);
+                $tableNameArray[] = $table['name'];
+                $tableDefs[$table['schema_name'] . '.' . $table['name']] = [
+                    'name' => $table['name'],
+                    'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
+                    'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
+                    'type' => (isset($table['kind'])) ? $table['kind'] : null,
+                    'rowCount' => (isset($table['rows'])) ? $table['rows'] : null,
+                    'byteCount' => (isset($table['bytes'])) ? $table['bytes'] : null
+                ];
             }
         }
-        return $output;
-    }
-
-    public function describeTable(array $table)
-    {
-        $tabledef = [
-            'name' => $table['name'],
-            'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
-            'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
-            'type' => (isset($table['kind'])) ? $table['kind'] : null,
-            'rowCount' => (isset($table['rows'])) ? $table['rows'] : null,
-            'byteCount' => (isset($table['bytes'])) ? $table['bytes'] : null
-        ];
 
         $sql = sprintf(
             "SELECT * FROM information_schema.columns 
-             WHERE TABLE_SCHEMA = '%s' AND TABLE_NAME = '%s' 
-             ORDER BY ORDINAL_POSITION",
-            $table['schema_name'],
-            $table['name']
+             WHERE TABLE_NAME IN (%s) 
+             ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
+            implode(', ', array_map(function ($tableName) {
+                return "'" . $tableName . "'";
+            }, $tableNameArray))
         );
-        $columns = $this->db->fetchAll($sql);
 
+        $columns = $this->db->fetchAll($sql);
         foreach ($columns as $i => $column) {
+            $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
             $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
             if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
                 if ($column['NUMERIC_SCALE'] > 0) {
@@ -423,7 +421,7 @@ class Snowflake extends Extractor
                 }
             }
 
-            $tabledef['columns'][] = [
+            $curColumn = [
                 "name" => $column['COLUMN_NAME'],
                 "default" => $column['COLUMN_DEFAULT'],
                 "length" => $length,
@@ -431,8 +429,19 @@ class Snowflake extends Extractor
                 "type" => $column['DATA_TYPE'],
                 "ordinalPosition" => $column['ORDINAL_POSITION']
             ];
+
+            if (!array_key_exists('columns', $tableDefs[$curTable])) {
+                $tableDefs[$curTable]['columns'] = [];
+            }
+            $tableDefs[$curTable]['columns'][] = $curColumn;
         }
-        return $tabledef;
+        return array_values($tableDefs);
+    }
+
+    public function describeTable(array $table)
+    {
+        // Deprecated
+        return null;
     }
 
     public function simpleQuery(array $table, array $columns = array())
