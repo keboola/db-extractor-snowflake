@@ -400,6 +400,10 @@ class Snowflake extends Extractor
             }
         }
 
+        if (count($tableNameArray) === 0) {
+            return [];
+        }
+
         $sql = sprintf(
             "SELECT * FROM information_schema.columns 
              WHERE TABLE_NAME IN (%s) 
