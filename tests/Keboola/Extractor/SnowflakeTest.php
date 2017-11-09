@@ -316,7 +316,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'schema' => 'COMPONENT_TEST',
                     'type' => 'TABLE',
                     'rowCount' => '7',
-                    'byteCount' => '2048',
+                    'byteCount' => '1024',
                     'columns' =>
                         array (
                             0 =>
@@ -346,7 +346,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'schema' => 'COMPONENT_TEST',
                     'type' => 'TABLE',
                     'rowCount' => '100',
-                    'byteCount' => '11264',
+                    'byteCount' => '6656',
                     'columns' =>
                         array (
                             0 =>
@@ -513,7 +513,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             5 =>
                 array (
                     'key' => 'KBC.byteCount',
-                    'value' => '11264',
+                    'value' => '6656',
                 ),
         );
         $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
