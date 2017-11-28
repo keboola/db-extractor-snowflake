@@ -229,36 +229,39 @@ class Snowflake extends Extractor
             ];
 
             if (isset($table['table']) && isset($table['table']['tableName'])) {
-                $tableDetails = $this->getTables([$table['table']])[0];
-                $columnMetadata = [];
-                foreach ($tableDetails['columns'] as $column) {
-                    if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
-                        continue;
-                    }
-                    $datatypeKeys = ['length', 'nullable', 'default'];
-                    $datatype = new SnowflakeDatatype(
-                        $column['type'],
-                        array_intersect_key($column, array_flip($datatypeKeys))
-                    );
-                    $columnMetadata[$column['name']] = $datatype->toMetadata();
-                    $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
-                    foreach ($nonDatatypeKeys as $key => $value) {
-                        if ($key !== 'name') {
-                            $columnMetadata[$column['name']][] = [
-                                'key' => "KBC." . $key,
-                                'value'=> $value
-                            ];
+                $tables = $this->getTables([$table['table']]);
+                if (count($tables) > 0) {
+                    $tableDetails = $tables[0];
+                    $columnMetadata = [];
+                    foreach ($tableDetails['columns'] as $column) {
+                        if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
+                            continue;
+                        }
+                        $datatypeKeys = ['length', 'nullable', 'default'];
+                        $datatype = new SnowflakeDatatype(
+                            $column['type'],
+                            array_intersect_key($column, array_flip($datatypeKeys))
+                        );
+                        $columnMetadata[$column['name']] = $datatype->toMetadata();
+                        $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
+                        foreach ($nonDatatypeKeys as $key => $value) {
+                            if ($key !== 'name') {
+                                $columnMetadata[$column['name']][] = [
+                                    'key' => "KBC." . $key,
+                                    'value'=> $value
+                                ];
+                            }
                         }
                     }
+                    unset($tableDetails['columns']);
+                    foreach ($tableDetails as $key => $value) {
+                        $manifestData['metadata'][] = [
+                            "key" => "KBC." . $key,
+                            "value" => $value
+                        ];
+                    }
+                    $manifestData['column_metadata'] = $columnMetadata;
                 }
-                unset($tableDetails['columns']);
-                foreach ($tableDetails as $key => $value) {
-                    $manifestData['metadata'][] = [
-                        "key" => "KBC." . $key,
-                        "value" => $value
-                    ];
-                }
-                $manifestData['column_metadata'] = $columnMetadata;
             }
 
             file_put_contents($outputDataDir . '.manifest', Yaml::dump($manifestData));
@@ -363,10 +366,6 @@ class Snowflake extends Extractor
 
     private function execQuery($query)
     {
-        $logQuery = $this->hideCredentialsInQuery($query);
-        $logQuery = trim(preg_replace('/\s+/', ' ', $logQuery));
-
-        $this->logger->info(sprintf("Executing query '%s'", $logQuery));
         try {
             $this->db->query($query);
         } catch (\Exception $e) {
@@ -418,7 +417,7 @@ class Snowflake extends Extractor
             $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
             $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
             if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
-                if ($column['NUMERIC_SCALE'] > 0) {
+                if (is_numeric($column['NUMERIC_SCALE'])) {
                     $length = $column['NUMERIC_PRECISION'] . "," . $column['NUMERIC_SCALE'];
                 } else {
                     $length = $column['NUMERIC_PRECISION'];

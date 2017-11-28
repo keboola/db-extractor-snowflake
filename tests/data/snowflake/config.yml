@@ -30,13 +30,13 @@ parameters:
             enabled: true
             table:
               schema: COMPONENT_TEST
-              tableName: sales
+              tableName: types
             columns:
               -
-                usergender
+                character
               -
-                usercity
+                integer
               -
-                usersentiment
+                decimal
               -
-                zipcode
+                date
