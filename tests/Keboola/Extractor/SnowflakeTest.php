@@ -160,7 +160,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->createTextTable($csv2);
         $header2 = $csv2->getHeader();
 
-        $csv3 = new CsvFile($this->dataDir . '/snowflake/tableColumns.csv');
+        $csv3 = new CsvFile($this->dataDir . '/snowflake/types.csv');
         $header3 = $csv3->getHeader();
 
         $result = $app->run();
@@ -295,7 +295,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTablesPlease()
+    public function testGetTables()
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -306,7 +306,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(2, $result['tables']);
+        $this->assertCount(3, $result['tables']);
 
         $expectedData = array (
             0 =>
@@ -459,6 +459,54 @@ class SnowflakeTest extends AbstractSnowflakeTest
                                 ),
                         ),
                 ),
+            2 =>
+                array (
+                    'name' => 'types',
+                    'catalog' => 'COMPONENT_TESTING',
+                    'schema' => 'COMPONENT_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '4',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'character',
+                                    'default' => null,
+                                    'length' => '100',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'integer',
+                                    'default' => null,
+                                    'length' => '6,0',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'decimal',
+                                    'default' => null,
+                                    'length' => '10,2',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '3',
+                                ),
+                            3 =>
+                                array (
+                                    'name' => 'date',
+                                    'default' => null,
+                                    'length' => null,
+                                    'nullable' => true,
+                                    'type' => 'DATE',
+                                    'ordinalPosition' => '4',
+                                ),
+                        ),
+                ),
         );
 
         $this->assertEquals($expectedData, $result['tables']);
@@ -488,7 +536,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             0 =>
                 array (
                     'key' => 'KBC.name',
-                    'value' => 'sales',
+                    'value' => 'types',
                 ),
             1 =>
                 array (
@@ -508,12 +556,12 @@ class SnowflakeTest extends AbstractSnowflakeTest
             4 =>
                 array (
                     'key' => 'KBC.rowCount',
-                    'value' => '100',
+                    'value' => '4',
                 ),
             5 =>
                 array (
                     'key' => 'KBC.byteCount',
-                    'value' => '6656',
+                    'value' => '1024',
                 ),
         );
         $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
@@ -522,7 +570,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertCount(4, $outputManifest['column_metadata']);
 
         $expectedColumnMetadata = array (
-            'usergender' =>
+            'character' =>
                 array (
                     0 =>
                         array (
@@ -542,7 +590,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     3 =>
                         array (
                             'key' => 'KBC.datatype.length',
-                            'value' => '200',
+                            'value' => '100',
                         ),
                     4 =>
                         array (
@@ -555,32 +603,32 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '1',
                         ),
                 ),
-            'usercity' =>
+            'integer' =>
                 array (
                     0 =>
                         array (
                             'key' => 'KBC.datatype.type',
-                            'value' => 'TEXT',
+                            'value' => 'NUMBER',
                         ),
                     1 =>
                         array (
                             'key' => 'KBC.datatype.nullable',
-                            'value' => false,
+                            'value' => true,
                         ),
                     2 =>
                         array (
                             'key' => 'KBC.datatype.basetype',
-                            'value' => 'STRING',
+                            'value' => 'NUMERIC',
                         ),
                     3 =>
                         array (
                             'key' => 'KBC.datatype.length',
-                            'value' => '200',
+                            'value' => '6,0',
                         ),
                     4 =>
                         array (
                             'key' => 'KBC.type',
-                            'value' => 'TEXT',
+                            'value' => 'NUMBER',
                         ),
                     5 =>
                         array (
@@ -588,32 +636,32 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '2',
                         ),
                 ),
-            'usersentiment' =>
+            'decimal' =>
                 array (
                     0 =>
                         array (
                             'key' => 'KBC.datatype.type',
-                            'value' => 'TEXT',
+                            'value' => 'NUMBER',
                         ),
                     1 =>
                         array (
                             'key' => 'KBC.datatype.nullable',
-                            'value' => false,
+                            'value' => true,
                         ),
                     2 =>
                         array (
                             'key' => 'KBC.datatype.basetype',
-                            'value' => 'STRING',
+                            'value' => 'NUMERIC',
                         ),
                     3 =>
                         array (
                             'key' => 'KBC.datatype.length',
-                            'value' => '200',
+                            'value' => '10,2',
                         ),
                     4 =>
                         array (
                             'key' => 'KBC.type',
-                            'value' => 'TEXT',
+                            'value' => 'NUMBER',
                         ),
                     5 =>
                         array (
@@ -621,34 +669,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '3',
                         ),
                 ),
-            'zipcode' =>
+            'date' =>
                 array (
                     0 =>
                         array (
                             'key' => 'KBC.datatype.type',
-                            'value' => 'TEXT',
+                            'value' => 'DATE',
                         ),
                     1 =>
                         array (
                             'key' => 'KBC.datatype.nullable',
-                            'value' => false,
+                            'value' => true,
                         ),
                     2 =>
                         array (
                             'key' => 'KBC.datatype.basetype',
-                            'value' => 'STRING',
+                            'value' => 'DATE',
                         ),
                     3 =>
                         array (
-                            'key' => 'KBC.datatype.length',
-                            'value' => '200',
+                            'key' => 'KBC.type',
+                            'value' => 'DATE',
                         ),
                     4 =>
-                        array (
-                            'key' => 'KBC.type',
-                            'value' => 'TEXT',
-                        ),
-                    5 =>
                         array (
                             'key' => 'KBC.ordinalPosition',
                             'value' => '4',

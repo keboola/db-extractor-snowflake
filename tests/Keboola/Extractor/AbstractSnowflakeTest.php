@@ -15,6 +15,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      */
     protected $connection;
 
+    /**
+     * @var Client -- sapi client
+     */
+    protected $storageApiClient;
+
     public function setUp()
     {
         parent::setUp();
@@ -30,6 +35,10 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection->query(
             sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
         );
+
+        $this->storageApiClient = new Client([
+            'token' => getenv('STORAGE_API_TOKEN')
+        ]);
 
         $this->setupTables();
     }
@@ -85,6 +94,29 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $escaping = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
         $this->createTextTable($escaping);
+
+        $types = new CsvFile($this->dataDir . '/snowflake/types.csv');
+
+        $this->connection->query(sprintf(
+            'DROP TABLE IF EXISTS %s',
+            $this->connection->quoteIdentifier('types')
+        ));
+
+        $this->connection->query(
+            sprintf(
+                'CREATE TABLE %s ("character" VARCHAR(100) NOT NULL, "integer" NUMBER(6,0), "decimal" NUMBER(10,2), "date" DATE);',
+                $this->connection->quoteIdentifier('types')
+            )
+        );
+        $storageFileInfo = $this->storageApiClient->getFile(
+            $this->storageApiClient->uploadFile(
+                (string) $types,
+                new FileUploadOptions()
+            ),
+            (new GetFileOptions())->setFederationToken(true)
+        );
+        $createTableCommand = $this->generateCreateCommand('types', $types, $storageFileInfo);
+        $this->connection->query($createTableCommand);
     }
 
     private function quote($value)
@@ -147,12 +179,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             $tableName
         ));
 
-        $storageApi = new Client([
-            'token' => getenv('STORAGE_API_TOKEN')
-        ]);
-
-        $storageFileInfo = $storageApi->getFile(
-            $storageApi->uploadFile(
+        $storageFileInfo = $this->storageApiClient->getFile(
+            $this->storageApiClient->uploadFile(
                 (string) $file,
                 new FileUploadOptions()
             ),
