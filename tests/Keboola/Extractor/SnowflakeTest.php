@@ -306,10 +306,40 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(3, $result['tables']);
+        $this->assertCount(4, $result['tables']);
 
         $expectedData = array (
             0 =>
+                array (
+                    'name' => 'NUMBERTEST',
+                    'catalog' => 'COMPONENT_TESTING',
+                    'schema' => 'COMPONENT_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '10',
+                    'byteCount' => '512',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'first',
+                                    'default' => null,
+                                    'length' => '10,0',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'second',
+                                    'default' => null,
+                                    'length' => '2,0',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
+            1 =>
                 array (
                     'name' => 'escaping',
                     'catalog' => 'COMPONENT_TESTING',
@@ -339,7 +369,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                                 ),
                         ),
                 ),
-            1 =>
+            2 =>
                 array (
                     'name' => 'sales',
                     'catalog' => 'COMPONENT_TESTING',
@@ -459,7 +489,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                                 ),
                         ),
                 ),
-            2 =>
+            3 =>
                 array (
                     'name' => 'types',
                     'catalog' => 'COMPONENT_TESTING',
