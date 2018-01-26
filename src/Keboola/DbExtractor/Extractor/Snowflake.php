@@ -462,9 +462,4 @@ class Snowflake extends Extractor
             throw new UserException("Query execution error: " . $e->getMessage(), 0, $e);
         }
     }
-
-    private function hideCredentialsInQuery($query)
-    {
-        return preg_replace("/(AWS_[A-Z_]*\\s=\\s.)[0-9A-Za-z\\/\\+=]*./", '${1}...\'', $query);
-    }
 }
