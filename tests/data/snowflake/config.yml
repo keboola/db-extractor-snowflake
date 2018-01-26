@@ -29,7 +29,7 @@ parameters:
             primaryKey: null
             enabled: true
             table:
-              schema: COMPONENT_TEST
+              schema:
               tableName: types
             columns:
               -

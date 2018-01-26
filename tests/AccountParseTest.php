@@ -1,5 +1,5 @@
 <?php
-namespace Keboola\DbExtractor;
+namespace Keboola\Test;
 
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 

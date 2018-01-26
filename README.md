@@ -36,7 +36,9 @@ Docker application for exporting data from Snowflake Data Warehouse
 
 ## Snowflake Privileges Templates
 
-### Extractor
+### Development
+
+Required snowflake resource for extractor:
 
 ```
 CREATE DATABASE "snowflake_extractor";
@@ -63,3 +65,35 @@ GRANT ROLE "snowflake_extractor" TO USER "snowflake_extractor";
 ```
 
 Note that `GRANT SELECT ON ALL *` queries will grant permissions to objects existing at the execution time only. New objects will need to be granted to the role as they are created.  
+
+## Running Tests
+
+1. Download Snowflake drivers
+ - snowflake_linux_x8664_odbc.tgz
+ - snowsql-linux_x86_64.bash
+2. Create snowflake resources (database, schema, role and user)
+3. Create `.env` file and fill in you Redshift and S3 credentials:
+```
+SNOWFLAKE_DB_HOST=
+SNOWFLAKE_DB_PORT=443
+SNOWFLAKE_DB_USER=
+SNOWFLAKE_DB_PASSWORD=
+SNOWFLAKE_DB_DATABASE=
+SNOWFLAKE_DB_SCHEMA=
+SNOWFLAKE_DB_WAREHOUSE=
+STORAGE_API_TOKEN=
+```
+4. Install composer dependencies locally and load test fixtures to S3
+```$xslt
+docker-compose run --rm dev composer install
+```
+5. Run the tests:
+
+```
+docker-compose run --rm app
+```
+
+Run single test example:
+```
+docker-compose run --rm dev ./vendor/bin/phpunit --debug --filter testGetTables
+```
