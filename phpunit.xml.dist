@@ -15,7 +15,7 @@
     </php>
 
     <testsuite name="DB Extractor Snowflake Test Suite">
-        <directory>tests/Keboola/Extractor</directory>
+        <directory>tests</directory>
     </testsuite>
 
 </phpunit>
