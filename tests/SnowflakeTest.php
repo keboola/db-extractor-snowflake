@@ -265,7 +265,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 $this->assertFalse($rawFile->isFile());
 
                 exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
-                var_dump($archiveFile, $rawFile, $output,$return);
                 $this->assertEquals(0, $return);
 
                 clearstatcache();
