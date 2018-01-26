@@ -1,7 +1,4 @@
 <?php
-/**
- * Keboola DB Snowflake extractor
- */
 use Keboola\DbExtractor\SnowflakeApplication;
 use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;

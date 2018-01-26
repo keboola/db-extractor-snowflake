@@ -1,7 +1,6 @@
 <?php
-namespace Keboola\DbWriter\Writer;
+namespace Keboola\Test;
 
-use Keboola\DbExtractor\AbstractSnowflakeTest;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
@@ -20,6 +19,9 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $config['parameters']['db']['database'] = $this->getEnv($driver, 'DB_DATABASE');
         $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
 
+        if (isset($config['parameters']['tables'][2]['table'])) {
+            $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+        }
         file_put_contents($rootPath . '/config.yml', Yaml::dump($config));
 
         return new \SplFileInfo($rootPath . '/config.yml');
@@ -27,8 +29,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
     public function testRunAction()
     {
-        $rootPath = __DIR__ . '/../../..';
-        $dataPath = __DIR__ . '/../../data/runAction';
+        $dataPath = __DIR__ . '/data/runAction';
 
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz.manifest");
@@ -41,10 +42,9 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->createConfigFile($dataPath);
 
-        $process = new Process('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->setTimeout(300);
         $process->run();
-        var_dump($process->getErrorOutput());
         $this->assertEquals(0, $process->getExitCode());
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
@@ -56,15 +56,15 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
     public function testConnectionAction()
     {
-        $rootPath = __DIR__ . '/../../..';
-        $dataPath = __DIR__ . '/../../data/connectionAction';
+        $dataPath = __DIR__ . '/data/connectionAction';
 
         $this->createConfigFile($dataPath);
 
-        $process = new Process('php ' . $rootPath . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->run();
 
         $output = $process->getOutput();
+        var_dump($process->getOutput(), $process->getErrorOutput());
 
         $this->assertEquals(0, $process->getExitCode());
         $this->assertJson($output);

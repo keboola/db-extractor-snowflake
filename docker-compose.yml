@@ -3,8 +3,6 @@ services:
   app:
     build: .
     image: keboola/ex-db-snowflake
-    working_dir: /code
-    command: "./phpunit.sh"
     tty: true
     stdin_open: true
     environment:
@@ -16,7 +14,22 @@ services:
       - SNOWFLAKE_DB_DATABASE
       - SNOWFLAKE_DB_SCHEMA
       - SNOWFLAKE_DB_WAREHOUSE
-
+  dev:
+    image: keboola/ex-db-snowflake
+    tty: true
+    stdin_open: true
+    command: vendor/bin/phpunit
+    volumes:
+      - .:/code
+    environment:
+      - STORAGE_API_TOKEN
+      - SNOWFLAKE_DB_HOST
+      - SNOWFLAKE_DB_PORT
+      - SNOWFLAKE_DB_USER
+      - SNOWFLAKE_DB_PASSWORD
+      - SNOWFLAKE_DB_DATABASE
+      - SNOWFLAKE_DB_SCHEMA
+      - SNOWFLAKE_DB_WAREHOUSE
   drivers-download:
       build:
         context: .

@@ -1,5 +1,5 @@
 <?php
-namespace Keboola\DbExtractor;
+namespace Keboola\Test;
 
 use Keboola\Csv\CsvFile;
 use Keboola\Db\Import\Snowflake\Connection;
@@ -7,6 +7,8 @@ use Keboola\DbExtractor\Test\ExtractorTest;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Options\FileUploadOptions;
 use Keboola\StorageApi\Options\GetFileOptions;
+use Keboola\DbExtractor\SnowflakeApplication;
+use Symfony\Component\Filesystem\Filesystem;
 
 abstract class AbstractSnowflakeTest extends ExtractorTest
 {
@@ -41,6 +43,13 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         ]);
 
         $this->setupTables();
+
+        $fileSystem = new Filesystem();
+        $fileSystem->remove(__DIR__ . '/data/out');
+        $fileSystem->remove(__DIR__ . '/data/runAction/config.yml');
+        $fileSystem->remove(__DIR__ . '/data/runAction/out');
+        $fileSystem->remove(__DIR__ . '/data/connectionAction/config.yml');
+        $fileSystem->remove(__DIR__ . '/tests/data/connectionAction/out');
     }
 
     /**
@@ -58,6 +67,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];
         }
         $config['parameters']['extractor_class'] = 'Snowflake';
+        $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
 
         return $config;
     }
@@ -217,5 +227,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         }
 
         return $linesCount;
+    }
+
+    public function getSnowflakePrivateKey()
+    {
+        // docker-compose .env file does not support new lines in variables so we have to modify the key https://github.com/moby/moby/issues/12997
+        return str_replace('"', '', str_replace('\n', "\n", $this->getEnv('snowflake', 'DB_SSH_KEY_PRIVATE')));
     }
 }
