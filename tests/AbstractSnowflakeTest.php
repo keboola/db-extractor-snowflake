@@ -228,10 +228,4 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         return $linesCount;
     }
-
-    public function getSnowflakePrivateKey()
-    {
-        // docker-compose .env file does not support new lines in variables so we have to modify the key https://github.com/moby/moby/issues/12997
-        return str_replace('"', '', str_replace('\n', "\n", $this->getEnv('snowflake', 'DB_SSH_KEY_PRIVATE')));
-    }
 }
