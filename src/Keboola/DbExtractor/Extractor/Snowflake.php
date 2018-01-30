@@ -204,8 +204,8 @@ class Snowflake extends Extractor
         $process->run();
 
         if (!$process->isSuccessful()) {
+            $this->logger->error(sprintf("Snowsql error, process output %s", $process->getOutput()));
             $this->logger->error(sprintf("Snowsql error: %s", $process->getErrorOutput()));
-            $this->logger->error(sprintf("Snowsql error: %s", $process->getOutput()));
             throw new \Exception("File download error occurred");
         }
 
@@ -384,7 +384,13 @@ class Snowflake extends Extractor
 
         foreach ($lines as $line) {
             if (!preg_match('/^downloaded$/ui', $line[2])) {
-                throw new \Exception(sprintf("Cannot download file: %s Status: %s", $line[0], $line[2]));
+                throw new \Exception(sprintf(
+                    "Cannot download file: %s Status: %s Size: %s Message: %s",
+                    $line[0],
+                    $line[2],
+                    $line[1],
+                    $line[3]
+                ));
             }
 
             $file = new \SplFileInfo($path . '/' . $line[0]);
