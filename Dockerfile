@@ -43,7 +43,7 @@ ENV LC_ALL=C.UTF-8
 ADD snowsql-linux_x86_64.bash /usr/bin
 RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
 RUN rm /usr/bin/snowsql-linux_x86_64.bash
-RUN snowsql -v 1.1.20
+RUN snowsql -v 1.1.49
 
 # install composer
 RUN cd \
