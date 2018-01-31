@@ -128,9 +128,11 @@ class Snowflake extends Extractor
         try {
             $this->db->query($sql);
         } catch (\Exception $e) {
-            $message = sprintf('DB query failed: %s', $e->getMessage());
-            $exception = new UserException($message, 0, $e);
-            throw $exception;
+            throw new UserException(
+                sprintf('DB query failed: %s', $e->getMessage()),
+                0,
+                $e
+            );
         }
 
         $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
