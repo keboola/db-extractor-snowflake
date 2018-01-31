@@ -69,7 +69,7 @@ Note that `GRANT SELECT ON ALL *` queries will grant permissions to objects exis
 ## Running Tests
 
 1. Download Snowflake drivers
- - snowflake_linux_x8664_odbc.tgz
+ - snowflake-odbc-x86_64.deb
  - snowsql-linux_x86_64.bash
 2. Create snowflake resources (database, schema, role and user)
 3. Create `.env` file and fill in you Redshift and S3 credentials:
