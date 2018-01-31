@@ -20,15 +20,20 @@ RUN set -x \
     && docker-php-ext-install odbc \
     && docker-php-source delete
 
-## install snowflake drivers
-ADD snowflake_linux_x8664_odbc.tgz /usr/bin
-ADD ./driver/simba.snowflake.ini /etc/simba.snowflake.ini
-ADD ./driver/odbcinst.ini /etc/odbcinst.ini
-RUN mkdir -p  /usr/bin/snowflake_odbc/log
+# Snowflake ODBC
+# https://github.com/docker-library/php/issues/103
+RUN set -x \
+    && docker-php-source extract \
+    && cd /usr/src/php/ext/odbc \
+    && phpize \
+    && sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
+    && ./configure --with-unixODBC=shared,/usr \
+    && docker-php-ext-install odbc \
+    && docker-php-source delete
 
-ENV SIMBAINI /etc/simba.snowflake.ini
-ENV SSL_DIR /usr/bin/snowflake_odbc/SSLCertificates/nssdb
-ENV LD_LIBRARY_PATH /usr/bin/snowflake_odbc/lib
+ADD ./snowflake-odbc-x86_64.deb /tmp/snowflake-odbc.deb
+RUN dpkg -i /tmp/snowflake-odbc.deb
+ADD ./driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 
 # snowflake - charset settings
 ENV LANG en_US.UTF-8
@@ -38,7 +43,7 @@ ENV LC_ALL=C.UTF-8
 ADD snowsql-linux_x86_64.bash /usr/bin
 RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
 RUN rm /usr/bin/snowsql-linux_x86_64.bash
-RUN snowsql -v 1.1.20
+RUN snowsql -v 1.1.49
 
 # install composer
 RUN cd \
