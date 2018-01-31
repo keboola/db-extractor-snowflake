@@ -486,7 +486,7 @@ class Snowflake extends Extractor
         }
     }
 
-    private function cleanupTableStage(string $tmpTableName): string
+    private function cleanupTableStage(string $tmpTableName): void
     {
         $sql = sprintf("REMOVE @~/%s;", $tmpTableName);
         $this->execQuery($sql);
