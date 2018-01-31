@@ -109,15 +109,8 @@ class Snowflake extends Extractor
             $query = $table['query'];
         }
 
-        $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
-        $this->execQuery($sql);
-
-        $csvOptions = [];
-        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
-        $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
-        $csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
-        $csvOptions[] = sprintf("NULL_IF=()");
+        $tmpTableName = str_replace('.', '_', $table['outputTable']);
+        $sql = $this->cleanupTableStage($tmpTableName);
 
         // Create temporary view from the supplied query
         $sql = sprintf(
@@ -128,37 +121,23 @@ class Snowflake extends Extractor
         try {
             $this->db->query($sql);
         } catch (\Exception $e) {
-            $message = sprintf('DB query failed: %s', $e->getMessage());
-            $exception = new UserException($message, 0, $e);
-            throw $exception;
+            throw new UserException(
+                sprintf('DB query failed: %s', $e->getMessage()),
+                0,
+                $e
+            );
         }
 
-        $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
-        $columns = [];
-        foreach ($columnDefinitions as $column) {
-            $columns[] = $column['name'];
-        }
-
-        $tmpTableName = str_replace('.', '_', $table['outputTable']);
-
-        $sql = sprintf(
-            "
-            COPY INTO @%s/%s/part
-            FROM (%s)
-
-            FILE_FORMAT = (TYPE=CSV %s)
-            HEADER = false
-            MAX_FILE_SIZE=50000000
-            OVERWRITE = TRUE
-            ;
-            ",
-            $this->generateStageName(),
-            $tmpTableName,
-            rtrim(trim($query), ';'),
-            implode(' ', $csvOptions)
+        $columns = array_map(
+            function ($column) {
+                return $column['name'];
+            },
+            $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()")
         );
-        $res = $this->db->fetchAll($sql);
 
+
+        // copy into internal staging
+        $res = $this->db->fetchAll($this->generateCopyCommand($tmpTableName, $query));
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
             return;
@@ -179,8 +158,7 @@ class Snowflake extends Extractor
         }
 
         $sql[] = sprintf(
-            'GET @%s/%s file://%s;',
-            $this->generateStageName(),
+            'GET @~/%s file://%s;',
             $tmpTableName,
             $outputDataDir
         );
@@ -199,8 +177,8 @@ class Snowflake extends Extractor
 
         $this->logger->debug(trim($command));
 
-
-        $process = new Process($command, null, null, null, null);
+        $process = new Process($command);
+        $process->setTimeout(null);
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -210,62 +188,106 @@ class Snowflake extends Extractor
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
-        $bytes = 0;
+        $bytesDownloaded = 0;
         foreach ($csvFiles as $csvFile) {
-            $bytes += $csvFile->getSize();
-
-            $manifestData = [
-                'destination' => $table['outputTable'],
-                'delimiter' => CsvFile::DEFAULT_DELIMITER,
-                'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
-                'primary_key' => $table['primaryKey'],
-                'incremental' => $table['incremental'],
-                'columns' => $columns
-            ];
-
-            if (isset($table['table']) && isset($table['table']['tableName'])) {
-                $tables = $this->getTables([$table['table']]);
-                if (count($tables) > 0) {
-                    $tableDetails = $tables[0];
-                    $columnMetadata = [];
-                    foreach ($tableDetails['columns'] as $column) {
-                        if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
-                            continue;
-                        }
-                        $datatypeKeys = ['length', 'nullable', 'default'];
-                        $datatype = new SnowflakeDatatype(
-                            $column['type'],
-                            array_intersect_key($column, array_flip($datatypeKeys))
-                        );
-                        $columnMetadata[$column['name']] = $datatype->toMetadata();
-                        $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
-                        foreach ($nonDatatypeKeys as $key => $value) {
-                            if ($key !== 'name') {
-                                $columnMetadata[$column['name']][] = [
-                                    'key' => "KBC." . $key,
-                                    'value'=> $value
-                                ];
-                            }
-                        }
-                    }
-                    unset($tableDetails['columns']);
-                    foreach ($tableDetails as $key => $value) {
-                        $manifestData['metadata'][] = [
-                            "key" => "KBC." . $key,
-                            "value" => $value
-                        ];
-                    }
-                    $manifestData['column_metadata'] = $columnMetadata;
-                }
-            }
-
-            file_put_contents($outputDataDir . '.manifest', Yaml::dump($manifestData));
+            $bytesDownloaded += $csvFile->getSize();
         }
 
+        file_put_contents(
+            $outputDataDir . '.manifest',
+            Yaml::dump($this->createTableManifest($table, $columns))
+        );
+
+        $this->logger->info(sprintf(
+            "%d files (%s) downloaded",
+            count($csvFiles),
+            $this->dataSizeFormatted($bytesDownloaded)
+        ));
+
+        $this->cleanupTableStage($tmpTableName);
+    }
+
+    private function generateCopyCommand($stageTmpPath, $query)
+    {
+        $csvOptions = [];
+        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
+        $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
+        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
+        $csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
+        $csvOptions[] = sprintf("NULL_IF=()");
+
+        return sprintf(
+            "
+            COPY INTO @~/%s/part
+            FROM (%s)
+
+            FILE_FORMAT = (TYPE=CSV %s)
+            HEADER = false
+            MAX_FILE_SIZE=50000000
+            OVERWRITE = TRUE
+            ;
+            ",
+            $stageTmpPath,
+            rtrim(trim($query), ';'),
+            implode(' ', $csvOptions)
+        );
+    }
+
+    private function createTableManifest(array $table, array $columns): array
+    {
+        $manifestData = [
+            'destination' => $table['outputTable'],
+            'delimiter' => CsvFile::DEFAULT_DELIMITER,
+            'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
+            'primary_key' => $table['primaryKey'],
+            'incremental' => $table['incremental'],
+            'columns' => $columns
+        ];
+
+        if (isset($table['table']) && isset($table['table']['tableName'])) {
+            $tables = $this->getTables([$table['table']]);
+            if (count($tables) > 0) {
+                $tableDetails = $tables[0];
+                $columnMetadata = [];
+                foreach ($tableDetails['columns'] as $column) {
+                    if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
+                        continue;
+                    }
+                    $datatypeKeys = ['length', 'nullable', 'default'];
+                    $datatype = new SnowflakeDatatype(
+                        $column['type'],
+                        array_intersect_key($column, array_flip($datatypeKeys))
+                    );
+                    $columnMetadata[$column['name']] = $datatype->toMetadata();
+                    $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
+                    foreach ($nonDatatypeKeys as $key => $value) {
+                        if ($key !== 'name') {
+                            $columnMetadata[$column['name']][] = [
+                                'key' => "KBC." . $key,
+                                'value'=> $value
+                            ];
+                        }
+                    }
+                }
+                unset($tableDetails['columns']);
+                foreach ($tableDetails as $key => $value) {
+                    $manifestData['metadata'][] = [
+                        "key" => "KBC." . $key,
+                        "value" => $value
+                    ];
+                }
+                $manifestData['column_metadata'] = $columnMetadata;
+            }
+        }
+
+        return $manifestData;
+    }
+    
+    private function dataSizeFormatted(int $bytes)
+    {
         $base = log($bytes) / log(1024);
-        $suffixes = array(' B', ' KB', ' MB', ' GB', ' TB');
-        $bytes =  round(pow(1024, $base - floor($base)), 2) . $suffixes[floor($base)];
-        $this->logger->info(sprintf("%d files (%s) downloaded", count($csvFiles), $bytes));
+        $suffixes = [' B', ' KB', ' MB', ' GB', ' TB'];
+        return round(pow(1024, $base - floor($base)), 2) . $suffixes[(int) floor($base)];
     }
 
     public function getTables(array $tables = null)
@@ -409,11 +431,6 @@ class Snowflake extends Extractor
         return "'" . addslashes($value) . "'";
     }
 
-    private function generateStageName()
-    {
-        return '~';
-    }
-
     /**
      * @param $dbParams
      * @return \SplFileInfo
@@ -467,5 +484,11 @@ class Snowflake extends Extractor
         } catch (\Exception $e) {
             throw new UserException("Query execution error: " . $e->getMessage(), 0, $e);
         }
+    }
+
+    private function cleanupTableStage(string $tmpTableName): void
+    {
+        $sql = sprintf("REMOVE @~/%s;", $tmpTableName);
+        $this->execQuery($sql);
     }
 }
