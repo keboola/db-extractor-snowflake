@@ -109,8 +109,8 @@ class Snowflake extends Extractor
             $query = $table['query'];
         }
 
-        $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
-        $this->execQuery($sql);
+        $tmpTableName = str_replace('.', '_', $table['outputTable']);
+        $sql = $this->cleanupTableStage($tmpTableName);
 
         // Create temporary view from the supplied query
         $sql = sprintf(
@@ -135,7 +135,6 @@ class Snowflake extends Extractor
             $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()")
         );
 
-        $tmpTableName = str_replace('.', '_', $table['outputTable']);
 
         // copy into internal staging
         $res = $this->db->fetchAll($this->generateCopyCommand($tmpTableName, $query));
@@ -159,8 +158,7 @@ class Snowflake extends Extractor
         }
 
         $sql[] = sprintf(
-            'GET @%s/%s file://%s;',
-            $this->generateStageName(),
+            'GET @~/%s file://%s;',
             $tmpTableName,
             $outputDataDir
         );
@@ -205,9 +203,11 @@ class Snowflake extends Extractor
             count($csvFiles),
             $this->dataSizeFormatted($bytesDownloaded)
         ));
+
+        $this->cleanupTableStage($tmpTableName);
     }
 
-    private function generateCopyCommand($tableName, $query)
+    private function generateCopyCommand($stageTmpPath, $query)
     {
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
@@ -218,7 +218,7 @@ class Snowflake extends Extractor
 
         return sprintf(
             "
-            COPY INTO @%s/%s/part
+            COPY INTO @~/%s/part
             FROM (%s)
 
             FILE_FORMAT = (TYPE=CSV %s)
@@ -227,8 +227,7 @@ class Snowflake extends Extractor
             OVERWRITE = TRUE
             ;
             ",
-            $this->generateStageName(),
-            $tableName,
+            $stageTmpPath,
             rtrim(trim($query), ';'),
             implode(' ', $csvOptions)
         );
@@ -432,11 +431,6 @@ class Snowflake extends Extractor
         return "'" . addslashes($value) . "'";
     }
 
-    private function generateStageName()
-    {
-        return '~';
-    }
-
     /**
      * @param $dbParams
      * @return \SplFileInfo
@@ -490,5 +484,11 @@ class Snowflake extends Extractor
         } catch (\Exception $e) {
             throw new UserException("Query execution error: " . $e->getMessage(), 0, $e);
         }
+    }
+
+    private function cleanupTableStage(string $tmpTableName): string
+    {
+        $sql = sprintf("REMOVE @~/%s;", $tmpTableName);
+        $this->execQuery($sql);
     }
 }
