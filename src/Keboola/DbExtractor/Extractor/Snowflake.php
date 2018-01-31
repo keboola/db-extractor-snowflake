@@ -112,13 +112,6 @@ class Snowflake extends Extractor
         $sql = sprintf("REMOVE @%s/%s;", $this->generateStageName(), str_replace('.', '_', $table['outputTable']));
         $this->execQuery($sql);
 
-        $csvOptions = [];
-        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
-        $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
-        $csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
-        $csvOptions[] = sprintf("NULL_IF=()");
-
         // Create temporary view from the supplied query
         $sql = sprintf(
             "SELECT * FROM (%s) LIMIT 0;",
@@ -135,32 +128,17 @@ class Snowflake extends Extractor
             );
         }
 
-        $columnDefinitions = $this->db->fetchAll("DESC RESULT LAST_QUERY_ID();");
-        $columns = [];
-        foreach ($columnDefinitions as $column) {
-            $columns[] = $column['name'];
-        }
+        $columns = array_map(
+          function ($column) {
+              return $column['name'];
+          },
+          $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()")
+        );
 
         $tmpTableName = str_replace('.', '_', $table['outputTable']);
 
-        $sql = sprintf(
-            "
-            COPY INTO @%s/%s/part
-            FROM (%s)
-
-            FILE_FORMAT = (TYPE=CSV %s)
-            HEADER = false
-            MAX_FILE_SIZE=50000000
-            OVERWRITE = TRUE
-            ;
-            ",
-            $this->generateStageName(),
-            $tmpTableName,
-            rtrim(trim($query), ';'),
-            implode(' ', $csvOptions)
-        );
-        $res = $this->db->fetchAll($sql);
-
+        // copy into internal staging
+        $res = $this->db->fetchAll($this->generateCopyCommand($tmpTableName, $query));
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
             return;
@@ -268,6 +246,33 @@ class Snowflake extends Extractor
         $suffixes = array(' B', ' KB', ' MB', ' GB', ' TB');
         $bytes =  round(pow(1024, $base - floor($base)), 2) . $suffixes[floor($base)];
         $this->logger->info(sprintf("%d files (%s) downloaded", count($csvFiles), $bytes));
+    }
+
+    private function generateCopyCommand($tableName, $query)
+    {
+        $csvOptions = [];
+        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
+        $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
+        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
+        $csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
+        $csvOptions[] = sprintf("NULL_IF=()");
+
+        return sprintf(
+            "
+            COPY INTO @%s/%s/part
+            FROM (%s)
+
+            FILE_FORMAT = (TYPE=CSV %s)
+            HEADER = false
+            MAX_FILE_SIZE=50000000
+            OVERWRITE = TRUE
+            ;
+            ",
+            $this->generateStageName(),
+            $tableName,
+            rtrim(trim($query), ';'),
+            implode(' ', $csvOptions)
+        );
     }
 
     public function getTables(array $tables = null)
