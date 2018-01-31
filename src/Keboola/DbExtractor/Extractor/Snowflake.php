@@ -129,10 +129,10 @@ class Snowflake extends Extractor
         }
 
         $columns = array_map(
-          function ($column) {
-              return $column['name'];
-          },
-          $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()")
+            function ($column) {
+                return $column['name'];
+            },
+            $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()")
         );
 
         $tmpTableName = str_replace('.', '_', $table['outputTable']);
