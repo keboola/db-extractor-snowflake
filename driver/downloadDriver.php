@@ -24,6 +24,6 @@ $client->getObject([
 
 $client->getObject([
     'Bucket' => 'keboola-configs',
-    'Key' => 'drivers/snowflake-snowsql/snowsql-linux_x86_64.1.1.20.bash',
+    'Key' => 'drivers/snowflake-snowsql/snowsql-1.1.50-linux_x86_64.bash',
     'SaveAs' => './snowsql-linux_x86_64.bash'
 ]);
