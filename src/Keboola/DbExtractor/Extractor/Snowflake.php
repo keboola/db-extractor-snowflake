@@ -179,8 +179,8 @@ class Snowflake extends Extractor
 
         $this->logger->debug(trim($command));
 
-
-        $process = new Process($command, null, null, null, null);
+        $process = new Process($command);
+        $process->setTimeout(null);
         $process->run();
 
         if (!$process->isSuccessful()) {
@@ -190,9 +190,9 @@ class Snowflake extends Extractor
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
-        $bytes = 0;
+        $bytesDownloaded = 0;
         foreach ($csvFiles as $csvFile) {
-            $bytes += $csvFile->getSize();
+            $bytesDownloaded += $csvFile->getSize();
         }
 
         file_put_contents(
@@ -200,10 +200,11 @@ class Snowflake extends Extractor
             Yaml::dump($this->createTableManifest($table, $columns))
         );
 
-        $base = log($bytes) / log(1024);
-        $suffixes = array(' B', ' KB', ' MB', ' GB', ' TB');
-        $bytes =  round(pow(1024, $base - floor($base)), 2) . $suffixes[floor($base)];
-        $this->logger->info(sprintf("%d files (%s) downloaded", count($csvFiles), $bytes));
+        $this->logger->info(sprintf(
+            "%d files (%s) downloaded",
+            count($csvFiles),
+            $this->dataSizeFormatted($bytesDownloaded)
+        ));
     }
 
     private function generateCopyCommand($tableName, $query)
@@ -281,6 +282,13 @@ class Snowflake extends Extractor
         }
 
         return $manifestData;
+    }
+    
+    private function dataSizeFormatted(int $bytes)
+    {
+        $base = log($bytes) / log(1024);
+        $suffixes = [' B', ' KB', ' MB', ' GB', ' TB'];
+        return round(pow(1024, $base - floor($base)), 2) . $suffixes[(int) floor($base)];
     }
 
     public function getTables(array $tables = null)
