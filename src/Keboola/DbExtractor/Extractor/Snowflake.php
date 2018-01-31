@@ -193,54 +193,12 @@ class Snowflake extends Extractor
         $bytes = 0;
         foreach ($csvFiles as $csvFile) {
             $bytes += $csvFile->getSize();
-
-            $manifestData = [
-                'destination' => $table['outputTable'],
-                'delimiter' => CsvFile::DEFAULT_DELIMITER,
-                'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
-                'primary_key' => $table['primaryKey'],
-                'incremental' => $table['incremental'],
-                'columns' => $columns
-            ];
-
-            if (isset($table['table']) && isset($table['table']['tableName'])) {
-                $tables = $this->getTables([$table['table']]);
-                if (count($tables) > 0) {
-                    $tableDetails = $tables[0];
-                    $columnMetadata = [];
-                    foreach ($tableDetails['columns'] as $column) {
-                        if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
-                            continue;
-                        }
-                        $datatypeKeys = ['length', 'nullable', 'default'];
-                        $datatype = new SnowflakeDatatype(
-                            $column['type'],
-                            array_intersect_key($column, array_flip($datatypeKeys))
-                        );
-                        $columnMetadata[$column['name']] = $datatype->toMetadata();
-                        $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
-                        foreach ($nonDatatypeKeys as $key => $value) {
-                            if ($key !== 'name') {
-                                $columnMetadata[$column['name']][] = [
-                                    'key' => "KBC." . $key,
-                                    'value'=> $value
-                                ];
-                            }
-                        }
-                    }
-                    unset($tableDetails['columns']);
-                    foreach ($tableDetails as $key => $value) {
-                        $manifestData['metadata'][] = [
-                            "key" => "KBC." . $key,
-                            "value" => $value
-                        ];
-                    }
-                    $manifestData['column_metadata'] = $columnMetadata;
-                }
-            }
-
-            file_put_contents($outputDataDir . '.manifest', Yaml::dump($manifestData));
         }
+
+        file_put_contents(
+            $outputDataDir . '.manifest',
+            Yaml::dump($this->createTableManifest($table, $columns))
+        );
 
         $base = log($bytes) / log(1024);
         $suffixes = array(' B', ' KB', ' MB', ' GB', ' TB');
@@ -273,6 +231,56 @@ class Snowflake extends Extractor
             rtrim(trim($query), ';'),
             implode(' ', $csvOptions)
         );
+    }
+
+    private function createTableManifest(array $table, array $columns): array
+    {
+        $manifestData = [
+            'destination' => $table['outputTable'],
+            'delimiter' => CsvFile::DEFAULT_DELIMITER,
+            'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
+            'primary_key' => $table['primaryKey'],
+            'incremental' => $table['incremental'],
+            'columns' => $columns
+        ];
+
+        if (isset($table['table']) && isset($table['table']['tableName'])) {
+            $tables = $this->getTables([$table['table']]);
+            if (count($tables) > 0) {
+                $tableDetails = $tables[0];
+                $columnMetadata = [];
+                foreach ($tableDetails['columns'] as $column) {
+                    if (count($table['columns']) > 0 && !in_array($column['name'], $table['columns'])) {
+                        continue;
+                    }
+                    $datatypeKeys = ['length', 'nullable', 'default'];
+                    $datatype = new SnowflakeDatatype(
+                        $column['type'],
+                        array_intersect_key($column, array_flip($datatypeKeys))
+                    );
+                    $columnMetadata[$column['name']] = $datatype->toMetadata();
+                    $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
+                    foreach ($nonDatatypeKeys as $key => $value) {
+                        if ($key !== 'name') {
+                            $columnMetadata[$column['name']][] = [
+                                'key' => "KBC." . $key,
+                                'value'=> $value
+                            ];
+                        }
+                    }
+                }
+                unset($tableDetails['columns']);
+                foreach ($tableDetails as $key => $value) {
+                    $manifestData['metadata'][] = [
+                        "key" => "KBC." . $key,
+                        "value" => $value
+                    ];
+                }
+                $manifestData['column_metadata'] = $columnMetadata;
+            }
+        }
+
+        return $manifestData;
     }
 
     public function getTables(array $tables = null)
