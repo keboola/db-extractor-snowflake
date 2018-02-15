@@ -295,7 +295,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTables()
+    public function testGetTablesInside()
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -306,7 +306,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(3, $result['tables']);
+        $this->assertCount(4, $result['tables']);
 
         $expectedData = array (
             array (
@@ -501,6 +501,35 @@ class SnowflakeTest extends AbstractSnowflakeTest
                                 'nullable' => true,
                                 'type' => 'DATE',
                                 'ordinalPosition' => '4',
+                            ),
+                    ),
+            ),
+            array (
+                'name' => 'escaping_view',
+                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'type' => 'VIEW',
+                'rowCount' => null,
+                'byteCount' => null,
+                'columns' =>
+                    array (
+                        0 =>
+                            array (
+                                'name' => 'col1',
+                                'default' => null,
+                                'length' => '200',
+                                'nullable' => true,
+                                'type' => 'TEXT',
+                                'ordinalPosition' => '1',
+                            ),
+                        1 =>
+                            array (
+                                'name' => 'col2',
+                                'default' => null,
+                                'length' => '200',
+                                'nullable' => true,
+                                'type' => 'TEXT',
+                                'ordinalPosition' => '2',
                             ),
                     ),
             ),

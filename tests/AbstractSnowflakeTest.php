@@ -127,6 +127,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         );
         $createTableCommand = $this->generateCreateCommand('types', $types, $storageFileInfo);
         $this->connection->query($createTableCommand);
+
+        // drop view if it exists
+        $this->connection->query('DROP VIEW IF EXISTS "escaping_view"');
+        // create a view
+        $this->connection->query('CREATE VIEW "escaping_view" AS SELECT * FROM "escaping"');
     }
 
     private function quote($value)
