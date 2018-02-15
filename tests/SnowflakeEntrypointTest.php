@@ -64,7 +64,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->run();
 
         $output = $process->getOutput();
-        var_dump($process->getOutput(), $process->getErrorOutput());
 
         $this->assertEquals(0, $process->getExitCode());
         $this->assertJson($output);
@@ -85,8 +84,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->setTimeout(300);
         $process->run();
 
-        var_dump($process->getErrorOutput());
-
         $this->assertEquals(1, $process->getExitCode());
     }
 
@@ -101,10 +98,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->setTimeout(300);
         $process->run();
 
-        var_dump($process->getErrorOutput());
-        var_dump($process->getOutput());
-
-        //$this->assertJson($process->getOutput());
+        $this->assertJson($process->getOutput());
         $this->assertEquals(0, $process->getExitCode());
         $this->assertEquals("", $process->getErrorOutput());
     }
