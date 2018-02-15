@@ -295,16 +295,21 @@ class Snowflake extends Extractor
         $sql = "SHOW TABLES";
         $arr = $this->db->fetchAll($sql);
 
+        $sql = "SHOW VIEWS";
+        $views = $this->db->fetchAll($sql);
+        $arr = array_merge($arr, $views);
+
         $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
                 $tableNameArray[] = $table['name'];
+                $isView = array_key_exists('text', $table);
                 $tableDefs[$table['schema_name'] . '.' . $table['name']] = [
                     'name' => $table['name'],
                     'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
                     'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
-                    'type' => (isset($table['kind'])) ? $table['kind'] : null,
+                    'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null),
                     'rowCount' => (isset($table['rows'])) ? $table['rows'] : null,
                     'byteCount' => (isset($table['bytes'])) ? $table['bytes'] : null
                 ];
@@ -317,7 +322,7 @@ class Snowflake extends Extractor
 
         $sql = sprintf(
             "SELECT * FROM information_schema.columns 
-             WHERE TABLE_NAME IN (%s) 
+             WHERE TABLE_NAME IN (%s)
              ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
             implode(', ', array_map(function ($tableName) {
                 return "'" . $tableName . "'";
