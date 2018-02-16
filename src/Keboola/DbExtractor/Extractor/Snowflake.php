@@ -304,7 +304,7 @@ class Snowflake extends Extractor
         $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
-            if ($this->schema && $table['schema_name'] !== $this->schema) {
+            if (($this->schema && $table['schema_name'] !== $this->schema) || $table['schema_name'] === 'INFORMATION_SCHEMA') {
                 continue;
             }
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
