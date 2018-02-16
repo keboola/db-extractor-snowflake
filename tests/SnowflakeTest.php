@@ -211,24 +211,26 @@ class SnowflakeTest extends AbstractSnowflakeTest
     {
         $config = $this->getConfig();
         unset($config['parameters']['db']['schema']);
-        unset($config['parameters']['tables'][0]);
-        unset($config['parameters']['tables'][2]);
+        $table = $config['parameters']['tables'][1];
+        unset($config['parameters']['tables']);
+        $config['parameters']['tables'] = [$table];
 
         // running the query that doesn't specify schema in the query should produce a user error
         $app = $this->createApplication($config);
         try {
             $result = $app->run();
             $this->fail('The query does not specify schema and no schema is specified in the connection.');
-        } catch (UserException $e) {
+        } catch (\Exception $e) {
+            $this->assertContains('no schema is specified', $e->getMessage());
 
         }
 
         // add schema to db query
-        $config['parameters']['tables'][1]['query'] = sprintf(
+        $config['parameters']['tables'][0]['query'] = sprintf(
             'SELECT * FROM %s."escaping"',
-            $this->connection->quoteIdentifier($this->getEnv('snowflake', 'schema'))
+            $this->connection->quoteIdentifier($this->getEnv('snowflake', 'DB_SCHEMA'))
         );
-
+        
         $app = $this->createApplication($config);
         $app->run();
         $this->validateExtraction($config['parameters']['tables'][0]);

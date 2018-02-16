@@ -153,7 +153,10 @@ class Snowflake extends Extractor
 
         $sql = [];
         $sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
-        $sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+
+        if ($this->schema) {
+            $sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+        }
 
         if ($this->warehouse) {
             $sql[] = sprintf('USE WAREHOUSE %s;', $this->db->quoteIdentifier($this->warehouse));
@@ -186,7 +189,7 @@ class Snowflake extends Extractor
         if (!$process->isSuccessful()) {
             $this->logger->error(sprintf("Snowsql error, process output %s", $process->getOutput()));
             $this->logger->error(sprintf("Snowsql error: %s", $process->getErrorOutput()));
-            throw new \Exception("File download error occurred");
+            throw new \Exception(sprintf("File download error occurred processing [%s]", $table['name']));
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
