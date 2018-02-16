@@ -171,20 +171,10 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * Create table from csv file with text columns
      *
      * @param CsvFile $file
-     * @param string $tableName - optional name override (default uses filename)
-     * @param string $schemaName - optional schema in which to create the table
      */
-    protected function createTextTable(CsvFile $file, $tableName = null, $schemaName = null)
+    protected function createTextTable(CsvFile $file)
     {
-        if (!$tableName) {
-            $tableName = $this->generateTableName($file);
-        }
-
-        if ($schemaName) {
-            $this->connection->query(
-                sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($schemaName))
-            );
-        }
+        $tableName = $this->generateTableName($file);
 
         $this->connection->query(sprintf(
             'DROP TABLE IF EXISTS %s',
