@@ -604,7 +604,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(4, $result['tables']);
+        $this->assertCount(5, $result['tables']);
 
         $expectedData = array (
             array (
@@ -803,35 +803,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     ),
             ),
             array (
-                'name' => 'escaping_view',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'VIEW',
-                'rowCount' => null,
-                'byteCount' => null,
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'col1',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => true,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'col2',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => true,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                    ),
-            ),
-            array (
                 'name' => 'no_schema_escaping',
                 'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                 'schema' => 'PUBLIC',
@@ -855,6 +826,35 @@ class SnowflakeTest extends AbstractSnowflakeTest
                                 'default' => null,
                                 'length' => '200',
                                 'nullable' => false,
+                                'type' => 'TEXT',
+                                'ordinalPosition' => '2',
+                            ),
+                    ),
+            ),
+            array (
+                'name' => 'escaping_view',
+                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'type' => 'VIEW',
+                'rowCount' => null,
+                'byteCount' => null,
+                'columns' =>
+                    array (
+                        0 =>
+                            array (
+                                'name' => 'col1',
+                                'default' => null,
+                                'length' => '200',
+                                'nullable' => true,
+                                'type' => 'TEXT',
+                                'ordinalPosition' => '1',
+                            ),
+                        1 =>
+                            array (
+                                'name' => 'col2',
+                                'default' => null,
+                                'length' => '200',
+                                'nullable' => true,
                                 'type' => 'TEXT',
                                 'ordinalPosition' => '2',
                             ),
