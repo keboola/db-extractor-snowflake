@@ -297,7 +297,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
             foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
                 // archive validation
-                var_dump('csv', $csvFile);
                 $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
                 $pos = strrpos($archiveFile, ".gz");
                 $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen(".gz")));
