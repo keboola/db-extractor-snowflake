@@ -222,7 +222,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
             $this->fail('The query does not specify schema and no schema is specified in the connection.');
         } catch (\Exception $e) {
             $this->assertContains('no schema is specified', $e->getMessage());
-
         }
 
         // add schema to db query
@@ -230,7 +229,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             'SELECT * FROM %s."escaping"',
             $this->connection->quoteIdentifier($this->getEnv('snowflake', 'DB_SCHEMA'))
         );
-        
+
         $app = $this->createApplication($config);
         $app->run();
         $this->validateExtraction($config['parameters']['tables'][0]);
