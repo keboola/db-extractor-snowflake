@@ -182,6 +182,9 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         if ($schemaName) {
             $this->connection->query(
+                sprintf("CREATE SCHEMA IF NOT EXISTS %s", $this->connection->quoteIdentifier($schemaName))
+            );
+            $this->connection->query(
                 sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($schemaName))
             );
         }
