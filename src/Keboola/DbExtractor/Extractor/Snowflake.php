@@ -50,13 +50,15 @@ class Snowflake extends Extractor
         $this->user = $dbParams['user'];
 
         $this->database = $dbParams['database'];
-        $this->schema = $dbParams['schema'];
 
         if (!empty($dbParams['warehouse'])) {
             $this->warehouse = $dbParams['warehouse'];
         }
 
-        $connection->query(sprintf("USE SCHEMA %s", $connection->quoteIdentifier($this->schema)));
+        if (!empty($dbParams['schema'])) {
+            $this->schema = $dbParams['schema'];
+            $connection->query(sprintf("USE SCHEMA %s", $connection->quoteIdentifier($this->schema)));
+        }
 
         return $connection;
     }
@@ -151,7 +153,10 @@ class Snowflake extends Extractor
 
         $sql = [];
         $sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
-        $sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+
+        if ($this->schema) {
+            $sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+        }
 
         if ($this->warehouse) {
             $sql[] = sprintf('USE WAREHOUSE %s;', $this->db->quoteIdentifier($this->warehouse));
@@ -184,7 +189,7 @@ class Snowflake extends Extractor
         if (!$process->isSuccessful()) {
             $this->logger->error(sprintf("Snowsql error, process output %s", $process->getOutput()));
             $this->logger->error(sprintf("Snowsql error: %s", $process->getErrorOutput()));
-            throw new \Exception("File download error occurred");
+            throw new \Exception(sprintf("File download error occurred processing [%s]", $table['name']));
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
@@ -292,16 +297,19 @@ class Snowflake extends Extractor
 
     public function getTables(array $tables = null)
     {
-        $sql = "SHOW TABLES";
+        $sql = $this->schema ? "SHOW TABLES IN SCHEMA" : "SHOW TABLES IN DATABASE";
         $arr = $this->db->fetchAll($sql);
 
-        $sql = "SHOW VIEWS";
+        $sql = $this->schema ? "SHOW VIEWS IN SCHEMA" : "SHOW VIEWS IN DATABASE";
         $views = $this->db->fetchAll($sql);
         $arr = array_merge($arr, $views);
 
         $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
+            if (($this->schema && $table['schema_name'] !== $this->schema) || $table['schema_name'] === 'INFORMATION_SCHEMA') {
+                continue;
+            }
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
                 $tableNameArray[] = $table['name'];
                 $isView = array_key_exists('text', $table);
@@ -445,12 +453,14 @@ class Snowflake extends Extractor
         $cliConfig[] = sprintf('username = "%s"', $dbParams['user']);
         $cliConfig[] = sprintf('password = "%s"', $dbParams['password']);
         $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
-        $cliConfig[] = sprintf('schemaname = "%s"', $dbParams['schema']);
 
         if (isset($dbParams['warehouse'])) {
             $cliConfig[] = sprintf('warehousename = "%s"', $dbParams['warehouse']);
         }
 
+        if (isset($dbParams['schema'])) {
+            $cliConfig[] = sprintf('schemaname = "%s"', $dbParams['schema']);
+        }
 
         $file = $this->temp->createFile('snowsql.config');
         file_put_contents($file, implode("\n", $cliConfig));
