@@ -116,7 +116,7 @@ class Snowflake extends Extractor
 
         // Create temporary view from the supplied query
         $sql = sprintf(
-            "SELECT * FROM (%s) LIMIT 1;",
+            "SELECT * FROM (%s) ORDER BY RANDOM() LIMIT 0;",
             rtrim(trim($query), ';')
         );
 
