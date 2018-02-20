@@ -7,7 +7,9 @@ use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
+use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
+use Keboola\Datatype\Definition\Exception\InvalidTypeException;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
@@ -259,10 +261,19 @@ class Snowflake extends Extractor
                         continue;
                     }
                     $datatypeKeys = ['length', 'nullable', 'default'];
-                    $datatype = new SnowflakeDatatype(
-                        $column['type'],
-                        array_intersect_key($column, array_flip($datatypeKeys))
-                    );
+                    try {
+                        $datatype = new SnowflakeDatatype(
+                            $column['type'],
+                            array_intersect_key($column, array_flip($datatypeKeys))
+                        );
+                    } catch (InvalidTypeException $e) {
+                        $this->logger->warning("Encountered irregular type: " . $column['type'] . " for culumn " . $column['name']);
+                        $datatype = new GenericDatatype(
+                            $column['type'],
+                            array_intersect_key($column, array_flip($datatypeKeys))
+                        );
+                    }
+
                     $columnMetadata[$column['name']] = $datatype->toMetadata();
                     $nonDatatypeKeys = array_diff_key($column, array_flip($datatypeKeys));
                     foreach ($nonDatatypeKeys as $key => $value) {
