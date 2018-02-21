@@ -11,6 +11,9 @@ use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\Datatype\Definition\Exception\InvalidTypeException;
 use Keboola\Temp\Temp;
+use Retry\BackOff\ExponentialBackOffPolicy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\RetryProxy;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
@@ -114,7 +117,7 @@ class Snowflake extends Extractor
         }
 
         $tmpTableName = str_replace('.', '_', $table['outputTable']);
-        $sql = $this->cleanupTableStage($tmpTableName);
+        $this->cleanupTableStage($tmpTableName);
 
         // Create temporary view from the supplied query
         $sql = sprintf(
@@ -141,7 +144,15 @@ class Snowflake extends Extractor
 
 
         // copy into internal staging
-        $res = $this->db->fetchAll($this->generateCopyCommand($tmpTableName, $query));
+        $copyCommand = $this->generateCopyCommand($tmpTableName, $query)
+        try {
+            $res = $this->db->fetchAll($copyCommand);
+        } catch (\Exception $e) {
+            throw new UserException(
+                sprintf('Copy Command: %s failed with message: %s', $copyCommand, $e->getMessage())
+            );
+        }
+
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
             return;
