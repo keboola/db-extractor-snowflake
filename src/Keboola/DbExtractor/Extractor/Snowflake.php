@@ -144,9 +144,11 @@ class Snowflake extends Extractor
 
 
         // copy into internal staging
-        $copyCommand = $this->generateCopyCommand($tmpTableName, $query)
+        $copyCommand = $this->generateCopyCommand($tmpTableName, $query);
+        // use the backoff retries for executing the copy command
+
         try {
-            $res = $this->db->fetchAll($copyCommand);
+            $res = $this->executeCopyCommand($copyCommand);
         } catch (\Exception $e) {
             throw new UserException(
                 sprintf('Copy Command: %s failed with message: %s', $copyCommand, $e->getMessage())
@@ -249,6 +251,46 @@ class Snowflake extends Extractor
             rtrim(trim($query), ';'),
             implode(' ', $csvOptions)
         );
+    }
+
+    /**
+     * @param $copyCommand
+     * @param int $maxTries
+     * @return array
+     * @throws \Exception
+     */
+    private function executeCopyCommand($copyCommand, $maxTries = 5): array
+    {
+        $retryPolicy = new SimpleRetryPolicy($maxTries, ['PDOException', 'ErrorException', 'Exception']);
+        $backOffPolicy = new ExponentialBackOffPolicy(1000);
+        $proxy = new RetryProxy($retryPolicy, $backOffPolicy);
+        $counter = 0;
+        /** @var \Exception $lastException */
+        $lastException = null;
+        try {
+            $ret = $proxy->call(function () use ($copyCommand, &$counter, &$lastException) {
+                if ($counter > 0) {
+                    $this->logger->info(sprintf('%s. Retrying... [%dx]', $lastException->getMessage(), $counter));
+                }
+                try {
+                    return $this->db->fetchAll($copyCommand);
+                } catch (\Exception $e) {
+                    $lastException = new UserException(
+                        sprintf("Copy Command failed: %s", $e->getMessage()),
+                        0,
+                        $e
+                    );
+                    $counter++;
+                    throw $e;
+                }
+            });
+        } catch (\Exception $e) {
+            if ($lastException) {
+                throw $lastException;
+            }
+            throw $e;
+        }
+        return $ret;
     }
 
     private function createTableManifest(array $table, array $columns): array
