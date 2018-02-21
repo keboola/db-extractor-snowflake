@@ -102,4 +102,27 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertEquals(0, $process->getExitCode());
         $this->assertEquals("", $process->getErrorOutput());
     }
+
+    public function testBadTypesRetries()
+    {
+        $config = $this->getConfig();
+        $this->createTextTable(new \Keboola\Csv\CsvFile($this->dataDir . '/snowflake/badTypes.csv'), 'types');
+        $table = $config['parameters']['tables'][0];
+        $table['name'] = 'badTypes';
+        $table['query'] = 'SELECT CAST("decimal" AS DECIMAL(15,5)), "character", "integer", "date" FROM "types"';
+        $table['outputTable'] = 'in.c-main.badTypes';
+        unset($config['parameters']['tables']);
+        $config['parameters']['tables'] = [$table];
+        @unlink($this->dataDir . '/config.yml');
+        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
+        $process->run();
+
+        // make sure we tried 4 additional times
+        $this->assertContains('[4x]', $process->getOutput());
+        $this->assertContains('failed with message:', $process->getErrorOutput());
+        $this->assertEquals(1, $process->getExitCode());
+    }
 }
