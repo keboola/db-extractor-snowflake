@@ -129,7 +129,7 @@ class Snowflake extends Extractor
             $this->db->query($sql);
         } catch (\Exception $e) {
             throw new UserException(
-                sprintf('DB query failed: %s', $e->getMessage()),
+                sprintf('DB query "%s" failed: %s', rtrim(trim($query), ';'), $e->getMessage()),
                 0,
                 $e
             );
@@ -381,10 +381,14 @@ class Snowflake extends Extractor
                     'name' => $table['name'],
                     'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
                     'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
-                    'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null),
-                    'rowCount' => (isset($table['rows'])) ? $table['rows'] : null,
-                    'byteCount' => (isset($table['bytes'])) ? $table['bytes'] : null
+                    'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null)
                 ];
+                if (isset($table['rows'])) {
+                    $tableDefs[$table['schema_name'] . '.' . $table['name']]['rowCount'] = $table['rows'];
+                }
+                if (isset($table['bytes'])) {
+                    $tableDefs[$table['schema_name'] . '.' . $table['name']]['byteCount'] = $table['bytes'];
+                }
             }
         }
 
