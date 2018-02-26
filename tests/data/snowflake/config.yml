@@ -40,3 +40,5 @@ parameters:
                 decimal
               -
                 date
+              -
+                object

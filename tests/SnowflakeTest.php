@@ -7,46 +7,6 @@ use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeTest extends AbstractSnowflakeTest
 {
-    private function getUserDefaultWarehouse($user)
-    {
-        $sql = sprintf(
-            "DESC USER %s;",
-            $this->connection->quoteIdentifier($user)
-        );
-
-        $config = $this->connection->fetchAll($sql);
-
-        foreach ($config as $item) {
-            if ($item['property'] === 'DEFAULT_WAREHOUSE') {
-                return $item['value'] === 'null' ? null : $item['value'];
-            }
-        }
-
-        return null;
-    }
-
-    private function setUserDefaultWarehouse($user, $warehouse = null)
-    {
-        if ($warehouse) {
-            $sql = sprintf(
-                "ALTER USER %s SET DEFAULT_WAREHOUSE = %s;",
-                $this->connection->quoteIdentifier($user),
-                $this->connection->quoteIdentifier($warehouse)
-            );
-            $this->connection->query($sql);
-
-            $this->assertEquals($warehouse, $this->getUserDefaultWarehouse($user));
-        } else {
-            $sql = sprintf(
-                "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
-                $this->connection->quoteIdentifier($user)
-            );
-            $this->connection->query($sql);
-
-            $this->assertEmpty($this->getUserDefaultWarehouse($user));
-        }
-    }
-
     public function testDefaultWarehouse()
     {
         $config = $this->getConfig();
@@ -193,17 +153,17 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // remove header
         $csv1arr = iterator_to_array($csv1);
         array_shift($csv1arr);
-        $outCsv1 = new CsvFile($this->dataDir . '/out/tables/in_c-main_sales.csv.gz/part_0_0_0.csv');
+        $outCsv1 = new CsvFile($this->dataDir . '/out/tables/in_c-main_sales.csv.gz/expected-semi-structured.csv');
         $this->assertEquals($csv1arr, iterator_to_array($outCsv1));
 
         $csv2arr = iterator_to_array($csv2);
         array_shift($csv2arr);
-        $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/part_0_0_0.csv');
+        $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/expected-semi-structured.csv');
         $this->assertEquals($csv2arr, iterator_to_array($outCsv2));
 
         $csv3arr = iterator_to_array($csv3);
         array_shift($csv3arr);
-        $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/part_0_0_0.csv');
+        $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/expected-semi-structured.csv');
         $this->assertEquals($csv3arr, iterator_to_array($outCsv3));
     }
 
@@ -235,86 +195,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->validateExtraction($config['parameters']['tables'][0]);
     }
 
-    private function validateExtraction(array $query, $expectedFiles = 1)
-    {
-
-        $dirPath = $this->dataDir . '/out/tables';
-        $outputTable = $query['outputTable'];
-
-        $manifestFiles = array_map(
-            function ($manifestFileName) use ($dirPath) {
-                return $dirPath . '/' . $manifestFileName;
-            },
-            array_filter(
-                scandir($dirPath),
-                function ($fileName) use ($dirPath, $outputTable) {
-                    $filePath = $dirPath . '/' . $fileName;
-                    if (is_dir($filePath)) {
-                        return false;
-                    }
-
-                    $file = new \SplFileInfo($filePath);
-                    if ($file->getExtension() !== 'manifest') {
-                        return false;
-                    }
-
-                    $manifest = Yaml::parse(file_get_contents($file));
-                    return $manifest['destination'] === $outputTable;
-                }
-            )
-        );
-
-        if (!$expectedFiles) {
-            return;
-        }
-
-        $this->assertCount($expectedFiles, $manifestFiles);
-        $columns = [];
-        foreach ($manifestFiles as $file) {
-            // manifest validation
-            $params = Yaml::parse(file_get_contents($file));
-
-            $this->assertArrayHasKey('destination', $params);
-            $this->assertArrayHasKey('incremental', $params);
-            $this->assertArrayHasKey('primary_key', $params);
-            $this->assertArrayHasKey('columns', $params);
-            $columns = $params['columns'];
-
-            if ($query['primaryKey']) {
-                $this->assertEquals($query['primaryKey'], $params['primary_key']);
-            } else {
-                $this->assertEmpty($params['primary_key']);
-            }
-
-            $this->assertEquals($query['incremental'], $params['incremental']);
-
-            if (isset($query['outputTable'])) {
-                $this->assertEquals($query['outputTable'], $params['destination']);
-            }
-
-            $csvDir = new \SplFileInfo(str_replace('.manifest', '', $file));
-
-            $this->assertTrue(is_dir($csvDir));
-
-            foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
-                // archive validation
-                $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
-                $pos = strrpos($archiveFile, ".gz");
-                $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen(".gz")));
-
-                clearstatcache();
-                $this->assertFalse($rawFile->isFile());
-
-                exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
-                $this->assertEquals(0, $return);
-
-                clearstatcache();
-                $this->assertTrue($rawFile->isFile());
-            }
-        }
-        return $columns;
-    }
-
     public function testRunEmptyQuery()
     {
         $csv = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
@@ -336,7 +216,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTables()
+    public function testGetTablesInner()
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -350,6 +230,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $app = $this->createApplication($config);
         $result = $app->run();
+
+        var_export($result['tables']);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
@@ -865,6 +747,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $this->assertEquals($expectedData, $result['tables']);
     }
+
     public function testManifestMetadata()
     {
         $config = $this->getConfig();
@@ -1052,5 +935,156 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 ),
         );
         $this->assertEquals($expectedColumnMetadata, $outputManifest['column_metadata']);
+    }
+
+    public function testSemiStructured()
+    {
+        $config = $this->getConfig();
+        $table = $config['parameters']['tables'][0];
+        unset($table['query']);
+        $table['table'] = [
+            'tableName' => 'semi-structured',
+            'schema' => $this->getEnv('snowflake', 'DB_SCHEMA')
+        ];
+        $table['outputTable'] = 'in.c-main.semi-structured';
+        $table['primaryKey'] = null;
+        unset($config['parameters']['tables']);
+        $config['parameters']['tables'] = [$table];
+
+        $app = $this->createApplication($config);
+
+        $result = $app->run();
+        $this->assertEquals('success', $result['status']);
+
+        // validate the output
+        $archiveFile = $this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv.gz';
+        exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
+        $this->assertEquals(0, $return);
+
+        $rawFile = new \SplFileInfo($this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv');
+        $this->assertEquals(
+            file_get_contents($this->dataDir . '/snowflake/expected-semi-structured.csv'),
+            file_get_contents($rawFile)
+        );
+    }
+
+    private function getUserDefaultWarehouse($user)
+    {
+        $sql = sprintf(
+            "DESC USER %s;",
+            $this->connection->quoteIdentifier($user)
+        );
+
+        $config = $this->connection->fetchAll($sql);
+
+        foreach ($config as $item) {
+            if ($item['property'] === 'DEFAULT_WAREHOUSE') {
+                return $item['value'] === 'null' ? null : $item['value'];
+            }
+        }
+
+        return null;
+    }
+
+    private function setUserDefaultWarehouse($user, $warehouse = null)
+    {
+        if ($warehouse) {
+            $sql = sprintf(
+                "ALTER USER %s SET DEFAULT_WAREHOUSE = %s;",
+                $this->connection->quoteIdentifier($user),
+                $this->connection->quoteIdentifier($warehouse)
+            );
+            $this->connection->query($sql);
+
+            $this->assertEquals($warehouse, $this->getUserDefaultWarehouse($user));
+        } else {
+            $sql = sprintf(
+                "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
+                $this->connection->quoteIdentifier($user)
+            );
+            $this->connection->query($sql);
+
+            $this->assertEmpty($this->getUserDefaultWarehouse($user));
+        }
+    }
+
+    private function validateExtraction(array $query, $expectedFiles = 1)
+    {
+
+        $dirPath = $this->dataDir . '/out/tables';
+        $outputTable = $query['outputTable'];
+
+        $manifestFiles = array_map(
+            function ($manifestFileName) use ($dirPath) {
+                return $dirPath . '/' . $manifestFileName;
+            },
+            array_filter(
+                scandir($dirPath),
+                function ($fileName) use ($dirPath, $outputTable) {
+                    $filePath = $dirPath . '/' . $fileName;
+                    if (is_dir($filePath)) {
+                        return false;
+                    }
+
+                    $file = new \SplFileInfo($filePath);
+                    if ($file->getExtension() !== 'manifest') {
+                        return false;
+                    }
+
+                    $manifest = Yaml::parse(file_get_contents($file));
+                    return $manifest['destination'] === $outputTable;
+                }
+            )
+        );
+
+        if (!$expectedFiles) {
+            return;
+        }
+
+        $this->assertCount($expectedFiles, $manifestFiles);
+        $columns = [];
+        foreach ($manifestFiles as $file) {
+            // manifest validation
+            $params = Yaml::parse(file_get_contents($file));
+
+            $this->assertArrayHasKey('destination', $params);
+            $this->assertArrayHasKey('incremental', $params);
+            $this->assertArrayHasKey('primary_key', $params);
+            $this->assertArrayHasKey('columns', $params);
+            $columns = $params['columns'];
+
+            if ($query['primaryKey']) {
+                $this->assertEquals($query['primaryKey'], $params['primary_key']);
+            } else {
+                $this->assertEmpty($params['primary_key']);
+            }
+
+            $this->assertEquals($query['incremental'], $params['incremental']);
+
+            if (isset($query['outputTable'])) {
+                $this->assertEquals($query['outputTable'], $params['destination']);
+            }
+
+            $csvDir = new \SplFileInfo(str_replace('.manifest', '', $file));
+
+            $this->assertTrue(is_dir($csvDir));
+
+            foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
+                // archive validation
+                $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
+                $pos = strrpos($archiveFile, ".gz");
+                $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen(".gz")));
+
+                clearstatcache();
+                $this->assertFalse($rawFile->isFile());
+
+                exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
+                $this->assertEquals(0, $return);
+
+                clearstatcache();
+                $this->assertTrue($rawFile->isFile());
+            }
+        }
+        return $columns;
     }
 }

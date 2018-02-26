@@ -132,6 +132,21 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection->query('DROP VIEW IF EXISTS "escaping_view"');
         // create a view
         $this->connection->query('CREATE VIEW "escaping_view" AS SELECT * FROM "escaping"');
+
+        // create a view with a json object column
+        $this->connection->query('DROP TABLE IF EXISTS "semi-structured"');
+        $this->connection->query('CREATE TABLE "semi-structured" ( 
+                                            "var" VARIANT, 
+                                            "obj" OBJECT,
+                                            "arr" ARRAY
+                                       )');
+        $this->connection->query(
+            'INSERT INTO "semi-structured" 
+                  SELECT 
+                      OBJECT_CONSTRUCT(\'a\', 1, \'b\', \'BBBB\', \'c\', null) AS "var",
+                      OBJECT_CONSTRUCT(\'a\', 1, \'b\', \'BBBB\', \'c\', null) AS "org",
+                      ARRAY_CONSTRUCT(10, 20, 30) AS "arr";'
+        );
     }
 
     private function quote($value)
@@ -144,7 +159,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote($csv->getEnclosure()));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->connection->quoteIdentifier("\\"));
+        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = NONE");
 
         if (!$fileInfo['isSliced']) {
             $csvOptions[] = "SKIP_HEADER = 1";
