@@ -240,8 +240,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             0 =>
                 array (
                     'name' => 'escaping',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '7',
                     'byteCount' => '1024',
@@ -270,8 +270,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             1 =>
                 array (
                     'name' => 'sales',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '100',
                     'byteCount' => '6656',
@@ -390,8 +390,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             2 =>
                 array (
                     'name' => 'semi-structured',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '1',
                     'byteCount' => '1024',
@@ -429,8 +429,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             3 =>
                 array (
                     'name' => 'types',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '4',
                     'byteCount' => '1024',
@@ -477,8 +477,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             4 =>
                 array (
                     'name' => 'escaping_view',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'VIEW',
                     'columns' =>
                         array (
@@ -532,8 +532,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             0 =>
                 array (
                     'name' => 'escaping',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '7',
                     'byteCount' => '1024',
@@ -562,8 +562,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             1 =>
                 array (
                     'name' => 'sales',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '100',
                     'byteCount' => '6656',
@@ -682,8 +682,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             2 =>
                 array (
                     'name' => 'semi-structured',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '1',
                     'byteCount' => '1024',
@@ -721,8 +721,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             3 =>
                 array (
                     'name' => 'types',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
                     'rowCount' => '4',
                     'byteCount' => '1024',
@@ -769,7 +769,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             4 =>
                 array (
                     'name' => 'no_schema_escaping',
-                    'catalog' => 'MARC_GARBAGE',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => 'PUBLIC',
                     'type' => 'TABLE',
                     'rowCount' => '7',
@@ -799,8 +799,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
             5 =>
                 array (
                     'name' => 'escaping_view',
-                    'catalog' => 'MARC_GARBAGE',
-                    'schema' => 'EXTRACTOR_TEST',
+                    'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'VIEW',
                     'columns' =>
                         array (
