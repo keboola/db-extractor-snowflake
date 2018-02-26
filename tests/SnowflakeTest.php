@@ -153,17 +153,17 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // remove header
         $csv1arr = iterator_to_array($csv1);
         array_shift($csv1arr);
-        $outCsv1 = new CsvFile($this->dataDir . '/out/tables/in_c-main_sales.csv.gz/expected-semi-structured.csv');
+        $outCsv1 = new CsvFile($this->dataDir . '/out/tables/in_c-main_sales.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv1arr, iterator_to_array($outCsv1));
 
         $csv2arr = iterator_to_array($csv2);
         array_shift($csv2arr);
-        $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/expected-semi-structured.csv');
+        $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv2arr, iterator_to_array($outCsv2));
 
         $csv3arr = iterator_to_array($csv3);
         array_shift($csv3arr);
-        $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/expected-semi-structured.csv');
+        $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv3arr, iterator_to_array($outCsv3));
     }
 
@@ -216,7 +216,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTablesInner()
+    public function testGetTables()
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -231,238 +231,277 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $app = $this->createApplication($config);
         $result = $app->run();
 
-        var_export($result['tables']);
-
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(4, $result['tables']);
+        $this->assertCount(5, $result['tables']);
 
         $expectedData = array (
-            array (
-                'name' => 'escaping',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'TABLE',
-                'rowCount' => '7',
-                'byteCount' => '1024',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'col1',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'col2',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'sales',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'TABLE',
-                'rowCount' => '100',
-                'byteCount' => '6656',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'usergender',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'usercity',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                        2 =>
-                            array (
-                                'name' => 'usersentiment',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '3',
-                            ),
-                        3 =>
-                            array (
-                                'name' => 'zipcode',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '4',
-                            ),
-                        4 =>
-                            array (
-                                'name' => 'sku',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '5',
-                            ),
-                        5 =>
-                            array (
-                                'name' => 'createdat',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '6',
-                            ),
-                        6 =>
-                            array (
-                                'name' => 'category',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '7',
-                            ),
-                        7 =>
-                            array (
-                                'name' => 'price',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '8',
-                            ),
-                        8 =>
-                            array (
-                                'name' => 'county',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '9',
-                            ),
-                        9 =>
-                            array (
-                                'name' => 'countycode',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '10',
-                            ),
-                        10 =>
-                            array (
-                                'name' => 'userstate',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '11',
-                            ),
-                        11 =>
-                            array (
-                                'name' => 'categorygroup',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '12',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'types',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'TABLE',
-                'rowCount' => '4',
-                'byteCount' => '1024',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'character',
-                                'default' => null,
-                                'length' => '100',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'integer',
-                                'default' => null,
-                                'length' => '6,0',
-                                'nullable' => true,
-                                'type' => 'NUMBER',
-                                'ordinalPosition' => '2',
-                            ),
-                        2 =>
-                            array (
-                                'name' => 'decimal',
-                                'default' => null,
-                                'length' => '10,2',
-                                'nullable' => true,
-                                'type' => 'NUMBER',
-                                'ordinalPosition' => '3',
-                            ),
-                        3 =>
-                            array (
-                                'name' => 'date',
-                                'default' => null,
-                                'length' => null,
-                                'nullable' => true,
-                                'type' => 'DATE',
-                                'ordinalPosition' => '4',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'escaping_view',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'VIEW',
-                'rowCount' => null,
-                'byteCount' => null,
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'col1',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => true,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'col2',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => true,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                    ),
-            ),
+            0 =>
+                array (
+                    'name' => 'escaping',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '7',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'col1',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'col2',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
+            1 =>
+                array (
+                    'name' => 'sales',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '100',
+                    'byteCount' => '6656',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'usergender',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'usercity',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'usersentiment',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '3',
+                                ),
+                            3 =>
+                                array (
+                                    'name' => 'zipcode',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '4',
+                                ),
+                            4 =>
+                                array (
+                                    'name' => 'sku',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '5',
+                                ),
+                            5 =>
+                                array (
+                                    'name' => 'createdat',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '6',
+                                ),
+                            6 =>
+                                array (
+                                    'name' => 'category',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '7',
+                                ),
+                            7 =>
+                                array (
+                                    'name' => 'price',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '8',
+                                ),
+                            8 =>
+                                array (
+                                    'name' => 'county',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '9',
+                                ),
+                            9 =>
+                                array (
+                                    'name' => 'countycode',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '10',
+                                ),
+                            10 =>
+                                array (
+                                    'name' => 'userstate',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '11',
+                                ),
+                            11 =>
+                                array (
+                                    'name' => 'categorygroup',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '12',
+                                ),
+                        ),
+                ),
+            2 =>
+                array (
+                    'name' => 'semi-structured',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '1',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'var',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'VARIANT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'obj',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'OBJECT',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'arr',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'ARRAY',
+                                    'ordinalPosition' => '3',
+                                ),
+                        ),
+                ),
+            3 =>
+                array (
+                    'name' => 'types',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '4',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'character',
+                                    'default' => NULL,
+                                    'length' => '100',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'integer',
+                                    'default' => NULL,
+                                    'length' => '6,0',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'decimal',
+                                    'default' => NULL,
+                                    'length' => '10,2',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '3',
+                                ),
+                            3 =>
+                                array (
+                                    'name' => 'date',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'DATE',
+                                    'ordinalPosition' => '4',
+                                ),
+                        ),
+                ),
+            4 =>
+                array (
+                    'name' => 'escaping_view',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'VIEW',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'col1',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => true,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'col2',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => true,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
         );
 
         $this->assertEquals($expectedData, $result['tables']);
@@ -487,262 +526,304 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
         $this->assertEquals('success', $result['status']);
-        $this->assertCount(5, $result['tables']);
+        $this->assertCount(6, $result['tables']);
 
         $expectedData = array (
-            array (
-                'name' => 'escaping',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'TABLE',
-                'rowCount' => '7',
-                'byteCount' => '1024',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'col1',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'col2',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'sales',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'TABLE',
-                'rowCount' => '100',
-                'byteCount' => '6656',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'usergender',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'usercity',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                        2 =>
-                            array (
-                                'name' => 'usersentiment',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '3',
-                            ),
-                        3 =>
-                            array (
-                                'name' => 'zipcode',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '4',
-                            ),
-                        4 =>
-                            array (
-                                'name' => 'sku',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '5',
-                            ),
-                        5 =>
-                            array (
-                                'name' => 'createdat',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '6',
-                            ),
-                        6 =>
-                            array (
-                                'name' => 'category',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '7',
-                            ),
-                        7 =>
-                            array (
-                                'name' => 'price',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '8',
-                            ),
-                        8 =>
-                            array (
-                                'name' => 'county',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '9',
-                            ),
-                        9 =>
-                            array (
-                                'name' => 'countycode',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '10',
-                            ),
-                        10 =>
-                            array (
-                                'name' => 'userstate',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '11',
-                            ),
-                        11 =>
-                            array (
-                                'name' => 'categorygroup',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '12',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'types',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'TABLE',
-                'rowCount' => '4',
-                'byteCount' => '1024',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'character',
-                                'default' => null,
-                                'length' => '100',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'integer',
-                                'default' => null,
-                                'length' => '6,0',
-                                'nullable' => true,
-                                'type' => 'NUMBER',
-                                'ordinalPosition' => '2',
-                            ),
-                        2 =>
-                            array (
-                                'name' => 'decimal',
-                                'default' => null,
-                                'length' => '10,2',
-                                'nullable' => true,
-                                'type' => 'NUMBER',
-                                'ordinalPosition' => '3',
-                            ),
-                        3 =>
-                            array (
-                                'name' => 'date',
-                                'default' => null,
-                                'length' => null,
-                                'nullable' => true,
-                                'type' => 'DATE',
-                                'ordinalPosition' => '4',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'no_schema_escaping',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' => 'PUBLIC',
-                'type' => 'TABLE',
-                'rowCount' => '7',
-                'byteCount' => '1024',
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'col1',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'col2',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => false,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                    ),
-            ),
-            array (
-                'name' => 'escaping_view',
-                'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
-                'schema' =>  $this->getEnv('snowflake', 'DB_SCHEMA'),
-                'type' => 'VIEW',
-                'rowCount' => null,
-                'byteCount' => null,
-                'columns' =>
-                    array (
-                        0 =>
-                            array (
-                                'name' => 'col1',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => true,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '1',
-                            ),
-                        1 =>
-                            array (
-                                'name' => 'col2',
-                                'default' => null,
-                                'length' => '200',
-                                'nullable' => true,
-                                'type' => 'TEXT',
-                                'ordinalPosition' => '2',
-                            ),
-                    ),
-            ),
+            0 =>
+                array (
+                    'name' => 'escaping',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '7',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'col1',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'col2',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
+            1 =>
+                array (
+                    'name' => 'sales',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '100',
+                    'byteCount' => '6656',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'usergender',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'usercity',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'usersentiment',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '3',
+                                ),
+                            3 =>
+                                array (
+                                    'name' => 'zipcode',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '4',
+                                ),
+                            4 =>
+                                array (
+                                    'name' => 'sku',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '5',
+                                ),
+                            5 =>
+                                array (
+                                    'name' => 'createdat',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '6',
+                                ),
+                            6 =>
+                                array (
+                                    'name' => 'category',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '7',
+                                ),
+                            7 =>
+                                array (
+                                    'name' => 'price',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '8',
+                                ),
+                            8 =>
+                                array (
+                                    'name' => 'county',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '9',
+                                ),
+                            9 =>
+                                array (
+                                    'name' => 'countycode',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '10',
+                                ),
+                            10 =>
+                                array (
+                                    'name' => 'userstate',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '11',
+                                ),
+                            11 =>
+                                array (
+                                    'name' => 'categorygroup',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '12',
+                                ),
+                        ),
+                ),
+            2 =>
+                array (
+                    'name' => 'semi-structured',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '1',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'var',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'VARIANT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'obj',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'OBJECT',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'arr',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'ARRAY',
+                                    'ordinalPosition' => '3',
+                                ),
+                        ),
+                ),
+            3 =>
+                array (
+                    'name' => 'types',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'TABLE',
+                    'rowCount' => '4',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'character',
+                                    'default' => NULL,
+                                    'length' => '100',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'integer',
+                                    'default' => NULL,
+                                    'length' => '6,0',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '2',
+                                ),
+                            2 =>
+                                array (
+                                    'name' => 'decimal',
+                                    'default' => NULL,
+                                    'length' => '10,2',
+                                    'nullable' => true,
+                                    'type' => 'NUMBER',
+                                    'ordinalPosition' => '3',
+                                ),
+                            3 =>
+                                array (
+                                    'name' => 'date',
+                                    'default' => NULL,
+                                    'length' => NULL,
+                                    'nullable' => true,
+                                    'type' => 'DATE',
+                                    'ordinalPosition' => '4',
+                                ),
+                        ),
+                ),
+            4 =>
+                array (
+                    'name' => 'no_schema_escaping',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'PUBLIC',
+                    'type' => 'TABLE',
+                    'rowCount' => '7',
+                    'byteCount' => '1024',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'col1',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'col2',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => false,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
+            5 =>
+                array (
+                    'name' => 'escaping_view',
+                    'catalog' => 'MARC_GARBAGE',
+                    'schema' => 'EXTRACTOR_TEST',
+                    'type' => 'VIEW',
+                    'columns' =>
+                        array (
+                            0 =>
+                                array (
+                                    'name' => 'col1',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => true,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '1',
+                                ),
+                            1 =>
+                                array (
+                                    'name' => 'col2',
+                                    'default' => NULL,
+                                    'length' => '200',
+                                    'nullable' => true,
+                                    'type' => 'TEXT',
+                                    'ordinalPosition' => '2',
+                                ),
+                        ),
+                ),
         );
 
         $this->assertEquals($expectedData, $result['tables']);

@@ -159,7 +159,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));
         $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote($csv->getEnclosure()));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = NONE");
+        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->connection->quoteIdentifier("\\"));
 
         if (!$fileInfo['isSliced']) {
             $csvOptions[] = "SKIP_HEADER = 1";
