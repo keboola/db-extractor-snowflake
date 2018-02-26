@@ -136,7 +136,7 @@ class Snowflake extends Extractor
         if (!isset($table['query']) || $table['query'] === '') {
             $query = $this->simpleQuery($table['table'], $table['columns']);
             $columnInfo = $this->getColumnInfo($query);
-            $objectColumns = array_filter($columnInfo, function($column) {
+            $objectColumns = array_filter($columnInfo, function ($column) {
                 return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
             });
             if (!empty($objectColumns)) {
