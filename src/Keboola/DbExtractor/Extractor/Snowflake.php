@@ -19,6 +19,9 @@ use Symfony\Component\Yaml\Yaml;
 
 class Snowflake extends Extractor
 {
+
+    const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
+
     /**
      * @var Connection
      */
@@ -102,23 +105,13 @@ class Snowflake extends Extractor
 
         $this->logger->info("Exporting to " . $outputTable);
 
-
         $this->exportAndDownload($table);
 
         return $outputTable;
     }
 
-    private function exportAndDownload(array $table)
+    private function getColumnInfo(string $query)
     {
-        if (!isset($table['query']) || $table['query'] === '') {
-            $query = $this->simpleQuery($table['table'], $table['columns']);
-        } else {
-            $query = $table['query'];
-        }
-
-        $tmpTableName = str_replace('.', '_', $table['outputTable']);
-        $this->cleanupTableStage($tmpTableName);
-
         // Create temporary view from the supplied query
         $sql = sprintf(
             "SELECT * FROM (%s) ORDER BY RANDOM() LIMIT 0;",
@@ -135,17 +128,30 @@ class Snowflake extends Extractor
             );
         }
 
-        $columns = array_map(
-            function ($column) {
-                return $column['name'];
-            },
-            $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()")
-        );
+        return $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()");
+    }
 
+    private function exportAndDownload(array $table)
+    {
+        if (!isset($table['query']) || $table['query'] === '') {
+            $query = $this->simpleQuery($table['table'], $table['columns']);
+            $columnInfo = $this->getColumnInfo($query);
+            $objectColumns = array_filter($columnInfo, function($column) {
+                return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
+            });
+            if (!empty($objectColumns)) {
+                $query = $this->simpleQueryWithCasting($table['table'], $columnInfo);
+            }
+        } else {
+            $query = $table['query'];
+            $columnInfo = $this->getColumnInfo($query);
+        }
+
+        $tmpTableName = str_replace('.', '_', $table['outputTable']);
+        $this->cleanupTableStage($tmpTableName);
 
         // copy into internal staging
         $copyCommand = $this->generateCopyCommand($tmpTableName, $query);
-        // use the backoff retries for executing the copy command
 
         try {
             $res = $this->executeCopyCommand($copyCommand);
@@ -215,7 +221,12 @@ class Snowflake extends Extractor
 
         file_put_contents(
             $outputDataDir . '.manifest',
-            Yaml::dump($this->createTableManifest($table, $columns))
+            Yaml::dump($this->createTableManifest($table, array_map(
+                function ($column) {
+                    return $column['name'];
+                },
+                $columnInfo
+            )))
         );
 
         $this->logger->info(sprintf(
@@ -320,7 +331,11 @@ class Snowflake extends Extractor
                             array_intersect_key($column, array_flip($datatypeKeys))
                         );
                     } catch (InvalidTypeException $e) {
-                        $this->logger->warning("Encountered irregular type: " . $column['type'] . " for culumn " . $column['name']);
+                        if (!in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+                            $this->logger->warning(
+                                "Encountered irregular type: " . $column['type'] . " for culumn " . $column['name']
+                            );
+                        }
                         $datatype = new GenericDatatype(
                             $column['type'],
                             array_intersect_key($column, array_flip($datatypeKeys))
@@ -452,6 +467,25 @@ class Snowflake extends Extractor
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
+    }
+
+    private function simpleQueryWithCasting(array $table, array $columnInfo) : string
+    {
+        return sprintf(
+            "SELECT %s FROM %s.%s",
+            implode(', ', array_map(function ($column) {
+                if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+                    return sprintf(
+                        'CAST(%s AS TEXT) AS %s',
+                        $this->db->quoteIdentifier($column['name']),
+                        $this->db->quoteIdentifier($column['name'])
+                    );
+                }
+                return $this->db->quoteIdentifier($column['name']);
+            }, $columnInfo)),
+            $this->db->quoteIdentifier($table['schema']),
+            $this->db->quoteIdentifier($table['tableName'])
+        );
     }
 
     /**
