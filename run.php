@@ -53,8 +53,10 @@ try {
     $logger->log('error', $e->getMessage(), (array) $e->getData());
     exit(2);
 } catch (\Exception $e) {
-    print $e->getMessage();
-    print $e->getTraceAsString();
-
+    $logger->log('error', $e->getMessage(), [
+        'errFile' => $e->getFile(),
+        'errLine' => $e->getLine(),
+        'trace' => $e->getTrace()
+    ]);
     exit(2);
 }
