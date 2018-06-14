@@ -39,7 +39,19 @@ ADD ./driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 ENV LANG en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 
-# install snowsql
+# create snowsql user
+RUN groupadd snowsql -g 501 && useradd snowsql -u 501 -g 501
+RUN mkdir -p /home/snowsql && touch /home/snowsql/.profile && chown -R 501:501 /home/snowsql
+
+# install snowsql for user snowsql
+USER snowsql:snowsql
+ADD snowsql-linux_x86_64.bash /home/snowsql
+RUN SNOWSQL_DEST=/home/snowsql/bin SNOWSQL_LOGIN_SHELL=/home/snowsql/.profile bash /home/snowsql/snowsql-linux_x86_64.bash
+RUN rm /home/snowsql/snowsql-linux_x86_64.bash
+RUN /home/snowsql/bin/snowsql -v 1.1.49
+
+# install snowsql for user root
+USER root:root
 ADD snowsql-linux_x86_64.bash /usr/bin
 RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
 RUN rm /usr/bin/snowsql-linux_x86_64.bash
