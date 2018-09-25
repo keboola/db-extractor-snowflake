@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install Dependencies
 RUN apt-get update \
-  && apt-get install unzip git unixODBC-dev libpq-dev -y
+  && apt-get install unzip git unixodbc unixodbc-dev libpq-dev -y
 
 RUN docker-php-ext-install pdo_pgsql pdo_mysql
 RUN pecl install xdebug \
