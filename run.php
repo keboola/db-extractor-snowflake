@@ -51,20 +51,20 @@ try {
     exit(0);
 } catch (UserException $e) {
     $logger->log('error', $e->getMessage(), (array) $e->getData());
-
     if (!$runAction) {
         echo $e->getMessage();
     }
-
     exit(1);
-} catch (ApplicationException $e) {
-    $logger->log('error', $e->getMessage(), (array) $e->getData());
-    exit(2);
-} catch (\Exception $e) {
-    $logger->log('error', $e->getMessage(), [
-        'errFile' => $e->getFile(),
-        'errLine' => $e->getLine(),
-        'trace' => $e->getTrace()
-    ]);
+} catch (\Throwable $e) {
+    $logger->critical(
+        get_class($e) . ':' . $e->getMessage(),
+        [
+            'errFile' => $e->getFile(),
+            'errLine' => $e->getLine(),
+            'errCode' => $e->getCode(),
+            'errTrace' => $e->getTraceAsString(),
+            'errPrevious' => $e->getPrevious() ? get_class($e->getPrevious()) : '',
+        ]
+    );
     exit(2);
 }
