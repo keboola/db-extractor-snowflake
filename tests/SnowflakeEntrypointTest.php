@@ -23,6 +23,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         if (isset($config['parameters']['tables'][2]['table'])) {
             $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
         }
+
         // unlink any old configs written here
         @unlink($rootPath . '/config.yml');
         @unlink($rootPath . '/config.json');
@@ -110,9 +111,11 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      */
     public function testGetTablesAction(string $configType)
     {
-        $this->createConfigFile(__DIR__ . '/data/getTablesAction', $configType);
+        $dataPath = __DIR__ . '/data/getTablesAction';
+
+        $this->createConfigFile($dataPath, $configType);
         
-        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $dataPath);
         $process->setTimeout(300);
         $process->run();
 
