@@ -258,4 +258,12 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         return $linesCount;
     }
+
+    public function configTypesProvider(): array
+    {
+        return [
+            ['yaml'],
+            ['json'],
+        ];
+    }
 }
