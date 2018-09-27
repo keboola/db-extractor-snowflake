@@ -41,9 +41,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
         );
 
-        $this->storageApiClient = new Client([
+        $this->storageApiClient = new Client(
+            [
             'token' => getenv('STORAGE_API_TOKEN')
-        ]);
+            ]
+        );
 
         $this->setupTables();
 
@@ -72,7 +74,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     }
 
     /**
-     * @param array $config
+     * @param  array $config
      * @return SnowflakeApplication
      */
     public function createApplication(array $config)
@@ -84,7 +86,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     }
 
     /**
-     * @param CsvFile $file
+     * @param  CsvFile $file
      * @return string
      */
     protected function generateTableName(CsvFile $file)
@@ -107,10 +109,12 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $types = new CsvFile($this->dataDir . '/snowflake/types.csv');
 
-        $this->connection->query(sprintf(
-            'DROP TABLE IF EXISTS %s',
-            $this->connection->quoteIdentifier('types')
-        ));
+        $this->connection->query(
+            sprintf(
+                'DROP TABLE IF EXISTS %s',
+                $this->connection->quoteIdentifier('types')
+            )
+        );
 
         $this->connection->query(
             sprintf(
@@ -135,11 +139,13 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         // create a view with a json object column
         $this->connection->query('DROP TABLE IF EXISTS "semi-structured"');
-        $this->connection->query('CREATE TABLE "semi-structured" ( 
+        $this->connection->query(
+            'CREATE TABLE "semi-structured" ( 
                                             "var" VARIANT, 
                                             "obj" OBJECT,
                                             "arr" ARRAY
-                                       )');
+                                       )'
+        );
         $this->connection->query(
             'INSERT INTO "semi-structured" 
                   SELECT 
@@ -186,8 +192,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * Create table from csv file with text columns
      *
      * @param CsvFile $file
-     * @param string $tableName - optional name override (default uses filename)
-     * @param string $schemaName - optional schema in which to create the table
+     * @param string  $tableName  - optional name override (default uses filename)
+     * @param string  $schemaName - optional schema in which to create the table
      */
     protected function createTextTable(CsvFile $file, $tableName = null, $schemaName = null)
     {
@@ -201,23 +207,29 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             );
         }
 
-        $this->connection->query(sprintf(
-            'DROP TABLE IF EXISTS %s',
-            $this->connection->quoteIdentifier($tableName)
-        ));
+        $this->connection->query(
+            sprintf(
+                'DROP TABLE IF EXISTS %s',
+                $this->connection->quoteIdentifier($tableName)
+            )
+        );
 
-        $this->connection->query(sprintf(
-            'CREATE TABLE %s (%s);',
-            $this->connection->quoteIdentifier($tableName),
-            implode(
-                ', ',
-                array_map(function ($column) {
-                    $q = '"';
-                    return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR(200) NOT NULL';
-                }, $file->getHeader())
-            ),
-            $tableName
-        ));
+        $this->connection->query(
+            sprintf(
+                'CREATE TABLE %s (%s);',
+                $this->connection->quoteIdentifier($tableName),
+                implode(
+                    ', ',
+                    array_map(
+                        function ($column) {
+                            $q = '"';
+                            return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR(200) NOT NULL';
+                        }, $file->getHeader()
+                    )
+                ),
+                $tableName
+            )
+        );
 
         $storageFileInfo = $this->storageApiClient->getFile(
             $this->storageApiClient->uploadFile(
@@ -241,7 +253,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     /**
      * Count records in CSV (with headers)
      *
-     * @param CsvFile $file
+     * @param  CsvFile $file
      * @return int
      */
     protected function countTable(CsvFile $file)

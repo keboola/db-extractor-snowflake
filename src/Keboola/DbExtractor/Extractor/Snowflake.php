@@ -86,10 +86,12 @@ class Snowflake extends Extractor
         }
 
         try {
-            $this->db->query(sprintf(
-                'USE WAREHOUSE %s;',
-                $this->db->quoteIdentifier($warehouse)
-            ));
+            $this->db->query(
+                sprintf(
+                    'USE WAREHOUSE %s;',
+                    $this->db->quoteIdentifier($warehouse)
+                )
+            );
         } catch (\Exception $e) {
             if (preg_match('/Object does not exist/ui', $e->getMessage())) {
                 throw new UserException(sprintf('Invalid warehouse "%s" specified', $warehouse));
@@ -139,9 +141,11 @@ class Snowflake extends Extractor
         if (!isset($table['query']) || $table['query'] === '') {
             $query = $this->simpleQuery($table['table'], $table['columns']);
             $columnInfo = $this->getColumnInfo($query);
-            $objectColumns = array_filter($columnInfo, function ($column) {
-                return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
-            });
+            $objectColumns = array_filter(
+                $columnInfo, function ($column) {
+                    return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
+                }
+            );
             if (!empty($objectColumns)) {
                 $query = $this->simpleQueryWithCasting($table['table'], $columnInfo);
             }
@@ -226,19 +230,25 @@ class Snowflake extends Extractor
 
         file_put_contents(
             $outputDataDir . '.manifest',
-            Yaml::dump($this->createTableManifest($table, array_map(
-                function ($column) {
-                    return $column['name'];
-                },
-                $columnInfo
-            )))
+            Yaml::dump(
+                $this->createTableManifest(
+                    $table, array_map(
+                        function ($column) {
+                            return $column['name'];
+                        },
+                        $columnInfo
+                    )
+                )
+            )
         );
 
-        $this->logger->info(sprintf(
-            "%d files (%s) downloaded",
-            count($csvFiles),
-            $this->dataSizeFormatted($bytesDownloaded)
-        ));
+        $this->logger->info(
+            sprintf(
+                "%d files (%s) downloaded",
+                count($csvFiles),
+                $this->dataSizeFormatted($bytesDownloaded)
+            )
+        );
 
         $this->cleanupTableStage($tmpTableName);
 
@@ -272,8 +282,8 @@ class Snowflake extends Extractor
     }
 
     /**
-     * @param $copyCommand
-     * @param int $maxTries
+     * @param  $copyCommand
+     * @param  int         $maxTries
      * @return array
      * @throws \Exception
      */
@@ -283,25 +293,29 @@ class Snowflake extends Extractor
         $backOffPolicy = new ExponentialBackOffPolicy(1000);
         $proxy = new RetryProxy($retryPolicy, $backOffPolicy);
         $counter = 0;
-        /** @var \Exception $lastException */
+        /**
+ * @var \Exception $lastException 
+*/
         $lastException = null;
         try {
-            $ret = $proxy->call(function () use ($copyCommand, &$counter, &$lastException) {
-                if ($counter > 0) {
-                    $this->logger->info(sprintf('%s. Retrying... [%dx]', $lastException->getMessage(), $counter));
+            $ret = $proxy->call(
+                function () use ($copyCommand, &$counter, &$lastException) {
+                    if ($counter > 0) {
+                        $this->logger->info(sprintf('%s. Retrying... [%dx]', $lastException->getMessage(), $counter));
+                    }
+                    try {
+                        return $this->db->fetchAll($copyCommand);
+                    } catch (\Exception $e) {
+                        $lastException = new UserException(
+                            sprintf("Copy Command failed: %s", $e->getMessage()),
+                            0,
+                            $e
+                        );
+                        $counter++;
+                        throw $e;
+                    }
                 }
-                try {
-                    return $this->db->fetchAll($copyCommand);
-                } catch (\Exception $e) {
-                    $lastException = new UserException(
-                        sprintf("Copy Command failed: %s", $e->getMessage()),
-                        0,
-                        $e
-                    );
-                    $counter++;
-                    throw $e;
-                }
-            });
+            );
         } catch (\Exception $e) {
             if ($lastException) {
                 throw $lastException;
@@ -422,9 +436,13 @@ class Snowflake extends Extractor
             "SELECT * FROM information_schema.columns 
              WHERE TABLE_NAME IN (%s)
              ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
-            implode(', ', array_map(function ($tableName) {
-                return "'" . $tableName . "'";
-            }, $tableNameArray))
+            implode(
+                ', ', array_map(
+                    function ($tableName) {
+                        return "'" . $tableName . "'";
+                    }, $tableNameArray
+                )
+            )
         );
 
         $columns = $this->db->fetchAll($sql);
@@ -461,9 +479,13 @@ class Snowflake extends Extractor
         if (count($columns) > 0) {
             return sprintf(
                 "SELECT %s FROM %s.%s",
-                implode(', ', array_map(function ($column) {
-                    return $this->db->quoteIdentifier($column);
-                }, $columns)),
+                implode(
+                    ', ', array_map(
+                        function ($column) {
+                            return $this->db->quoteIdentifier($column);
+                        }, $columns
+                    )
+                ),
                 $this->db->quoteIdentifier($table['schema']),
                 $this->db->quoteIdentifier($table['tableName'])
             );
@@ -480,24 +502,28 @@ class Snowflake extends Extractor
     {
         return sprintf(
             "SELECT %s FROM %s.%s",
-            implode(', ', array_map(function ($column) {
-                if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
-                    return sprintf(
-                        'CAST(%s AS TEXT) AS %s',
-                        $this->db->quoteIdentifier($column['name']),
-                        $this->db->quoteIdentifier($column['name'])
-                    );
-                }
-                return $this->db->quoteIdentifier($column['name']);
-            }, $columnInfo)),
+            implode(
+                ', ', array_map(
+                    function ($column) {
+                        if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+                            return sprintf(
+                                'CAST(%s AS TEXT) AS %s',
+                                $this->db->quoteIdentifier($column['name']),
+                                $this->db->quoteIdentifier($column['name'])
+                            );
+                        }
+                        return $this->db->quoteIdentifier($column['name']);
+                    }, $columnInfo
+                )
+            ),
             $this->db->quoteIdentifier($table['schema']),
             $this->db->quoteIdentifier($table['tableName'])
         );
     }
 
     /**
-     * @param $output
-     * @param $path
+     * @param  $output
+     * @param  $path
      * @return \SplFileInfo[]
      * @throws \Exception
      */
@@ -522,13 +548,15 @@ class Snowflake extends Extractor
 
         foreach ($lines as $line) {
             if (!preg_match('/^downloaded$/ui', $line[2])) {
-                throw new \Exception(sprintf(
-                    "Cannot download file: %s Status: %s Size: %s Message: %s",
-                    $line[0],
-                    $line[2],
-                    $line[1],
-                    $line[3]
-                ));
+                throw new \Exception(
+                    sprintf(
+                        "Cannot download file: %s Status: %s Size: %s Message: %s",
+                        $line[0],
+                        $line[2],
+                        $line[1],
+                        $line[3]
+                    )
+                );
             }
 
             $file = new \SplFileInfo($path . '/' . $line[0]);
@@ -548,7 +576,7 @@ class Snowflake extends Extractor
     }
 
     /**
-     * @param $dbParams
+     * @param  $dbParams
      * @return \SplFileInfo
      */
     private function crateSnowSqlConfig($dbParams)

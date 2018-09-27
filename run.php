@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 define('APP_NAME', 'ex-db-snowflake');
 define('ROOT_PATH', __DIR__);
 
-require_once(dirname(__FILE__) . "/vendor/autoload.php");
+require_once dirname(__FILE__) . "/vendor/autoload.php";
 
 $logger = new \Keboola\DbExtractor\Logger(APP_NAME);
 

@@ -38,7 +38,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param $configType
+     * @param        $configType
      * @dataProvider configTypesProvider
      */
     public function testRunAction(string $configType)
@@ -70,7 +70,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param $configType
+     * @param        $configType
      * @dataProvider configTypesProvider
      */
     public function testConnectionAction(string $configType)
@@ -107,7 +107,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param $configType
+     * @param        $configType
      * @dataProvider configTypesProvider
      */
     public function testGetTablesAction(string $configType)
