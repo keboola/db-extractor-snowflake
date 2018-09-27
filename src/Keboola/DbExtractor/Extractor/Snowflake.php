@@ -105,9 +105,12 @@ class Snowflake extends Extractor
 
         $this->logger->info("Exporting to " . $outputTable);
 
-        $this->exportAndDownload($table);
+        $rowCount = $this->exportAndDownload($table);
 
-        return $outputTable;
+        return [
+            "outputTable"=> $outputTable,
+            "rows" => $rowCount,
+        ];
     }
 
     private function getColumnInfo(string $query): array
@@ -131,7 +134,7 @@ class Snowflake extends Extractor
         return $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()");
     }
 
-    private function exportAndDownload(array $table)
+    private function exportAndDownload(array $table): int
     {
         if (!isset($table['query']) || $table['query'] === '') {
             $query = $this->simpleQuery($table['table'], $table['columns']);
@@ -163,8 +166,10 @@ class Snowflake extends Extractor
 
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
-            return;
+            return 0;
         }
+
+        $rowCount = $res[0]['rows_unloaded'];
 
         $this->logger->info("Downloading data from Snowflake");
 
@@ -236,6 +241,8 @@ class Snowflake extends Extractor
         ));
 
         $this->cleanupTableStage($tmpTableName);
+
+        return $rowCount;
     }
 
     private function generateCopyCommand($stageTmpPath, $query)

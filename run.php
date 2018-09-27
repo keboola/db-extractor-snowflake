@@ -34,7 +34,7 @@ try {
         throw new UserException('Invalid configuration file type');
     }
 
-    $app = new SnowflakeApplication($config, $arguments["data"]);
+    $app = new SnowflakeApplication($config, $logger, [], $arguments["data"]);
 
     if ($app['action'] !== 'run') {
         $app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));
