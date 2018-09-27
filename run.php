@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 use Keboola\DbExtractor\SnowflakeApplication;
 use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
@@ -71,7 +74,7 @@ class Snowflake extends Extractor
         return $connection;
     }
 
-    public function testConnection()
+    public function testConnection(): void
     {
         $this->db->query('SELECT current_date;');
 
@@ -92,7 +95,7 @@ class Snowflake extends Extractor
                     $this->db->quoteIdentifier($warehouse)
                 )
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if (preg_match('/Object does not exist/ui', $e->getMessage())) {
                 throw new UserException(sprintf('Invalid warehouse "%s" specified', $warehouse));
             } else {
@@ -125,7 +128,7 @@ class Snowflake extends Extractor
 
         try {
             $this->db->query($sql);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new UserException(
                 sprintf('DB query "%s" failed: %s', rtrim(trim($query), ';'), $e->getMessage()),
                 0,
@@ -142,7 +145,8 @@ class Snowflake extends Extractor
             $query = $this->simpleQuery($table['table'], $table['columns']);
             $columnInfo = $this->getColumnInfo($query);
             $objectColumns = array_filter(
-                $columnInfo, function ($column) {
+                $columnInfo,
+                function ($column) {
                     return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
                 }
             );
@@ -162,7 +166,7 @@ class Snowflake extends Extractor
 
         try {
             $res = $this->executeCopyCommand($copyCommand);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new UserException(
                 sprintf('Copy Command: %s failed with message: %s', $copyCommand, $e->getMessage())
             );
@@ -232,7 +236,8 @@ class Snowflake extends Extractor
             $outputDataDir . '.manifest',
             Yaml::dump(
                 $this->createTableManifest(
-                    $table, array_map(
+                    $table,
+                    array_map(
                         function ($column) {
                             return $column['name'];
                         },
@@ -287,14 +292,14 @@ class Snowflake extends Extractor
      * @return array
      * @throws \Exception
      */
-    private function executeCopyCommand($copyCommand, $maxTries = 5): array
+    private function executeCopyCommand($copyCommand, int $maxTries = 5): array
     {
         $retryPolicy = new SimpleRetryPolicy($maxTries, ['PDOException', 'ErrorException', 'Exception']);
         $backOffPolicy = new ExponentialBackOffPolicy(1000);
         $proxy = new RetryProxy($retryPolicy, $backOffPolicy);
         $counter = 0;
         /**
- * @var \Exception $lastException 
+ * @var \Exception $lastException
 */
         $lastException = null;
         try {
@@ -305,7 +310,7 @@ class Snowflake extends Extractor
                     }
                     try {
                         return $this->db->fetchAll($copyCommand);
-                    } catch (\Exception $e) {
+                    } catch (\Throwable $e) {
                         $lastException = new UserException(
                             sprintf("Copy Command failed: %s", $e->getMessage()),
                             0,
@@ -316,7 +321,7 @@ class Snowflake extends Extractor
                     }
                 }
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             if ($lastException) {
                 throw $lastException;
             }
@@ -333,7 +338,7 @@ class Snowflake extends Extractor
             'enclosure' => CsvFile::DEFAULT_ENCLOSURE,
             'primary_key' => $table['primaryKey'],
             'incremental' => $table['incremental'],
-            'columns' => $columns
+            'columns' => $columns,
         ];
 
         if (isset($table['table']) && isset($table['table']['tableName'])) {
@@ -369,7 +374,7 @@ class Snowflake extends Extractor
                         if ($key !== 'name') {
                             $columnMetadata[$column['name']][] = [
                                 'key' => "KBC." . $key,
-                                'value'=> $value
+                                'value'=> $value,
                             ];
                         }
                     }
@@ -378,7 +383,7 @@ class Snowflake extends Extractor
                 foreach ($tableDetails as $key => $value) {
                     $manifestData['metadata'][] = [
                         "key" => "KBC." . $key,
-                        "value" => $value
+                        "value" => $value,
                     ];
                 }
                 $manifestData['column_metadata'] = $columnMetadata;
@@ -417,7 +422,7 @@ class Snowflake extends Extractor
                     'name' => $table['name'],
                     'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
                     'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
-                    'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null)
+                    'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null),
                 ];
                 if (isset($table['rows'])) {
                     $tableDefs[$table['schema_name'] . '.' . $table['name']]['rowCount'] = $table['rows'];
@@ -437,10 +442,12 @@ class Snowflake extends Extractor
              WHERE TABLE_NAME IN (%s)
              ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
             implode(
-                ', ', array_map(
+                ', ',
+                array_map(
                     function ($tableName) {
                         return "'" . $tableName . "'";
-                    }, $tableNameArray
+                    },
+                    $tableNameArray
                 )
             )
         );
@@ -463,7 +470,7 @@ class Snowflake extends Extractor
                 "length" => $length,
                 "nullable" => (trim($column['IS_NULLABLE']) === "NO") ? false : true,
                 "type" => $column['DATA_TYPE'],
-                "ordinalPosition" => $column['ORDINAL_POSITION']
+                "ordinalPosition" => $column['ORDINAL_POSITION'],
             ];
 
             if (!array_key_exists('columns', $tableDefs[$curTable])) {
@@ -480,10 +487,12 @@ class Snowflake extends Extractor
             return sprintf(
                 "SELECT %s FROM %s.%s",
                 implode(
-                    ', ', array_map(
+                    ', ',
+                    array_map(
                         function ($column) {
                             return $this->db->quoteIdentifier($column);
-                        }, $columns
+                        },
+                        $columns
                     )
                 ),
                 $this->db->quoteIdentifier($table['schema']),
@@ -503,7 +512,8 @@ class Snowflake extends Extractor
         return sprintf(
             "SELECT %s FROM %s.%s",
             implode(
-                ', ', array_map(
+                ', ',
+                array_map(
                     function ($column) {
                         if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
                             return sprintf(
@@ -513,7 +523,8 @@ class Snowflake extends Extractor
                             );
                         }
                         return $this->db->quoteIdentifier($column['name']);
-                    }, $columnInfo
+                    },
+                    $columnInfo
                 )
             ),
             $this->db->quoteIdentifier($table['schema']),
@@ -575,11 +586,7 @@ class Snowflake extends Extractor
         return "'" . addslashes($value) . "'";
     }
 
-    /**
-     * @param  $dbParams
-     * @return \SplFileInfo
-     */
-    private function crateSnowSqlConfig($dbParams)
+    private function crateSnowSqlConfig($dbParams): \SplFileInfo
     {
         $cliConfig[] = '';
         $cliConfig[] = '[options]';
@@ -623,11 +630,11 @@ class Snowflake extends Extractor
         return null;
     }
 
-    private function execQuery($query)
+    private function execQuery($query): void
     {
         try {
             $this->db->query($query);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new UserException("Query execution error: " . $e->getMessage(), 0, $e);
         }
     }

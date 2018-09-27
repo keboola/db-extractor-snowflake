@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Keboola\Test;
 
 use Keboola\Csv\CsvFile;
@@ -7,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeTest extends AbstractSnowflakeTest
 {
-    public function testDefaultWarehouse()
+    public function testDefaultWarehouse(): void
     {
         $config = $this->getConfig();
         $user = $config['parameters']['db']['user'];
@@ -22,7 +25,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         try {
             $app->run();
             $this->fail('Run extractor without warehouse should fail');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertRegExp('/No active warehouse/ui', $e->getMessage());
         }
 
@@ -37,7 +40,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
-    public function testCredentials()
+    public function testCredentials(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
@@ -50,7 +53,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testCredentialsWithoutSchema()
+    public function testCredentialsWithoutSchema(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
@@ -64,7 +67,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testCredentialsDefaultWarehouse()
+    public function testCredentialsDefaultWarehouse(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
@@ -107,7 +110,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
-    public function testRunWithoutTables()
+    public function testRunWithoutTables(): void
     {
         $config = $this->getConfig();
 
@@ -120,7 +123,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testRunMain()
+    public function testRunMain(): void
     {
         $config = $this->getConfig();
         $app = $this->createApplication($config);
@@ -170,7 +173,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals(4, $result['imported']['2']['rows']);
     }
 
-    public function testRunWithoutSchema()
+    public function testRunWithoutSchema(): void
     {
         $config = $this->getConfig();
         unset($config['parameters']['db']['schema']);
@@ -183,7 +186,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         try {
             $result = $app->run();
             $this->fail('The query does not specify schema and no schema is specified in the connection.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertContains('no schema is specified', $e->getMessage());
         }
 
@@ -198,7 +201,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->validateExtraction($config['parameters']['tables'][0]);
     }
 
-    public function testRunEmptyQuery()
+    public function testRunEmptyQuery(): void
     {
         $csv = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
         $this->createTextTable($csv);
@@ -219,7 +222,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTables()
+    public function testGetTables(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -510,7 +513,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedData, $result['tables']);
     }
 
-    public function testGetTablesWithoutSchema()
+    public function testGetTablesWithoutSchema(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -832,7 +835,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedData, $result['tables']);
     }
 
-    public function testManifestMetadata()
+    public function testManifestMetadata(): void
     {
         $config = $this->getConfig();
 
@@ -1021,14 +1024,14 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedColumnMetadata, $outputManifest['column_metadata']);
     }
 
-    public function testSemiStructured()
+    public function testSemiStructured(): void
     {
         $config = $this->getConfig();
         $table = $config['parameters']['tables'][0];
         unset($table['query']);
         $table['table'] = [
             'tableName' => 'semi-structured',
-            'schema' => $this->getEnv('snowflake', 'DB_SCHEMA')
+            'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
         ];
         $table['outputTable'] = 'in.c-main.semi-structured';
         $table['primaryKey'] = null;
@@ -1070,7 +1073,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         return null;
     }
 
-    private function setUserDefaultWarehouse($user, $warehouse = null)
+    private function setUserDefaultWarehouse($user, $warehouse = null): void
     {
         if ($warehouse) {
             $sql = sprintf(
@@ -1092,7 +1095,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         }
     }
 
-    private function validateExtraction(array $query, $expectedFiles = 1)
+    private function validateExtraction(array $query, $expectedFiles = 1): void
     {
 
         $dirPath = $this->dataDir . '/out/tables';

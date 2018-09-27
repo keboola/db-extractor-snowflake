@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Keboola\Test;
 
 use Keboola\Csv\CsvFile;
@@ -25,7 +28,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
     protected $dataDir = __DIR__ . '/data';
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -43,7 +46,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $this->storageApiClient = new Client(
             [
-            'token' => getenv('STORAGE_API_TOKEN')
+            'token' => getenv('STORAGE_API_TOKEN'),
             ]
         );
 
@@ -77,7 +80,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * @param  array $config
      * @return SnowflakeApplication
      */
-    public function createApplication(array $config)
+    public function createApplication(array $config): SnowflakeApplication
     {
         $logger = new Logger('ex-db-snowflake-tests');
         $app = new SnowflakeApplication($config, $logger, [], $this->dataDir);
@@ -85,11 +88,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $app;
     }
 
-    /**
-     * @param  CsvFile $file
-     * @return string
-     */
-    protected function generateTableName(CsvFile $file)
+    protected function generateTableName(CsvFile $file): string
     {
         $tableName = sprintf(
             '%s',
@@ -99,7 +98,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $tableName;
     }
 
-    private function setupTables()
+    private function setupTables(): void
     {
         $salescsv = new CsvFile($this->dataDir . '/snowflake/sales.csv');
         $this->createTextTable($salescsv);
@@ -195,7 +194,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * @param string  $tableName  - optional name override (default uses filename)
      * @param string  $schemaName - optional schema in which to create the table
      */
-    protected function createTextTable(CsvFile $file, $tableName = null, $schemaName = null)
+    protected function createTextTable(CsvFile $file, ?string $tableName = null, ?string $schemaName = null): void
     {
         if (!$tableName) {
             $tableName = $this->generateTableName($file);
@@ -224,7 +223,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
                         function ($column) {
                             $q = '"';
                             return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR(200) NOT NULL';
-                        }, $file->getHeader()
+                        },
+                        $file->getHeader()
                     )
                 ),
                 $tableName
@@ -256,7 +256,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * @param  CsvFile $file
      * @return int
      */
-    protected function countTable(CsvFile $file)
+    protected function countTable(CsvFile $file): int
     {
         $linesCount = 0;
         foreach ($file as $i => $line) {

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Keboola\Test;
 
 use Keboola\DbExtractor\Exception\UserException;
@@ -7,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 {
-    private function createConfigFile(string $rootPath, string $configType = 'yaml')
+    private function createConfigFile(string $rootPath, string $configType = 'yaml'): void
     {
         $driver = 'snowflake';
 
@@ -41,7 +44,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      * @param        $configType
      * @dataProvider configTypesProvider
      */
-    public function testRunAction(string $configType)
+    public function testRunAction(string $configType): void
     {
         $dataPath = __DIR__ . '/data/runAction';
 
@@ -73,7 +76,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      * @param        $configType
      * @dataProvider configTypesProvider
      */
-    public function testConnectionAction(string $configType)
+    public function testConnectionAction(string $configType): void
     {
         $dataPath = __DIR__ . '/data/connectionAction';
 
@@ -92,7 +95,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $data['status']);
     }
 
-    public function testNonexistingTable()
+    public function testNonexistingTable(): void
     {
         $config = $this->getConfig();
         $config['parameters']['tables'][0]['query'] = "SELECT * FROM non_existing_table";
@@ -110,7 +113,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      * @param        $configType
      * @dataProvider configTypesProvider
      */
-    public function testGetTablesAction(string $configType)
+    public function testGetTablesAction(string $configType): void
     {
         $dataPath = __DIR__ . '/data/getTablesAction';
 
@@ -125,7 +128,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertEquals("", $process->getErrorOutput());
     }
 
-    public function testBadTypesRetries()
+    public function testBadTypesRetries(): void
     {
         $config = $this->getConfig();
         $this->createTextTable(new \Keboola\Csv\CsvFile($this->dataDir . '/snowflake/badTypes.csv'), 'types');
