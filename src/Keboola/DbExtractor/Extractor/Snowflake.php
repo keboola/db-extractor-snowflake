@@ -23,7 +23,7 @@ use Symfony\Component\Yaml\Yaml;
 class Snowflake extends Extractor
 {
 
-    const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
+    public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
     /**
      * @var Connection
@@ -35,9 +35,16 @@ class Snowflake extends Extractor
      */
     private $snowSqlConfig;
 
+    /** @var  string */
     private $warehouse;
+
+    /** @var  string */
     private $database;
+
+    /** @var  string */
     private $schema;
+
+    /** @var  string */
     private $user;
 
     /**
@@ -52,7 +59,7 @@ class Snowflake extends Extractor
         parent::__construct($parameters, $state, $logger);
     }
 
-    public function createConnection(array $dbParams)
+    public function createConnection(array $dbParams): Connection
     {
         $this->snowSqlConfig = $this->crateSnowSqlConfig($dbParams);
 
@@ -260,7 +267,7 @@ class Snowflake extends Extractor
         return $rowCount;
     }
 
-    private function generateCopyCommand($stageTmpPath, $query)
+    private function generateCopyCommand(string $stageTmpPath, string $query): string
     {
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
@@ -292,15 +299,13 @@ class Snowflake extends Extractor
      * @return array
      * @throws \Exception
      */
-    private function executeCopyCommand($copyCommand, int $maxTries = 5): array
+    private function executeCopyCommand(string $copyCommand, int $maxTries = 5): array
     {
         $retryPolicy = new SimpleRetryPolicy($maxTries, ['PDOException', 'ErrorException', 'Exception']);
         $backOffPolicy = new ExponentialBackOffPolicy(1000);
         $proxy = new RetryProxy($retryPolicy, $backOffPolicy);
         $counter = 0;
-        /**
- * @var \Exception $lastException
-*/
+        /** @var \Exception $lastException */
         $lastException = null;
         try {
             $ret = $proxy->call(
@@ -393,7 +398,7 @@ class Snowflake extends Extractor
         return $manifestData;
     }
     
-    private function dataSizeFormatted(int $bytes)
+    private function dataSizeFormatted(int $bytes): string
     {
         $base = log($bytes) / log(1024);
         $suffixes = [' B', ' KB', ' MB', ' GB', ' TB'];
@@ -532,13 +537,7 @@ class Snowflake extends Extractor
         );
     }
 
-    /**
-     * @param  $output
-     * @param  $path
-     * @return \SplFileInfo[]
-     * @throws \Exception
-     */
-    private function parseFiles($output, $path)
+    private function parseFiles(string $output, string $path): \SplFileInfo
     {
         $files = [];
         $lines = explode("\n", $output);
@@ -581,12 +580,12 @@ class Snowflake extends Extractor
         return $files;
     }
 
-    private function quote($value)
+    private function quote(string $value): string
     {
         return "'" . addslashes($value) . "'";
     }
 
-    private function crateSnowSqlConfig($dbParams): \SplFileInfo
+    private function crateSnowSqlConfig(array $dbParams): \SplFileInfo
     {
         $cliConfig[] = '';
         $cliConfig[] = '[options]';
@@ -612,7 +611,7 @@ class Snowflake extends Extractor
         return $file;
     }
 
-    private function getUserDefaultWarehouse()
+    private function getUserDefaultWarehouse(): ?string
     {
         $sql = sprintf(
             "DESC USER %s;",
