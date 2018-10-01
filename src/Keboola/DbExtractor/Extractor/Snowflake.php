@@ -539,19 +539,19 @@ class Snowflake extends Extractor
         );
     }
 
-    private function parseFiles(string $output, string $path): \SplFileInfo
+    private function parseFiles(string $output, string $path): array
     {
         $files = [];
         $lines = explode("\n", $output);
 
         $lines = array_map(
-            function ($item) {
+            function ($item): array {
                 $item = trim($item, '|');
                 return array_map('trim', explode('|', $item));
             },
             array_filter(
                 $lines,
-                function ($item) {
+                function ($item): bool {
                     $item = trim($item);
                     return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([a-z0-9\_\-\.]+\.gz)/ui', $item);
                 }

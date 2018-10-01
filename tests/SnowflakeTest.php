@@ -1095,7 +1095,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         }
     }
 
-    private function validateExtraction(array $query, int $expectedFiles = 1): void
+    private function validateExtraction(array $query, int $expectedFiles = 1): ?array
     {
 
         $dirPath = $this->dataDir . '/out/tables';
@@ -1125,7 +1125,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         );
 
         if (!$expectedFiles) {
-            return;
+            return null;
         }
 
         $this->assertCount($expectedFiles, $manifestFiles);
