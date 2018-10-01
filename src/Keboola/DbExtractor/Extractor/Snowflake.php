@@ -417,7 +417,9 @@ class Snowflake extends Extractor
         $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
-            if (($this->schema && $table['schema_name'] !== $this->schema) || $table['schema_name'] === 'INFORMATION_SCHEMA') {
+            if (($this->schema && $table['schema_name'] !== $this->schema)
+                || $table['schema_name'] === 'INFORMATION_SCHEMA'
+            ) {
                 continue;
             }
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
@@ -629,7 +631,7 @@ class Snowflake extends Extractor
         return null;
     }
 
-    private function execQuery($query): void
+    private function execQuery(string $query): void
     {
         try {
             $this->db->query($query);

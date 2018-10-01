@@ -26,6 +26,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      */
     protected $storageApiClient;
 
+    /** @var string  */
     protected $dataDir = __DIR__ . '/data';
 
     public function setUp(): void
@@ -117,7 +118,12 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $this->connection->query(
             sprintf(
-                'CREATE TABLE %s ("character" VARCHAR(100) NOT NULL, "integer" NUMBER(6,0), "decimal" NUMBER(10,2), "date" DATE);',
+                'CREATE TABLE %s (
+                  "character" VARCHAR(100) NOT NULL, 
+                  "integer" NUMBER(6,0), 
+                  "decimal" NUMBER(10,2), 
+                  "date" DATE
+                );',
                 $this->connection->quoteIdentifier('types')
             )
         );
@@ -154,12 +160,12 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         );
     }
 
-    private function quote($value)
+    private function quote(string $value): string
     {
         return "'" . addslashes($value) . "'";
     }
 
-    private function generateCreateCommand($tableName, CsvFile $csv, $fileInfo)
+    private function generateCreateCommand(string $tableName, CsvFile $csv, \SplFileInfo $fileInfo): string
     {
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));

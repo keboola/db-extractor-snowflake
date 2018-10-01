@@ -1055,7 +1055,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         );
     }
 
-    private function getUserDefaultWarehouse($user)
+    private function getUserDefaultWarehouse(string $user): ?string
     {
         $sql = sprintf(
             "DESC USER %s;",
@@ -1073,7 +1073,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         return null;
     }
 
-    private function setUserDefaultWarehouse($user, $warehouse = null): void
+    private function setUserDefaultWarehouse(string $user, ?string $warehouse = null): void
     {
         if ($warehouse) {
             $sql = sprintf(
@@ -1095,7 +1095,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         }
     }
 
-    private function validateExtraction(array $query, $expectedFiles = 1): void
+    private function validateExtraction(array $query, int $expectedFiles = 1): void
     {
 
         $dirPath = $this->dataDir . '/out/tables';
