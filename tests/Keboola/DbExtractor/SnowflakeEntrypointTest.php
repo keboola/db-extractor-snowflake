@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\Test;
+namespace Keboola\DbExtractor\Tests;
 
 use Keboola\DbExtractor\Exception\UserException;
 use Symfony\Component\Process\Process;
@@ -10,21 +10,23 @@ use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 {
+    public const DRIVER = 'snowflake';
+
+    public const ROOT_PATH = __DIR__ . '/../../..';
+
     private function createConfigFile(string $rootPath, string $configType = 'yaml'): void
     {
-        $driver = 'snowflake';
-
         $config = Yaml::parse(file_get_contents($rootPath . '/config.template.yml'));
-        $config['parameters']['db']['user'] = $this->getEnv($driver, 'DB_USER', true);
-        $config['parameters']['db']['#password'] = $this->getEnv($driver, 'DB_PASSWORD', true);
-        $config['parameters']['db']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
-        $config['parameters']['db']['host'] = $this->getEnv($driver, 'DB_HOST');
-        $config['parameters']['db']['port'] = $this->getEnv($driver, 'DB_PORT');
-        $config['parameters']['db']['database'] = $this->getEnv($driver, 'DB_DATABASE');
-        $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
+        $config['parameters']['db']['user'] = $this->getEnv(self::DRIVER, 'DB_USER', true);
+        $config['parameters']['db']['#password'] = $this->getEnv(self::DRIVER, 'DB_PASSWORD', true);
+        $config['parameters']['db']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
+        $config['parameters']['db']['host'] = $this->getEnv(self::DRIVER, 'DB_HOST');
+        $config['parameters']['db']['port'] = $this->getEnv(self::DRIVER, 'DB_PORT');
+        $config['parameters']['db']['database'] = $this->getEnv(self::DRIVER, 'DB_DATABASE');
+        $config['parameters']['db']['warehouse'] = $this->getEnv(self::DRIVER, 'DB_WAREHOUSE');
 
         if (isset($config['parameters']['tables'][2]['table'])) {
-            $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+            $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
         }
 
         // unlink any old configs written here

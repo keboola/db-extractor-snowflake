@@ -293,12 +293,6 @@ class Snowflake extends Extractor
         );
     }
 
-    /**
-     * @param  $copyCommand
-     * @param  int         $maxTries
-     * @return array
-     * @throws \Exception
-     */
     private function executeCopyCommand(string $copyCommand, int $maxTries = 5): array
     {
         $retryPolicy = new SimpleRetryPolicy($maxTries, ['PDOException', 'ErrorException', 'Exception']);

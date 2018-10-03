@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\Test;
+namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
 use Keboola\Db\Import\Snowflake\Connection;
@@ -128,7 +128,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             )
         );
         $storageFileInfo = $this->storageApiClient->getFile(
-            $this->storageApiClient->uploadFile(
+            (string) $this->storageApiClient->uploadFile(
                 (string) $types,
                 new FileUploadOptions()
             ),
@@ -165,7 +165,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return "'" . addslashes($value) . "'";
     }
 
-    private function generateCreateCommand(string $tableName, CsvFile $csv, \SplFileInfo $fileInfo): string
+    private function generateCreateCommand(string $tableName, CsvFile $csv, array $fileInfo): string
     {
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));
@@ -232,13 +232,12 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
                         },
                         $file->getHeader()
                     )
-                ),
-                $tableName
+                )
             )
         );
 
         $storageFileInfo = $this->storageApiClient->getFile(
-            $this->storageApiClient->uploadFile(
+            (string) $this->storageApiClient->uploadFile(
                 (string) $file,
                 new FileUploadOptions()
             ),

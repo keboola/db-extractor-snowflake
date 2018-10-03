@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\Test;
+namespace Keboola\DbExtractor\Tests;
 
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 
