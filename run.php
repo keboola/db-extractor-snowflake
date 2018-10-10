@@ -3,18 +3,14 @@
 declare(strict_types=1);
 
 use Keboola\DbExtractor\SnowflakeApplication;
-use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\Yaml\Yaml;
 
-define('APP_NAME', 'ex-db-snowflake');
-define('ROOT_PATH', __DIR__);
+require_once __DIR__ . "/vendor/autoload.php";
 
-require_once dirname(__FILE__) . "/vendor/autoload.php";
-
-$logger = new \Keboola\DbExtractor\Logger(APP_NAME);
+$logger = new Logger('ex-db-snowflake');
 
 try {
     $runAction = true;
