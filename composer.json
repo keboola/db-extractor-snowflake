@@ -21,7 +21,7 @@
         "codeclimate/php-test-reporter": "^0.3",
         "keboola/coding-standard": "^6.0",
         "keboola/storage-api-client": "^4.14",
-        "phpstan/phpstan": "^0.8"
+        "phpstan/phpstan-shim": "^0.10"
     },
     "autoload": {
         "psr-4": {
