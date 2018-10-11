@@ -210,7 +210,7 @@ class Snowflake extends Extractor
         );
 
         $snowSql = $this->temp->createTmpFile('snowsql.sql');
-        file_put_contents($snowSql, implode("\n", $sql));
+        file_put_contents($snowSql->getPathname(), implode("\n", $sql));
 
         $this->logger->debug(trim(implode("\n", $sql)));
 
@@ -258,7 +258,7 @@ class Snowflake extends Extractor
             sprintf(
                 "%d files (%s) downloaded",
                 count($csvFiles),
-                $this->dataSizeFormatted($bytesDownloaded)
+                $this->dataSizeFormatted((int) $bytesDownloaded)
             )
         );
 
@@ -321,7 +321,7 @@ class Snowflake extends Extractor
                 }
             );
         } catch (\Throwable $e) {
-            if ($lastException) {
+            if ($lastException !== null) {
                 throw $lastException;
             }
             throw $e;
@@ -602,7 +602,7 @@ class Snowflake extends Extractor
         }
 
         $file = $this->temp->createFile('snowsql.config');
-        file_put_contents($file, implode("\n", $cliConfig));
+        file_put_contents($file->getPathname(), implode("\n", $cliConfig));
 
         return $file;
     }

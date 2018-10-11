@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Configuration;
 
+use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 
 class SnowflakeConfigDefinition extends ConfigDefinition
@@ -11,9 +12,11 @@ class SnowflakeConfigDefinition extends ConfigDefinition
     public function getConfigTreeBuilder(): TreeBuilder
     {
         $treeBuilder = new TreeBuilder();
+        /** @var ArrayNodeDefinition $rootNode */
+        $rootNode = $treeBuilder->root('parameters');
 
         // @formatter:off
-        $treeBuilder->root('parameters')
+        $rootNode
             ->children()
                 ->scalarNode('data_dir')
                     ->isRequired()

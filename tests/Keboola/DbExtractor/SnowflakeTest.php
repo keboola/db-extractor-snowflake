@@ -848,7 +848,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $result = $app->run();
 
         $outputManifest = Yaml::parse(
-            file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
+            (string) file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
         );
 
         $this->assertArrayHasKey('destination', $outputManifest);
@@ -1048,7 +1048,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
         $this->assertEquals(0, $return);
 
-        $rawFile = new \SplFileInfo($this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv');
+        $rawFile = $this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv';
         $this->assertEquals(
             file_get_contents($this->dataDir . '/snowflake/expected-semi-structured.csv'),
             file_get_contents($rawFile)
@@ -1106,7 +1106,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 return $dirPath . '/' . $manifestFileName;
             },
             array_filter(
-                scandir($dirPath),
+                (array) scandir($dirPath),
                 function ($fileName) use ($dirPath, $outputTable) {
                     $filePath = $dirPath . '/' . $fileName;
                     if (is_dir($filePath)) {
@@ -1118,7 +1118,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                         return false;
                     }
 
-                    $manifest = Yaml::parse(file_get_contents($file));
+                    $manifest = Yaml::parse((string) file_get_contents($file->getPathname()));
                     return $manifest['destination'] === $outputTable;
                 }
             )
@@ -1132,7 +1132,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $columns = [];
         foreach ($manifestFiles as $file) {
             // manifest validation
-            $params = Yaml::parse(file_get_contents($file));
+            $params = Yaml::parse((string) file_get_contents($file));
 
             $this->assertArrayHasKey('destination', $params);
             $this->assertArrayHasKey('incremental', $params);
@@ -1152,13 +1152,13 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 $this->assertEquals($query['outputTable'], $params['destination']);
             }
 
-            $csvDir = new \SplFileInfo(str_replace('.manifest', '', $file));
+            $csvDir = str_replace('.manifest', '', $file);
 
             $this->assertTrue(is_dir($csvDir));
 
-            foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
+            foreach (array_diff((array) scandir($csvDir), array('..', '.')) as $csvFile) {
                 // archive validation
-                $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
+                $archiveFile = $csvDir . "/" . $csvFile;
                 $pos = strrpos($archiveFile, ".gz");
                 $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen(".gz")));
 

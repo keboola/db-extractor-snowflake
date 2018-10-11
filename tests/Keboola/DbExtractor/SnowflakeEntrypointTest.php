@@ -16,7 +16,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
     private function createConfigFile(string $rootPath, string $configType = 'yaml'): void
     {
-        $config = Yaml::parse(file_get_contents($rootPath . '/config.template.yml'));
+        $config = Yaml::parse((string) file_get_contents($rootPath . '/config.template.yml'));
         $config['parameters']['db']['user'] = $this->getEnv(self::DRIVER, 'DB_USER', true);
         $config['parameters']['db']['#password'] = $this->getEnv(self::DRIVER, 'DB_PASSWORD', true);
         $config['parameters']['db']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
@@ -43,8 +43,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param        $configType
      * @dataProvider configTypesProvider
+     * @param string $configType
      */
     public function testRunAction(string $configType): void
     {
@@ -65,7 +65,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->setTimeout(300);
         $process->run();
 
-        $this->assertEquals(0, $process->getExitCode(), sprintf('error output: ', $process->getErrorOutput()));
+        $this->assertEquals(0, $process->getExitCode(), sprintf('error output: %s', $process->getErrorOutput()));
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz");
@@ -75,8 +75,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param        $configType
      * @dataProvider configTypesProvider
+     * @param string $configType
      */
     public function testConnectionAction(string $configType): void
     {
@@ -112,8 +112,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param        $configType
      * @dataProvider configTypesProvider
+     * @param string $configType
      */
     public function testGetTablesAction(string $configType): void
     {
