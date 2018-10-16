@@ -35,7 +35,7 @@
     },
     "scripts": {
         "tests": "phpunit",
-        "phpstan": "phpstan analyse --no-progress --level=max ./src ./tests",
+        "phpstan": "phpstan analyse --no-progress --level=max -c phpstan.neon ./src ./tests",
         "phpcs": "phpcs -n --ignore=vendor --extensions=php .",
         "phpcbf": "phpcbf -n --ignore=vendor --extensions=php .",
         "build": [
