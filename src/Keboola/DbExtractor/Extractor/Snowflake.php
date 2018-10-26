@@ -184,7 +184,7 @@ class Snowflake extends Extractor
             return 0;
         }
 
-        $rowCount = $res[0]['rows_unloaded'];
+        $rowCount = (int) $res[0]['rows_unloaded'];
 
         $this->logger->info("Downloading data from Snowflake");
 
