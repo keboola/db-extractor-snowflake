@@ -27,7 +27,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     protected $storageApiClient;
 
     /** @var string  */
-    protected $dataDir = __DIR__ . '/data';
+    protected $dataDir = __DIR__ . '/../../data';
 
     public function setUp(): void
     {
