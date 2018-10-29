@@ -56,9 +56,14 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $fileSystem = new Filesystem();
         $fileSystem->remove($this->dataDir . '/out');
         $fileSystem->remove($this->dataDir . '/runAction/config.yml');
+        $fileSystem->remove($this->dataDir . '/runAction/config.json');
         $fileSystem->remove($this->dataDir . '/runAction/out');
         $fileSystem->remove($this->dataDir . '/connectionAction/config.yml');
+        $fileSystem->remove($this->dataDir . '/connectionAction/config.json');
         $fileSystem->remove($this->dataDir . '/connectionAction/out');
+        $fileSystem->remove($this->dataDir . '/getTablesAction/config.yml');
+        $fileSystem->remove($this->dataDir . '/getTablesAction/config.json');
+        $fileSystem->remove($this->dataDir . '/getTablesAction/out');
     }
 
     public function getConfig(string $driver = 'snowflake', string $format = 'json'): array
