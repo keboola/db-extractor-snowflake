@@ -48,7 +48,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      */
     public function testRunAction(string $configType): void
     {
-        $dataPath = __DIR__ . '/data/runAction';
+        $dataPath = __DIR__ . '/../../data/runAction';
 
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz");
         @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz.manifest");
@@ -80,7 +80,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      */
     public function testConnectionAction(string $configType): void
     {
-        $dataPath = __DIR__ . '/data/connectionAction';
+        $dataPath = __DIR__ . '/../../data/connectionAction';
 
         $this->createConfigFile($dataPath, $configType);
 
@@ -117,7 +117,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
      */
     public function testGetTablesAction(string $configType): void
     {
-        $dataPath = __DIR__ . '/data/getTablesAction';
+        $dataPath = __DIR__ . '/../../data/getTablesAction';
 
         $this->createConfigFile($dataPath, $configType);
         
