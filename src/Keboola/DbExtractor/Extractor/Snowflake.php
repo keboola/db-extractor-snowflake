@@ -35,16 +35,16 @@ class Snowflake extends Extractor
      */
     private $snowSqlConfig;
 
-    /** @var  string */
+    /** @var string */
     private $warehouse;
 
-    /** @var  string */
+    /** @var string */
     private $database;
 
-    /** @var  string */
+    /** @var string */
     private $schema;
 
-    /** @var  string */
+    /** @var string */
     private $user;
 
     /**

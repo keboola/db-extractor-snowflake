@@ -82,10 +82,6 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $config;
     }
 
-    /**
-     * @param  array $config
-     * @return SnowflakeApplication
-     */
     public function createApplication(array $config): SnowflakeApplication
     {
         $logger = new Logger('ex-db-snowflake-tests');
@@ -260,12 +256,6 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->assertEquals($this->countTable($file), (int) $result[0]['ROWCOUNT']);
     }
 
-    /**
-     * Count records in CSV (with headers)
-     *
-     * @param  CsvFile $file
-     * @return int
-     */
     protected function countTable(CsvFile $file): int
     {
         $linesCount = 0;
