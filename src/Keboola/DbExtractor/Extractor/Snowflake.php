@@ -241,7 +241,7 @@ class Snowflake extends Extractor
 
         file_put_contents(
             $outputDataDir . '.manifest',
-            Yaml::dump(
+            json_encode(
                 $this->createTableManifest(
                     $table,
                     array_map(
