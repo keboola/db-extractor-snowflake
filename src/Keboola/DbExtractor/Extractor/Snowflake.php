@@ -153,7 +153,7 @@ class Snowflake extends Extractor
             $columnInfo = $this->getColumnInfo($query);
             $objectColumns = array_filter(
                 $columnInfo,
-                function ($column) {
+                function ($column): bool {
                     return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
                 }
             );
@@ -245,7 +245,7 @@ class Snowflake extends Extractor
                 $this->createTableManifest(
                     $table,
                     array_map(
-                        function ($column) {
+                        function ($column): string {
                             return $column['name'];
                         },
                         $columnInfo
@@ -445,7 +445,7 @@ class Snowflake extends Extractor
             implode(
                 ', ',
                 array_map(
-                    function ($tableName) {
+                    function ($tableName): string {
                         return "'" . $tableName . "'";
                     },
                     $tableNameArray
@@ -490,7 +490,7 @@ class Snowflake extends Extractor
                 implode(
                     ', ',
                     array_map(
-                        function ($column) {
+                        function ($column): string {
                             return $this->db->quoteIdentifier($column);
                         },
                         $columns
@@ -515,7 +515,7 @@ class Snowflake extends Extractor
             implode(
                 ', ',
                 array_map(
-                    function ($column) {
+                    function ($column): string {
                         if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
                             return sprintf(
                                 'CAST(%s AS TEXT) AS %s',
