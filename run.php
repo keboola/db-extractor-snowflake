@@ -30,7 +30,7 @@ try {
             true
         );
     } else {
-        throw new UserException('Invalid configuration file type');
+        throw new UserException('Could not find configuration file');
     }
 
     $app = new SnowflakeApplication($config, $logger, [], $arguments["data"]);
