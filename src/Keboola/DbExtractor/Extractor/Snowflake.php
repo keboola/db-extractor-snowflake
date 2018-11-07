@@ -59,7 +59,7 @@ class Snowflake extends Extractor
 
     public function createConnection(array $dbParams): Connection
     {
-        $this->snowSqlConfig = $this->crateSnowSqlConfig($dbParams);
+        $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
 
         $connection = new Connection($dbParams);
 
@@ -579,7 +579,7 @@ class Snowflake extends Extractor
         return "'" . addslashes($value) . "'";
     }
 
-    private function crateSnowSqlConfig(array $dbParams): \SplFileInfo
+    private function createSnowSqlConfig(array $dbParams): \SplFileInfo
     {
         $cliConfig[] = '';
         $cliConfig[] = '[options]';
