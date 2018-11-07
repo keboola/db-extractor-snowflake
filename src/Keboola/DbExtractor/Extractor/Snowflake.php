@@ -444,7 +444,7 @@ class Snowflake extends Extractor
                 ', ',
                 array_map(
                     function ($tableName): string {
-                        return "'" . $tableName . "'";
+                        return $this->quote($tableName);
                     },
                     $tableNameArray
                 )
