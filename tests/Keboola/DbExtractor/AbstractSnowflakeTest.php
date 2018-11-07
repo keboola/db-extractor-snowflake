@@ -198,8 +198,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * Create table from csv file with text columns
      *
      * @param CsvFile $file
-     * @param string  $tableName  - optional name override (default uses filename)
-     * @param string  $schemaName - optional schema in which to create the table
+     * @param string $tableName  - optional name override (default uses filename)
+     * @param string $schemaName - optional schema in which to create the table
      */
     protected function createTextTable(CsvFile $file, ?string $tableName = null, ?string $schemaName = null): void
     {
