@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
-use Keboola\Db\Import\Exception;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
@@ -18,7 +17,6 @@ use Retry\BackOff\ExponentialBackOffPolicy;
 use Retry\Policy\SimpleRetryPolicy;
 use Retry\RetryProxy;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
 
 class Snowflake extends Extractor
 {
