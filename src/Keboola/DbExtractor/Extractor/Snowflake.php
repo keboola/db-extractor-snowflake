@@ -494,19 +494,16 @@ class Snowflake extends Extractor
     {
         return sprintf(
             "SELECT %s FROM %s.%s",
-            implode(', ', array_map(
-                function ($column): string {
-                    if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
-                        return sprintf(
-                            'CAST(%s AS TEXT) AS %s',
-                            $this->db->quoteIdentifier($column['name']),
-                            $this->db->quoteIdentifier($column['name'])
-                        );
-                    }
-                    return $this->db->quoteIdentifier($column['name']);
-                },
-                $columnInfo
-            )),
+            implode(', ', array_map(function ($column): string {
+                if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+                    return sprintf(
+                        'CAST(%s AS TEXT) AS %s',
+                        $this->db->quoteIdentifier($column['name']),
+                        $this->db->quoteIdentifier($column['name'])
+                    );
+                }
+                return $this->db->quoteIdentifier($column['name']);
+            }, $columnInfo)),
             $this->db->quoteIdentifier($table['schema']),
             $this->db->quoteIdentifier($table['tableName'])
         );
