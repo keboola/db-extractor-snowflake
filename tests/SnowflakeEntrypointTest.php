@@ -65,9 +65,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->setTimeout(300);
         $process->run();
 
-        var_export($process->getOutput());
-        var_export($process->getErrorOutput());
-
         $this->assertEquals(0, $process->getExitCode(), sprintf('error output: %s', $process->getErrorOutput()));
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
@@ -90,9 +87,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->run();
 
-        var_export($process->getOutput());
-        var_export($process->getErrorOutput());
-
         $output = $process->getOutput();
 
         $this->assertEquals(0, $process->getExitCode());
@@ -114,9 +108,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->setTimeout(300);
         $process->run();
 
-        var_export($process->getOutput());
-        var_export($process->getErrorOutput());
-
         $this->assertEquals(1, $process->getExitCode());
     }
 
@@ -133,9 +124,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath);
         $process->setTimeout(300);
         $process->run();
-
-        var_export($process->getOutput());
-        var_export($process->getErrorOutput());
 
         $this->assertJson($process->getOutput());
         $this->assertEquals(0, $process->getExitCode());
@@ -158,9 +146,6 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
         $process->setTimeout(300);
         $process->run();
-
-        var_export($process->getOutput());
-        var_export($process->getErrorOutput());
 
         // make sure we tried 4 additional times
         $this->assertContains('[4x]', $process->getOutput());
