@@ -108,12 +108,10 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $types = new CsvFile($this->dataDir . '/snowflake/types.csv');
 
-        $this->connection->query(
-            sprintf(
-                'DROP TABLE IF EXISTS %s',
-                $this->connection->quoteIdentifier('types')
-            )
-        );
+        $this->connection->query(sprintf(
+            'DROP TABLE IF EXISTS %s',
+            $this->connection->quoteIdentifier('types')
+        ));
 
         $this->connection->query(
             sprintf(
