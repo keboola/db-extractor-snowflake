@@ -221,12 +221,17 @@ class Snowflake extends Extractor
 
         file_put_contents(
             $outputDataDir . '.manifest',
-            Yaml::dump($this->createTableManifest($table, array_map(
-                function ($column) {
-                    return $column['name'];
-                },
-                $columnInfo
-            )))
+            json_encode(
+                $this->createTableManifest(
+                    $table,
+                    array_map(
+                        function ($column): string {
+                            return $column['name'];
+                        },
+                        $columnInfo
+                    )
+                )
+            )
         );
 
         $this->logger->info(sprintf(
