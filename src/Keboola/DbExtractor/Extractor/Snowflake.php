@@ -423,24 +423,19 @@ class Snowflake extends Extractor
             return [];
         }
 
-        $sqlWhereClause = "WHERE TABLE_SCHEMA != 'INFORMATION_SCHEMA'";
+        if ($this->schema) {
+            $sqlWhereClause = sprintf("WHERE TABLE_SCHEMA = %s", $this->quote($this->schema));
+        } else {
+            $sqlWhereClause = "WHERE TABLE_SCHEMA != 'INFORMATION_SCHEMA'";
+        }
         if ($tables && count($tables) > 0) {
             $sqlWhereClause = sprintf(
-                " AND TABLE_NAME IN (%s) AND TABLE_SCHEMA IN (%s)",
+                " AND TABLE_NAME IN (%s)",
                 implode(
                     ', ',
                     array_map(
                         function ($table): string {
                             return $this->quote($table['tableName']);
-                        },
-                        $tables
-                    )
-                ),
-                implode(
-                    ', ',
-                    array_map(
-                        function ($table): string {
-                            return $this->quote($table['schema']);
                         },
                         $tables
                     )

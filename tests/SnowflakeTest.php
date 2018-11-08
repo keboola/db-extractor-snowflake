@@ -222,7 +222,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTables(): void
+    public function testGetTablesWithSchema(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
