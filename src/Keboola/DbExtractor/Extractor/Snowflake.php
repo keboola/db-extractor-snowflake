@@ -447,6 +447,7 @@ class Snowflake extends Extractor
             . $sqlWhereClause
             . " ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION";
 
+        echo "\n\nTHE SQL: " . $sql . "\n\n";
         $columns = $this->db->fetchAll($sql);
         foreach ($columns as $i => $column) {
             $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
