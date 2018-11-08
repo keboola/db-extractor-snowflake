@@ -247,13 +247,11 @@ class Snowflake extends Extractor
             )
         );
 
-        $this->logger->info(
-            sprintf(
-                "%d files (%s) downloaded",
-                count($csvFiles),
-                $this->dataSizeFormatted((int) $bytesDownloaded)
-            )
-        );
+        $this->logger->info(sprintf(
+            "%d files (%s) downloaded",
+            count($csvFiles),
+            $this->dataSizeFormatted((int) $bytesDownloaded)
+        ));
 
         $this->cleanupTableStage($tmpTableName);
 
