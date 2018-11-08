@@ -143,10 +143,10 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection->query('DROP TABLE IF EXISTS "semi-structured"');
         $this->connection->query(
             'CREATE TABLE "semi-structured" ( 
-                                            "var" VARIANT, 
-                                            "obj" OBJECT,
-                                            "arr" ARRAY
-                                       )'
+                    "var" VARIANT, 
+                    "obj" OBJECT,
+                    "arr" ARRAY
+            )'
         );
         $this->connection->query(
             'INSERT INTO "semi-structured" 
