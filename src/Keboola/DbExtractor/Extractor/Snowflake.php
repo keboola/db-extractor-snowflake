@@ -429,7 +429,7 @@ class Snowflake extends Extractor
             $sqlWhereClause = "WHERE TABLE_SCHEMA != 'INFORMATION_SCHEMA'";
         }
         if ($tables && count($tables) > 0) {
-            $sqlWhereClause = sprintf(
+            $sqlWhereClause .= sprintf(
                 " AND TABLE_NAME IN (%s)",
                 implode(
                     ', ',
