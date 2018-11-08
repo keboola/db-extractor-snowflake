@@ -45,11 +45,9 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
         );
 
-        $this->storageApiClient = new Client(
-            [
+        $this->storageApiClient = new Client([
             'token' => getenv('STORAGE_API_TOKEN'),
-            ]
-        );
+        ]);
 
         $this->setupTables();
 

@@ -94,12 +94,10 @@ class Snowflake extends Extractor
         }
 
         try {
-            $this->db->query(
-                sprintf(
-                    'USE WAREHOUSE %s;',
-                    $this->db->quoteIdentifier($warehouse)
-                )
-            );
+            $this->db->query(sprintf(
+                'USE WAREHOUSE %s;',
+                $this->db->quoteIdentifier($warehouse)
+            ));
         } catch (\Throwable $e) {
             if (preg_match('/Object does not exist/ui', $e->getMessage())) {
                 throw new UserException(sprintf('Invalid warehouse "%s" specified', $warehouse));
@@ -149,12 +147,9 @@ class Snowflake extends Extractor
         if (!isset($table['query']) || $table['query'] === '') {
             $query = $this->simpleQuery($table['table'], $table['columns']);
             $columnInfo = $this->getColumnInfo($query);
-            $objectColumns = array_filter(
-                $columnInfo,
-                function ($column): bool {
-                    return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
-                }
-            );
+            $objectColumns = array_filter($columnInfo, function ($column): bool {
+                return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
+            });
             if (!empty($objectColumns)) {
                 $query = $this->simpleQueryWithCasting($table['table'], $columnInfo);
             }
@@ -300,24 +295,22 @@ class Snowflake extends Extractor
         /** @var \Exception $lastException */
         $lastException = null;
         try {
-            $ret = $proxy->call(
-                function () use ($copyCommand, &$counter, &$lastException) {
-                    if ($counter > 0) {
-                        $this->logger->info(sprintf('%s. Retrying... [%dx]', $lastException->getMessage(), $counter));
-                    }
-                    try {
-                        return $this->db->fetchAll($copyCommand);
-                    } catch (\Throwable $e) {
-                        $lastException = new UserException(
-                            sprintf("Copy Command failed: %s", $e->getMessage()),
-                            0,
-                            $e
-                        );
-                        $counter++;
-                        throw $e;
-                    }
+            $ret = $proxy->call(function () use ($copyCommand, &$counter, &$lastException) {
+                if ($counter > 0) {
+                    $this->logger->info(sprintf('%s. Retrying... [%dx]', $lastException->getMessage(), $counter));
                 }
-            );
+                try {
+                    return $this->db->fetchAll($copyCommand);
+                } catch (\Throwable $e) {
+                    $lastException = new UserException(
+                        sprintf("Copy Command failed: %s", $e->getMessage()),
+                        0,
+                        $e
+                    );
+                    $counter++;
+                    throw $e;
+                }
+            });
         } catch (\Throwable $e) {
             if ($lastException !== null) {
                 throw $lastException;
@@ -438,15 +431,12 @@ class Snowflake extends Extractor
             "SELECT * FROM information_schema.columns 
              WHERE TABLE_NAME IN (%s)
              ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
-            implode(
-                ', ',
-                array_map(
-                    function ($tableName): string {
-                        return $this->quote($tableName);
-                    },
-                    $tableNameArray
-                )
-            )
+            implode(', ', array_map(
+                function ($tableName): string {
+                    return $this->quote($tableName);
+                },
+                $tableNameArray
+            ))
         );
 
         $columns = $this->db->fetchAll($sql);
@@ -490,15 +480,12 @@ class Snowflake extends Extractor
         if (count($columns) > 0) {
             return sprintf(
                 "SELECT %s FROM %s.%s",
-                implode(
-                    ', ',
-                    array_map(
-                        function ($column): string {
-                            return $this->db->quoteIdentifier($column);
-                        },
-                        $columns
-                    )
-                ),
+                implode(', ', array_map(
+                    function ($column): string {
+                        return $this->db->quoteIdentifier($column);
+                    },
+                    $columns
+                )),
                 $this->db->quoteIdentifier($table['schema']),
                 $this->db->quoteIdentifier($table['tableName'])
             );
@@ -515,22 +502,19 @@ class Snowflake extends Extractor
     {
         return sprintf(
             "SELECT %s FROM %s.%s",
-            implode(
-                ', ',
-                array_map(
-                    function ($column): string {
-                        if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
-                            return sprintf(
-                                'CAST(%s AS TEXT) AS %s',
-                                $this->db->quoteIdentifier($column['name']),
-                                $this->db->quoteIdentifier($column['name'])
-                            );
-                        }
-                        return $this->db->quoteIdentifier($column['name']);
-                    },
-                    $columnInfo
-                )
-            ),
+            implode(', ', array_map(
+                function ($column): string {
+                    if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+                        return sprintf(
+                            'CAST(%s AS TEXT) AS %s',
+                            $this->db->quoteIdentifier($column['name']),
+                            $this->db->quoteIdentifier($column['name'])
+                        );
+                    }
+                    return $this->db->quoteIdentifier($column['name']);
+                },
+                $columnInfo
+            )),
             $this->db->quoteIdentifier($table['schema']),
             $this->db->quoteIdentifier($table['tableName'])
         );
@@ -557,15 +541,13 @@ class Snowflake extends Extractor
 
         foreach ($lines as $line) {
             if (!preg_match('/^downloaded$/ui', $line[2])) {
-                throw new \Exception(
-                    sprintf(
-                        "Cannot download file: %s Status: %s Size: %s Message: %s",
-                        $line[0],
-                        $line[2],
-                        $line[1],
-                        $line[3]
-                    )
-                );
+                throw new \Exception(sprintf(
+                    "Cannot download file: %s Status: %s Size: %s Message: %s",
+                    $line[0],
+                    $line[2],
+                    $line[1],
+                    $line[3]
+                ));
             }
 
             $file = new \SplFileInfo($path . '/' . $line[0]);
