@@ -431,7 +431,7 @@ class Snowflake extends Extractor
              ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
             implode(', ', array_map(function ($tableName): string {
                 return $this->quote($tableName);
-            },$tableNameArray))
+            }, $tableNameArray))
         );
 
         $columns = $this->db->fetchAll($sql);
@@ -475,12 +475,9 @@ class Snowflake extends Extractor
         if (count($columns) > 0) {
             return sprintf(
                 "SELECT %s FROM %s.%s",
-                implode(', ', array_map(
-                    function ($column): string {
-                        return $this->db->quoteIdentifier($column);
-                    },
-                    $columns
-                )),
+                implode(', ', array_map(function ($column): string {
+                    return $this->db->quoteIdentifier($column);
+                }, $columns)),
                 $this->db->quoteIdentifier($table['schema']),
                 $this->db->quoteIdentifier($table['tableName'])
             );
