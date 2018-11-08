@@ -397,14 +397,12 @@ class Snowflake extends Extractor
         $views = $this->db->fetchAll($sql);
         $arr = array_merge($arr, $views);
 
-        $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
             if ($this->shouldTableBeSkipped($table)) {
                 continue;
             }
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
-                $tableNameArray[] = $table['name'];
                 $isView = array_key_exists('text', $table);
                 $tableDefs[$table['schema_name'] . '.' . $table['name']] = [
                     'name' => $table['name'],
@@ -421,18 +419,38 @@ class Snowflake extends Extractor
             }
         }
 
-        if (count($tableNameArray) === 0) {
+        if (count($tableDefs) === 0) {
             return [];
         }
 
-        $sql = sprintf(
-            "SELECT * FROM information_schema.columns 
-             WHERE TABLE_NAME IN (%s)
-             ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
-            implode(', ', array_map(function ($tableName): string {
-                return $this->quote($tableName);
-            }, $tableNameArray))
-        );
+        $sqlWhereClause = "WHERE TABLE_SCHEMA != 'INFORMATION_SCHEMA'";
+        if ($tables && count($tables) > 0) {
+            $sqlWhereClause = sprintf(
+                " AND TABLE_NAME IN (%s) AND TABLE_SCHEMA IN (%s)",
+                implode(
+                    ', ',
+                    array_map(
+                        function ($table): string {
+                            return $this->quote($table['tableName']);
+                        },
+                        $tables
+                    )
+                ),
+                implode(
+                    ', ',
+                    array_map(
+                        function ($table): string {
+                            return $this->quote($table['schema']);
+                        },
+                        $tables
+                    )
+                )
+            );
+        }
+
+        $sql = "SELECT * FROM information_schema.columns "
+            . $sqlWhereClause
+            . " ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION";
 
         $columns = $this->db->fetchAll($sql);
         foreach ($columns as $i => $column) {
