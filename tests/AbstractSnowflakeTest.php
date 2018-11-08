@@ -194,7 +194,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * Create table from csv file with text columns
      *
      * @param CsvFile $file
-     * @param string $tableName  - optional name override (default uses filename)
+     * @param string $tableName - optional name override (default uses filename)
      * @param string $schemaName - optional schema in which to create the table
      */
     protected function createTextTable(CsvFile $file, ?string $tableName = null, ?string $schemaName = null): void
@@ -209,29 +209,22 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             );
         }
 
-        $this->connection->query(
-            sprintf(
-                'DROP TABLE IF EXISTS %s',
-                $this->connection->quoteIdentifier($tableName)
-            )
-        );
+        $this->connection->query(sprintf(
+            'DROP TABLE IF EXISTS %s',
+            $this->connection->quoteIdentifier($tableName)
+        ));
 
-        $this->connection->query(
-            sprintf(
-                'CREATE TABLE %s (%s);',
-                $this->connection->quoteIdentifier($tableName),
-                implode(
-                    ', ',
-                    array_map(
-                        function ($column) {
-                            $q = '"';
-                            return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR(200) NOT NULL';
-                        },
-                        $file->getHeader()
-                    )
-                )
+        $this->connection->query(sprintf(
+            'CREATE TABLE %s (%s);',
+            $this->connection->quoteIdentifier($tableName),
+            implode(
+                ', ',
+                array_map(function ($column) {
+                    $q = '"';
+                    return ($q . str_replace("$q", "$q$q", $column) . $q) . ' VARCHAR(200) NOT NULL';
+                }, $file->getHeader())
             )
-        );
+        ));
 
         $storageFileInfo = $this->storageApiClient->getFile(
             (string) $this->storageApiClient->uploadFile(
