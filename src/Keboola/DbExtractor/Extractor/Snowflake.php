@@ -429,12 +429,9 @@ class Snowflake extends Extractor
             "SELECT * FROM information_schema.columns 
              WHERE TABLE_NAME IN (%s)
              ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
-            implode(', ', array_map(
-                function ($tableName): string {
-                    return $this->quote($tableName);
-                },
-                $tableNameArray
-            ))
+            implode(', ', array_map(function ($tableName): string {
+                return $this->quote($tableName);
+            },$tableNameArray))
         );
 
         $columns = $this->db->fetchAll($sql);
