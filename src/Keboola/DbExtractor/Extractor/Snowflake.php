@@ -389,7 +389,7 @@ class Snowflake extends Extractor
 
         return $manifestData;
     }
-    
+
     private function dataSizeFormatted(int $bytes): string
     {
         $base = log($bytes) / log(1024);
@@ -409,9 +409,7 @@ class Snowflake extends Extractor
         $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
-            if (($this->schema && $table['schema_name'] !== $this->schema)
-                || $table['schema_name'] === 'INFORMATION_SCHEMA'
-            ) {
+            if ($this->shouldTableBeSkipped($table)) {
                 continue;
             }
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
@@ -478,6 +476,13 @@ class Snowflake extends Extractor
             $tableDefs[$curTable]['columns'][] = $curColumn;
         }
         return array_values($tableDefs);
+    }
+
+    private function shouldTableBeSkipped(array $table): bool
+    {
+        $isFromDifferentSchema = $this->schema && $table['schema_name'] !== $this->schema;
+        $isFromInformationSchema = $table['schema_name'] === 'INFORMATION_SCHEMA';
+        return $isFromDifferentSchema || $isFromInformationSchema;
     }
 
     public function simpleQuery(array $table, array $columns = array()): string
