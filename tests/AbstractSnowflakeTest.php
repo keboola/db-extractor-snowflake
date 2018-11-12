@@ -45,11 +45,16 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->setupTables();
 
         $fileSystem = new Filesystem();
-        $fileSystem->remove(__DIR__ . '/data/out');
-        $fileSystem->remove(__DIR__ . '/data/runAction/config.yml');
-        $fileSystem->remove(__DIR__ . '/data/runAction/out');
-        $fileSystem->remove(__DIR__ . '/data/connectionAction/config.yml');
-        $fileSystem->remove(__DIR__ . '/tests/data/connectionAction/out');
+        $fileSystem->remove($this->dataDir . '/out');
+        $fileSystem->remove($this->dataDir . '/runAction/config.yml');
+        $fileSystem->remove($this->dataDir . '/runAction/config.json');
+        $fileSystem->remove($this->dataDir . '/runAction/out');
+        $fileSystem->remove($this->dataDir . '/connectionAction/config.yml');
+        $fileSystem->remove($this->dataDir . '/connectionAction/config.json');
+        $fileSystem->remove($this->dataDir . '/connectionAction/out');
+        $fileSystem->remove($this->dataDir . '/getTablesAction/config.yml');
+        $fileSystem->remove($this->dataDir . '/getTablesAction/config.json');
+        $fileSystem->remove($this->dataDir . '/getTablesAction/out');
     }
 
     /**
@@ -257,5 +262,13 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         }
 
         return $linesCount;
+    }
+
+    public function configTypesProvider(): array
+    {
+        return [
+            ['yaml'],
+            ['json'],
+        ];
     }
 }
