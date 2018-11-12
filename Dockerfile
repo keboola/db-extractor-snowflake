@@ -1,5 +1,6 @@
 FROM php:7.1
-MAINTAINER Erik Zigo <erik.zigo@keboola.com>
+
+ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install Dependencies

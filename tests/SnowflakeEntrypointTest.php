@@ -1,5 +1,8 @@
 <?php
-namespace Keboola\Test;
+
+declare(strict_types=1);
+
+namespace Keboola\DbExtractor\Tests;
 
 use Keboola\DbExtractor\Exception\UserException;
 use Symfony\Component\Process\Process;
@@ -7,21 +10,23 @@ use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 {
-    private function createConfigFile(string $rootPath, string $configType = 'yaml')
-    {
-        $driver = 'snowflake';
+    public const DRIVER = 'snowflake';
 
-        $config = Yaml::parse(file_get_contents($rootPath . '/config.template.yml'));
-        $config['parameters']['db']['user'] = $this->getEnv($driver, 'DB_USER', true);
-        $config['parameters']['db']['#password'] = $this->getEnv($driver, 'DB_PASSWORD', true);
-        $config['parameters']['db']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
-        $config['parameters']['db']['host'] = $this->getEnv($driver, 'DB_HOST');
-        $config['parameters']['db']['port'] = $this->getEnv($driver, 'DB_PORT');
-        $config['parameters']['db']['database'] = $this->getEnv($driver, 'DB_DATABASE');
-        $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
+    public const ROOT_PATH = __DIR__ . '/..';
+
+    private function createConfigFile(string $rootPath, string $configType = 'yaml'): void
+    {
+        $config = Yaml::parse((string) file_get_contents($rootPath . '/config.template.yml'));
+        $config['parameters']['db']['user'] = $this->getEnv(self::DRIVER, 'DB_USER', true);
+        $config['parameters']['db']['#password'] = $this->getEnv(self::DRIVER, 'DB_PASSWORD', true);
+        $config['parameters']['db']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
+        $config['parameters']['db']['host'] = $this->getEnv(self::DRIVER, 'DB_HOST');
+        $config['parameters']['db']['port'] = $this->getEnv(self::DRIVER, 'DB_PORT');
+        $config['parameters']['db']['database'] = $this->getEnv(self::DRIVER, 'DB_DATABASE');
+        $config['parameters']['db']['warehouse'] = $this->getEnv(self::DRIVER, 'DB_WAREHOUSE');
 
         if (isset($config['parameters']['tables'][2]['table'])) {
-            $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+            $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
         }
 
         // unlink any old configs written here
@@ -38,10 +43,10 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param $configType
      * @dataProvider configTypesProvider
+     * @param string $configType
      */
-    public function testRunAction(string $configType)
+    public function testRunAction(string $configType): void
     {
         $dataPath = __DIR__ . '/data/runAction';
 
@@ -56,11 +61,11 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->createConfigFile($dataPath, $configType);
 
-        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->setTimeout(300);
         $process->run();
 
-        $this->assertEquals(0, $process->getExitCode(), sprintf('error output: ', $process->getErrorOutput()));
+        $this->assertEquals(0, $process->getExitCode(), sprintf('error output: %s', $process->getErrorOutput()));
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
         $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz");
@@ -70,16 +75,16 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param $configType
      * @dataProvider configTypesProvider
+     * @param string $configType
      */
-    public function testConnectionAction(string $configType)
+    public function testConnectionAction(string $configType): void
     {
         $dataPath = __DIR__ . '/data/connectionAction';
 
         $this->createConfigFile($dataPath, $configType);
 
-        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->run();
 
         $output = $process->getOutput();
@@ -92,14 +97,14 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $data['status']);
     }
 
-    public function testNonexistingTable()
+    public function testNonexistingTable(): void
     {
         $config = $this->getConfig();
         $config['parameters']['tables'][0]['query'] = "SELECT * FROM non_existing_table";
         @unlink($this->dataDir . '/config.yml');
         file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
 
-        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
         $process->setTimeout(300);
         $process->run();
 
@@ -107,16 +112,16 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     }
 
     /**
-     * @param $configType
      * @dataProvider configTypesProvider
+     * @param string $configType
      */
-    public function testGetTablesAction(string $configType)
+    public function testGetTablesAction(string $configType): void
     {
         $dataPath = __DIR__ . '/data/getTablesAction';
 
         $this->createConfigFile($dataPath, $configType);
         
-        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $dataPath);
+        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath);
         $process->setTimeout(300);
         $process->run();
 
@@ -125,7 +130,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertEquals("", $process->getErrorOutput());
     }
 
-    public function testBadTypesRetries()
+    public function testBadTypesRetries(): void
     {
         $config = $this->getConfig();
         $this->createTextTable(new \Keboola\Csv\CsvFile($this->dataDir . '/snowflake/badTypes.csv'), 'types');
@@ -138,7 +143,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         @unlink($this->dataDir . '/config.yml');
         file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
 
-        $process = new Process('php ' . ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
         $process->setTimeout(300);
         $process->run();
 

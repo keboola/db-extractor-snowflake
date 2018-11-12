@@ -1,11 +1,14 @@
 <?php
-namespace Keboola\Test;
+
+declare(strict_types=1);
+
+namespace Keboola\DbExtractor\Tests;
 
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 
 class AccountParseTest extends \PHPUnit_Framework_TestCase
 {
-    public function testParseAccount()
+    public function testParseAccount(): void
     {
         $this->assertEquals(
             'something',

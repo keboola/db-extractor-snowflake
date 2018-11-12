@@ -1,5 +1,8 @@
 <?php
-namespace Keboola\Test;
+
+declare(strict_types=1);
+
+namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
@@ -7,7 +10,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeTest extends AbstractSnowflakeTest
 {
-    public function testDefaultWarehouse()
+    public function testDefaultWarehouse(): void
     {
         $config = $this->getConfig();
         $user = $config['parameters']['db']['user'];
@@ -22,7 +25,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         try {
             $app->run();
             $this->fail('Run extractor without warehouse should fail');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertRegExp('/No active warehouse/ui', $e->getMessage());
         }
 
@@ -37,7 +40,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
-    public function testCredentials()
+    public function testCredentials(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
@@ -50,7 +53,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testCredentialsWithoutSchema()
+    public function testCredentialsWithoutSchema(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
@@ -64,7 +67,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testCredentialsDefaultWarehouse()
+    public function testCredentialsDefaultWarehouse(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
@@ -107,7 +110,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
-    public function testRunWithoutTables()
+    public function testRunWithoutTables(): void
     {
         $config = $this->getConfig();
 
@@ -120,7 +123,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testRunMain()
+    public function testRunMain(): void
     {
         $config = $this->getConfig();
         $app = $this->createApplication($config);
@@ -170,7 +173,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals(4, $result['imported']['2']['rows']);
     }
 
-    public function testRunWithoutSchema()
+    public function testRunWithoutSchema(): void
     {
         $config = $this->getConfig();
         unset($config['parameters']['db']['schema']);
@@ -183,7 +186,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         try {
             $result = $app->run();
             $this->fail('The query does not specify schema and no schema is specified in the connection.');
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertContains('no schema is specified', $e->getMessage());
         }
 
@@ -198,7 +201,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->validateExtraction($config['parameters']['tables'][0]);
     }
 
-    public function testRunEmptyQuery()
+    public function testRunEmptyQuery(): void
     {
         $csv = new CsvFile($this->dataDir . '/snowflake/escaping.csv');
         $this->createTextTable($csv);
@@ -219,7 +222,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertFileNotExists($outputManifestFile);
     }
 
-    public function testGetTables()
+    public function testGetTables(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -510,7 +513,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedData, $result['tables']);
     }
 
-    public function testGetTablesWithoutSchema()
+    public function testGetTablesWithoutSchema(): void
     {
         $config = $this->getConfig();
         $config['action'] = 'getTables';
@@ -832,7 +835,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedData, $result['tables']);
     }
 
-    public function testManifestMetadata()
+    public function testManifestMetadata(): void
     {
         $config = $this->getConfig();
 
@@ -845,7 +848,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $result = $app->run();
 
         $outputManifest = Yaml::parse(
-            file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
+            (string) file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
         );
 
         $this->assertArrayHasKey('destination', $outputManifest);
@@ -1021,14 +1024,14 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals($expectedColumnMetadata, $outputManifest['column_metadata']);
     }
 
-    public function testSemiStructured()
+    public function testSemiStructured(): void
     {
         $config = $this->getConfig();
         $table = $config['parameters']['tables'][0];
         unset($table['query']);
         $table['table'] = [
             'tableName' => 'semi-structured',
-            'schema' => $this->getEnv('snowflake', 'DB_SCHEMA')
+            'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
         ];
         $table['outputTable'] = 'in.c-main.semi-structured';
         $table['primaryKey'] = null;
@@ -1045,14 +1048,14 @@ class SnowflakeTest extends AbstractSnowflakeTest
         exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
         $this->assertEquals(0, $return);
 
-        $rawFile = new \SplFileInfo($this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv');
+        $rawFile = $this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv';
         $this->assertEquals(
             file_get_contents($this->dataDir . '/snowflake/expected-semi-structured.csv'),
             file_get_contents($rawFile)
         );
     }
 
-    private function getUserDefaultWarehouse($user)
+    private function getUserDefaultWarehouse(string $user): ?string
     {
         $sql = sprintf(
             "DESC USER %s;",
@@ -1070,7 +1073,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         return null;
     }
 
-    private function setUserDefaultWarehouse($user, $warehouse = null)
+    private function setUserDefaultWarehouse(string $user, ?string $warehouse = null): void
     {
         if ($warehouse) {
             $sql = sprintf(
@@ -1092,7 +1095,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         }
     }
 
-    private function validateExtraction(array $query, $expectedFiles = 1)
+    private function validateExtraction(array $query, int $expectedFiles = 1): ?array
     {
 
         $dirPath = $this->dataDir . '/out/tables';
@@ -1103,7 +1106,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 return $dirPath . '/' . $manifestFileName;
             },
             array_filter(
-                scandir($dirPath),
+                (array) scandir($dirPath),
                 function ($fileName) use ($dirPath, $outputTable) {
                     $filePath = $dirPath . '/' . $fileName;
                     if (is_dir($filePath)) {
@@ -1115,21 +1118,21 @@ class SnowflakeTest extends AbstractSnowflakeTest
                         return false;
                     }
 
-                    $manifest = Yaml::parse(file_get_contents($file));
+                    $manifest = Yaml::parse((string) file_get_contents($file->getPathname()));
                     return $manifest['destination'] === $outputTable;
                 }
             )
         );
 
         if (!$expectedFiles) {
-            return;
+            return null;
         }
 
         $this->assertCount($expectedFiles, $manifestFiles);
         $columns = [];
         foreach ($manifestFiles as $file) {
             // manifest validation
-            $params = Yaml::parse(file_get_contents($file));
+            $params = Yaml::parse((string) file_get_contents($file));
 
             $this->assertArrayHasKey('destination', $params);
             $this->assertArrayHasKey('incremental', $params);
@@ -1149,13 +1152,13 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 $this->assertEquals($query['outputTable'], $params['destination']);
             }
 
-            $csvDir = new \SplFileInfo(str_replace('.manifest', '', $file));
+            $csvDir = str_replace('.manifest', '', $file);
 
             $this->assertTrue(is_dir($csvDir));
 
-            foreach (array_diff(scandir($csvDir), array('..', '.')) as $csvFile) {
+            foreach (array_diff((array) scandir($csvDir), array('..', '.')) as $csvFile) {
                 // archive validation
-                $archiveFile = new \SplFileInfo($csvDir . "/" . $csvFile);
+                $archiveFile = $csvDir . "/" . $csvFile;
                 $pos = strrpos($archiveFile, ".gz");
                 $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen(".gz")));
 
