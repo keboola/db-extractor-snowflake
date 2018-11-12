@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 define('APP_NAME', 'ex-db-snowflake');
 define('ROOT_PATH', __DIR__);
 
-require_once(dirname(__FILE__) . "/vendor/keboola/db-extractor-common/bootstrap.php");
+require_once(dirname(__FILE__) . "/vendor/autoload.php");
 
 $logger = new \Keboola\DbExtractor\Logger(APP_NAME);
 
@@ -34,7 +34,7 @@ try {
         throw new UserException('Invalid configuration file type');
     }
 
-    $app = new SnowflakeApplication($config, $arguments["data"]);
+    $app = new SnowflakeApplication($config, $logger, [], $arguments["data"]);
 
     if ($app['action'] !== 'run') {
         $app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));

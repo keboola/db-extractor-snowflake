@@ -3,6 +3,7 @@ namespace Keboola\Test;
 
 use Keboola\Csv\CsvFile;
 use Keboola\Db\Import\Snowflake\Connection;
+use Keboola\DbExtractor\Logger;
 use Keboola\DbExtractor\Test\ExtractorTest;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Options\FileUploadOptions;
@@ -21,6 +22,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      * @var Client -- sapi client
      */
     protected $storageApiClient;
+
+    protected $dataDir = __DIR__ . '/data';
 
     public function setUp()
     {
@@ -57,11 +60,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $fileSystem->remove($this->dataDir . '/getTablesAction/out');
     }
 
-    /**
-     * @param string $driver
-     * @return mixed
-     */
-    public function getConfig($driver = 'snowflake')
+    public function getConfig(string $driver = 'snowflake', string $format = 'json'): array
     {
         $config = parent::getConfig($driver);
 
@@ -83,7 +82,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
      */
     public function createApplication(array $config)
     {
-        $app = new SnowflakeApplication($config, $this->dataDir);
+        $logger = new Logger('ex-db-snowflake-tests');
+        $app = new SnowflakeApplication($config, $logger, [], $this->dataDir);
 
         return $app;
     }

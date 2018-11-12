@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c3c98f6b89af5903fbdd2d662dbdc56",
+    "content-hash": "1f1d1ede73b41b70d51a87b72561e9d8",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.67.18",
+            "version": "3.67.20",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "590d47c6f2b07d665737e02ef3b6cee3155e12a8"
+                "reference": "6c8bc0f42ba73bab85da67c3af9131e455c3f14c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/590d47c6f2b07d665737e02ef3b6cee3155e12a8",
-                "reference": "590d47c6f2b07d665737e02ef3b6cee3155e12a8",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/6c8bc0f42ba73bab85da67c3af9131e455c3f14c",
+                "reference": "6c8bc0f42ba73bab85da67c3af9131e455c3f14c",
                 "shasum": ""
             },
             "require": {
@@ -84,7 +84,7 @@
                 "s3",
                 "sdk"
             ],
-            "time": "2018-09-24T21:19:19+00:00"
+            "time": "2018-09-26T20:06:30+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -300,34 +300,39 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "5.3.2",
+            "version": "9.1.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "9ec7ddd6057cd84a4bf391ff98a1f3e73700a1fd"
+                "reference": "a67d229d9672158ffb349cb3c5f24029e68bc570"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/9ec7ddd6057cd84a4bf391ff98a1f3e73700a1fd",
-                "reference": "9ec7ddd6057cd84a4bf391ff98a1f3e73700a1fd",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/a67d229d9672158ffb349cb3c5f24029e68bc570",
+                "reference": "a67d229d9672158ffb349cb3c5f24029e68bc570",
                 "shasum": ""
             },
             "require": {
                 "keboola/csv": "^1.1",
                 "keboola/php-datatypes": "^3.2",
+                "keboola/php-utils": "^2.3",
                 "keboola/ssh-tunnel": "^1.0",
                 "monolog/monolog": "^1.17",
                 "nette/utils": "^2.4",
-                "php": ">=5.6",
+                "php": ">=7.1",
                 "pimple/pimple": "^3.0",
                 "symfony/config": "^3.0",
                 "symfony/process": "^3.0",
-                "symfony/yaml": "^3.0"
+                "symfony/serializer": "^3.1",
+                "symfony/yaml": "^3.0",
+                "vkartaviy/retry": "^0.2"
             },
             "require-dev": {
+                "aws/aws-sdk-php": "^3.67",
+                "keboola/coding-standard": "^2.0",
                 "phpstan/phpstan": "^0.8",
-                "phpunit/phpunit": "4.6.*",
-                "squizlabs/php_codesniffer": "^2.6"
+                "phpunit/phpunit": "^5.0",
+                "symfony/finder": "*"
             },
             "type": "library",
             "autoload": {
@@ -336,13 +341,17 @@
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
             "authors": [
                 {
-                    "name": "Miroslav Cillik",
-                    "email": "miro@keboola.com"
+                    "name": "keboola",
+                    "email": "devel@keboola.com"
                 }
             ],
-            "time": "2018-09-25T13:36:49+00:00"
+            "description": "Common library from Keboola Database Extractors",
+            "time": "2018-09-22T12:54:02+00:00"
         },
         {
             "name": "keboola/php-csv-db-import",
@@ -377,7 +386,7 @@
             "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
-                    "name": "Martin Halamíček",
+                    "name": "Martin Halamicek",
                     "email": "martin@keboola.com"
                 }
             ],
@@ -420,16 +429,16 @@
         },
         {
             "name": "keboola/php-temp",
-            "version": "0.1.6",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-temp.git",
-                "reference": "ffe345e78ba0d35d970fc26fe2c1a36f7d20ca8c"
+                "reference": "2e3c2fc4cce8536a84cbad2a1586eb2eaebe5d3b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-temp/zipball/ffe345e78ba0d35d970fc26fe2c1a36f7d20ca8c",
-                "reference": "ffe345e78ba0d35d970fc26fe2c1a36f7d20ca8c",
+                "url": "https://api.github.com/repos/keboola/php-temp/zipball/2e3c2fc4cce8536a84cbad2a1586eb2eaebe5d3b",
+                "reference": "2e3c2fc4cce8536a84cbad2a1586eb2eaebe5d3b",
                 "shasum": ""
             },
             "require": {
@@ -465,7 +474,73 @@
                 "filesystem",
                 "temp"
             ],
-            "time": "2016-03-23T17:48:01+00:00"
+            "time": "2017-11-13T13:02:19+00:00"
+        },
+        {
+            "name": "keboola/php-utils",
+            "version": "2.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/keboola/php-utils.git",
+                "reference": "ec4d582994f2961bd16a6f6be40d3e8608ef5ec3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/keboola/php-utils/zipball/ec4d582994f2961bd16a6f6be40d3e8608ef5ec3",
+                "reference": "ec4d582994f2961bd16a6f6be40d3e8608ef5ec3",
+                "shasum": ""
+            },
+            "require": {
+                "keboola/php-temp": "^1.0",
+                "php": ">=5.6.0",
+                "seld/jsonlint": "^1.4"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "~0.2",
+                "phpunit/phpunit": "~5.0",
+                "squizlabs/php_codesniffer": "~2.4"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "src/Keboola/Utils/jsonDecode.php",
+                    "src/Keboola/Utils/sanitizeUtf8.php",
+                    "src/Keboola/Utils/objectToArray.php",
+                    "src/Keboola/Utils/formatDateTime.php",
+                    "src/Keboola/Utils/replaceDates.php",
+                    "src/Keboola/Utils/replaceDatesInArray.php",
+                    "src/Keboola/Utils/buildUrl.php",
+                    "src/Keboola/Utils/httpBuildUrl.php",
+                    "src/Keboola/Utils/returnBytes.php",
+                    "src/Keboola/Utils/camelize.php",
+                    "src/Keboola/Utils/getDataFromPath.php",
+                    "src/Keboola/Utils/isValidDateTimeString.php",
+                    "src/Keboola/Utils/flattenArray.php",
+                    "src/Keboola/Utils/arrayToObject.php",
+                    "src/Keboola/Utils/isEmptyObject.php",
+                    "src/Keboola/Utils/stripInvalidUtf16.php",
+                    "src/Keboola/Utils/toAscii.php",
+                    "src/Keboola/Utils/sanitizeColumnName.php"
+                ],
+                "psr-0": {
+                    "Keboola\\Utils": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Keboola",
+                    "email": "devel@keboola.com"
+                }
+            ],
+            "description": "Misc utility functions",
+            "keywords": [
+                "utility"
+            ],
+            "time": "2018-04-11T14:40:53+00:00"
         },
         {
             "name": "keboola/ssh-tunnel",
@@ -499,7 +574,7 @@
             ],
             "authors": [
                 {
-                    "name": "Miroslav Cillik",
+                    "name": "Miroslav Čillík",
                     "email": "miro@keboola.com"
                 }
             ],
@@ -918,6 +993,55 @@
             "time": "2016-10-10T12:19:37+00:00"
         },
         {
+            "name": "seld/jsonlint",
+            "version": "1.7.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/jsonlint.git",
+                "reference": "d15f59a67ff805a44c50ea0516d2341740f81a38"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/jsonlint/zipball/d15f59a67ff805a44c50ea0516d2341740f81a38",
+                "reference": "d15f59a67ff805a44c50ea0516d2341740f81a38",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.3 || ^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.0"
+            },
+            "bin": [
+                "bin/jsonlint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Seld\\JsonLint\\": "src/Seld/JsonLint/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "http://seld.be"
+                }
+            ],
+            "description": "JSON Linter",
+            "keywords": [
+                "json",
+                "linter",
+                "parser",
+                "validator"
+            ],
+            "time": "2018-01-24T12:46:19+00:00"
+        },
+        {
             "name": "squizlabs/php_codesniffer",
             "version": "2.9.1",
             "source": {
@@ -1215,6 +1339,85 @@
             "description": "Symfony Process Component",
             "homepage": "https://symfony.com",
             "time": "2018-08-03T10:42:44+00:00"
+        },
+        {
+            "name": "symfony/serializer",
+            "version": "v3.4.15",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/serializer.git",
+                "reference": "40031683816470610af87c2d03ea86d1cf0f0104"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/serializer/zipball/40031683816470610af87c2d03ea86d1cf0f0104",
+                "reference": "40031683816470610af87c2d03ea86d1cf0f0104",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.5.9|>=7.0.8",
+                "symfony/polyfill-ctype": "~1.8"
+            },
+            "conflict": {
+                "phpdocumentor/type-resolver": "<0.2.1",
+                "symfony/dependency-injection": "<3.2",
+                "symfony/property-access": ">=3.0,<3.0.4|>=2.8,<2.8.4",
+                "symfony/property-info": "<3.1",
+                "symfony/yaml": "<3.4"
+            },
+            "require-dev": {
+                "doctrine/annotations": "~1.0",
+                "doctrine/cache": "~1.0",
+                "phpdocumentor/reflection-docblock": "^3.0|^4.0",
+                "symfony/cache": "~3.1|~4.0",
+                "symfony/config": "~2.8|~3.0|~4.0",
+                "symfony/dependency-injection": "~3.2|~4.0",
+                "symfony/http-foundation": "~2.8|~3.0|~4.0",
+                "symfony/property-access": "~2.8|~3.0|~4.0",
+                "symfony/property-info": "~3.1|~4.0",
+                "symfony/yaml": "~3.4|~4.0"
+            },
+            "suggest": {
+                "doctrine/annotations": "For using the annotation mapping. You will also need doctrine/cache.",
+                "doctrine/cache": "For using the default cached annotation reader and metadata cache.",
+                "psr/cache-implementation": "For using the metadata cache.",
+                "symfony/config": "For using the XML mapping loader.",
+                "symfony/http-foundation": "To use the DataUriNormalizer.",
+                "symfony/property-access": "For using the ObjectNormalizer.",
+                "symfony/property-info": "To deserialize relations.",
+                "symfony/yaml": "For using the default YAML mapping loader."
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.4-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Serializer\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Serializer Component",
+            "homepage": "https://symfony.com",
+            "time": "2018-07-26T11:58:24+00:00"
         },
         {
             "name": "symfony/yaml",
@@ -2291,6 +2494,7 @@
                 "github",
                 "test"
             ],
+            "abandoned": "php-coveralls/php-coveralls",
             "time": "2017-10-14T23:15:34+00:00"
         },
         {
@@ -2958,7 +3162,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.6"
+        "php": ">=7.1"
     },
     "platform-dev": []
 }

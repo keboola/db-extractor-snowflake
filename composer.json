@@ -6,14 +6,14 @@
     "keywords": ["keboola", "snowflake", "db", "extractor"],
     "authors": [
         {
-            "name": "Erik Žigo",
-            "email": "erik@keboola.com"
+            "name": "Keboola",
+            "email": "devel@keboola.com"
         }
     ],
     "require": {
-        "php": ">=5.6",
-        "keboola/db-extractor-common": "~5.3",
-        "keboola/php-temp": "^0.1.6",
+        "php": ">=7.1",
+        "keboola/db-extractor-common": "~9.1",
+        "keboola/php-temp": "^1.0",
         "keboola/php-csv-db-import": "~2.3.0",
         "squizlabs/php_codesniffer": "^2.6",
         "vkartaviy/retry": "^0.2"

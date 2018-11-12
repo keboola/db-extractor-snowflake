@@ -120,7 +120,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
     }
 
-    public function testRun()
+    public function testRunMain()
     {
         $config = $this->getConfig();
         $app = $this->createApplication($config);
@@ -155,16 +155,19 @@ class SnowflakeTest extends AbstractSnowflakeTest
         array_shift($csv1arr);
         $outCsv1 = new CsvFile($this->dataDir . '/out/tables/in_c-main_sales.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv1arr, iterator_to_array($outCsv1));
+        $this->assertEquals(100, $result['imported']['0']['rows']);
 
         $csv2arr = iterator_to_array($csv2);
         array_shift($csv2arr);
         $outCsv2 = new CsvFile($this->dataDir . '/out/tables/in_c-main_escaping.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv2arr, iterator_to_array($outCsv2));
+        $this->assertEquals(7, $result['imported']['1']['rows']);
 
         $csv3arr = iterator_to_array($csv3);
         array_shift($csv3arr);
         $outCsv3 = new CsvFile($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz/part_0_0_0.csv');
         $this->assertEquals($csv3arr, iterator_to_array($outCsv3));
+        $this->assertEquals(4, $result['imported']['2']['rows']);
     }
 
     public function testRunWithoutSchema()

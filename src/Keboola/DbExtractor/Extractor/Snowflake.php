@@ -42,14 +42,14 @@ class Snowflake extends Extractor
      */
     private $temp;
 
-    public function __construct($parameters, Logger $logger)
+    public function __construct(array $parameters, array $state, Logger $logger)
     {
         $this->temp = new Temp('ex-snowflake');
 
-        parent::__construct($parameters, $logger);
+        parent::__construct($parameters, $state, $logger);
     }
 
-    public function createConnection($dbParams)
+    public function createConnection(array $dbParams)
     {
         $this->snowSqlConfig = $this->crateSnowSqlConfig($dbParams);
 
@@ -99,18 +99,21 @@ class Snowflake extends Extractor
         }
     }
 
-    public function export(array $table)
+    public function export(array $table): array
     {
         $outputTable = $table['outputTable'];
 
         $this->logger->info("Exporting to " . $outputTable);
 
-        $this->exportAndDownload($table);
+        $rowCount = $this->exportAndDownload($table);
 
-        return $outputTable;
+        return [
+            "outputTable"=> $outputTable,
+            "rows" => $rowCount,
+        ];
     }
 
-    private function getColumnInfo(string $query)
+    private function getColumnInfo(string $query): array
     {
         // Create temporary view from the supplied query
         $sql = sprintf(
@@ -131,7 +134,7 @@ class Snowflake extends Extractor
         return $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()");
     }
 
-    private function exportAndDownload(array $table)
+    private function exportAndDownload(array $table): int
     {
         if (!isset($table['query']) || $table['query'] === '') {
             $query = $this->simpleQuery($table['table'], $table['columns']);
@@ -163,8 +166,10 @@ class Snowflake extends Extractor
 
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
-            return;
+            return 0;
         }
+
+        $rowCount = $res[0]['rows_unloaded'];
 
         $this->logger->info("Downloading data from Snowflake");
 
@@ -241,6 +246,8 @@ class Snowflake extends Extractor
         ));
 
         $this->cleanupTableStage($tmpTableName);
+
+        return $rowCount;
     }
 
     private function generateCopyCommand($stageTmpPath, $query)
@@ -379,7 +386,7 @@ class Snowflake extends Extractor
         return round(pow(1024, $base - floor($base)), 2) . $suffixes[(int) floor($base)];
     }
 
-    public function getTables(array $tables = null)
+    public function getTables(?array $tables = null): array
     {
         $sql = $this->schema ? "SHOW TABLES IN SCHEMA" : "SHOW TABLES IN DATABASE";
         $arr = $this->db->fetchAll($sql);
@@ -454,7 +461,7 @@ class Snowflake extends Extractor
         return array_values($tableDefs);
     }
 
-    public function simpleQuery(array $table, array $columns = array())
+    public function simpleQuery(array $table, array $columns = array()): string
     {
         if (count($columns) > 0) {
             return sprintf(
