@@ -1,9 +1,12 @@
 version: '2'
 services:
-  app:
-    build: .
+  app: &base
+    build:
+      context: .
+      args:
+        - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
+        - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
     image: keboola/ex-db-snowflake
-    command: composer ci
     environment:
       - STORAGE_API_TOKEN
       - SNOWFLAKE_DB_HOST
@@ -14,29 +17,6 @@ services:
       - SNOWFLAKE_DB_SCHEMA
       - SNOWFLAKE_DB_WAREHOUSE
   dev:
-    image: keboola/ex-db-snowflake
-    command: composer ci
+    <<: *base
     volumes:
       - .:/code
-    environment:
-      - STORAGE_API_TOKEN
-      - SNOWFLAKE_DB_HOST
-      - SNOWFLAKE_DB_PORT
-      - SNOWFLAKE_DB_USER
-      - SNOWFLAKE_DB_PASSWORD
-      - SNOWFLAKE_DB_DATABASE
-      - SNOWFLAKE_DB_SCHEMA
-      - SNOWFLAKE_DB_WAREHOUSE
-  drivers-download:
-      build:
-        context: .
-        dockerfile: ./driver/Dockerfile
-      working_dir: /code
-      volumes:
-        - .:/code
-      environment:
-        - AWS_ACCESS_KEY
-        - AWS_SECRET_KEY
-        - AWS_S3_BUCKET
-        - AWS_REGION
-
