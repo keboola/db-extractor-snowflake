@@ -9,10 +9,7 @@ before_install:
   - docker-compose -v
 
 install:
-  - docker-compose run --rm drivers-download composer install
-  - docker-compose run --rm drivers-download php driver/downloadDriver.php
-  - docker-compose build app
-  - docker-compose run --rm app
+  - docker-compose run --rm app composer ci
 
 script:
   - docker pull quay.io/keboola/developer-portal-cli-v2:latest

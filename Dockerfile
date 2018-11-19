@@ -1,3 +1,11 @@
+FROM quay.io/keboola/aws-cli
+ARG AWS_SECRET_ACCESS_KEY
+ARG AWS_ACCESS_KEY_ID
+ARG AWS_SESSION_TOKEN
+# How to update drivers - https://github.com/keboola/drivers-management
+RUN /usr/bin/aws s3 cp s3://keboola-drivers/snowflake/snowflake-odbc-2.16.10.x86_64.deb /tmp/snowflake-odbc.deb
+RUN /usr/bin/aws s3 cp s3://keboola-drivers/snowflake/snowsql-1.1.68-linux_x86_64.bash /tmp/snowsql-linux_x86_64.bash
+
 FROM php:7.1
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -32,7 +40,7 @@ RUN set -x \
     && docker-php-ext-install odbc \
     && docker-php-source delete
 
-ADD ./snowflake-odbc-x86_64.deb /tmp/snowflake-odbc.deb
+COPY --from=0 /tmp/snowflake-odbc.deb /tmp/snowflake-odbc.deb
 RUN dpkg -i /tmp/snowflake-odbc.deb
 ADD ./driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 
@@ -41,7 +49,7 @@ ENV LANG en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 
 # install snowsql
-ADD snowsql-linux_x86_64.bash /usr/bin
+COPY --from=0 /tmp/snowsql-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
 RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
 RUN rm /usr/bin/snowsql-linux_x86_64.bash
 RUN snowsql -v 1.1.49
