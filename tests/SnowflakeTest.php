@@ -230,7 +230,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // add a table to a different schema (should not be fetched)
         $this->createTextTable(
             new CsvFile($this->dataDir . '/snowflake/escaping.csv'),
-            "no_schema_escaping",
+            "escaping",
             "PUBLIC"
         );
 
@@ -522,7 +522,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // add a table to a different schema (should not be fetched)
         $this->createTextTable(
             new CsvFile($this->dataDir . '/snowflake/escaping.csv'),
-            "no_schema_escaping",
+            "escaping",
             "PUBLIC"
         );
 
@@ -774,7 +774,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 ),
             4 =>
                 array (
-                    'name' => 'no_schema_escaping',
+                    'name' => 'escaping',
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => 'PUBLIC',
                     'type' => 'TABLE',

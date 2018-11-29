@@ -155,6 +155,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
                       OBJECT_CONSTRUCT(\'a\', 1, \'b\', \'BBBB\', \'c\', null) AS "org",
                       ARRAY_CONSTRUCT(10, 20, 30) AS "arr";'
         );
+
+        $this->connection->query("DROP TABLE IF EXISTS \"PUBLIC\".\"no_schema_escaping\"");
     }
 
     private function quote(string $value): string
