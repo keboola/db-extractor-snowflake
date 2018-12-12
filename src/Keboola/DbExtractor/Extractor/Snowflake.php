@@ -432,7 +432,7 @@ class Snowflake extends Extractor
                 $this->quote($tableDef['name'])
             );
         }
-        $sqlWhereClause = sprintf("WHERE %s", implode(" AND ", $sqlWhereElements));
+        $sqlWhereClause = sprintf("WHERE %s", implode(" OR ", $sqlWhereElements));
 
         $sql = "SELECT * FROM information_schema.columns "
             . $sqlWhereClause
