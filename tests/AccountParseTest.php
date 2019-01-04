@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Tests;
 
 use Keboola\DbExtractor\Utils\AccountUrlParser;
+use PHPUnit\Framework\TestCase;
 
-class AccountParseTest extends \PHPUnit_Framework_TestCase
+class AccountParseTest extends TestCase
 {
     public function testParseAccount(): void
     {

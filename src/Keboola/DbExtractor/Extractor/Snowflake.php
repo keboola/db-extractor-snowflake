@@ -397,42 +397,46 @@ class Snowflake extends Extractor
         $views = $this->db->fetchAll($sql);
         $arr = array_merge($arr, $views);
 
-        $tableNameArray = [];
         $tableDefs = [];
         foreach ($arr as $table) {
             if ($this->shouldTableBeSkipped($table)) {
                 continue;
             }
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
-                $tableNameArray[] = $table['name'];
                 $isView = array_key_exists('text', $table);
-                $tableDefs[$table['schema_name'] . '.' . $table['name']] = [
+                $fullTableId = $table['schema_name'] . '.' . $table['name'];
+                $tableDefs[$fullTableId] = [
                     'name' => $table['name'],
                     'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
                     'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
                     'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null),
                 ];
                 if (isset($table['rows'])) {
-                    $tableDefs[$table['schema_name'] . '.' . $table['name']]['rowCount'] = $table['rows'];
+                    $tableDefs[$fullTableId]['rowCount'] = $table['rows'];
                 }
                 if (isset($table['bytes'])) {
-                    $tableDefs[$table['schema_name'] . '.' . $table['name']]['byteCount'] = $table['bytes'];
+                    $tableDefs[$fullTableId]['byteCount'] = $table['bytes'];
                 }
             }
         }
 
-        if (count($tableNameArray) === 0) {
+        if (count($tableDefs) === 0) {
             return [];
         }
 
-        $sql = sprintf(
-            "SELECT * FROM information_schema.columns 
-             WHERE TABLE_NAME IN (%s)
-             ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION",
-            implode(', ', array_map(function ($tableName): string {
-                return $this->quote($tableName);
-            }, $tableNameArray))
-        );
+        $sqlWhereElements = [];
+        foreach ($tableDefs as $fullTableId => $tableDef) {
+            $sqlWhereElements[] = sprintf(
+                "(table_schema = %s AND table_name = %s)",
+                $this->quote($tableDef['schema']),
+                $this->quote($tableDef['name'])
+            );
+        }
+        $sqlWhereClause = sprintf("WHERE %s", implode(" OR ", $sqlWhereElements));
+
+        $sql = "SELECT * FROM information_schema.columns "
+            . $sqlWhereClause
+            . " ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION";
 
         $columns = $this->db->fetchAll($sql);
         foreach ($columns as $i => $column) {
