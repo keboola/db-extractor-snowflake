@@ -519,7 +519,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $config['action'] = 'getTables';
         unset($config['parameters']['db']['schema']);
 
-        // add a table to a different schema (should not be fetched)
+        // add a table to a different schema
         $this->createTextTable(
             new CsvFile($this->dataDir . '/snowflake/escaping.csv'),
             "escaping",
