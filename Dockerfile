@@ -20,16 +20,6 @@ RUN pecl install xdebug \
   && docker-php-ext-enable xdebug
 
 # Install PHP odbc extension
-RUN set -x \
-    && docker-php-source extract \
-    && cd /usr/src/php/ext/odbc \
-    && phpize \
-    && sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
-    && ./configure --with-unixODBC=shared,/usr \
-    && docker-php-ext-install odbc \
-    && docker-php-source delete
-
-# Snowflake ODBC
 # https://github.com/docker-library/php/issues/103
 RUN set -x \
     && docker-php-source extract \
