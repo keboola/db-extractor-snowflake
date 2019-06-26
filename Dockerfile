@@ -1,19 +1,14 @@
-FROM quay.io/keboola/aws-cli
-ARG AWS_SECRET_ACCESS_KEY
-ARG AWS_ACCESS_KEY_ID
-ARG AWS_SESSION_TOKEN
-# How to update drivers - https://github.com/keboola/drivers-management
-RUN /usr/bin/aws s3 cp s3://keboola-drivers/snowflake/snowflake-odbc-2.16.10.x86_64.deb /tmp/snowflake-odbc.deb
-RUN /usr/bin/aws s3 cp s3://keboola-drivers/snowflake/snowsql-1.1.68-linux_x86_64.bash /tmp/snowsql-linux_x86_64.bash
-
 FROM php:7.1
 
+ARG SNOWFLAKE_ODBC_VERSION=2.19.3
+ARG SNOWFLAKE_SNOWSQL_VERSION=1.1.81
+ARG SNOWFLAKE_GPG_KEY=EC218558EABB25A1
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install Dependencies
 RUN apt-get update \
-  && apt-get install unzip git unixodbc unixodbc-dev libpq-dev -y
+  && apt-get install unzip git unixodbc unixodbc-dev libpq-dev debsig-verify -y
 
 RUN docker-php-ext-install pdo_pgsql pdo_mysql
 RUN pecl install xdebug \
@@ -30,19 +25,30 @@ RUN set -x \
     && docker-php-ext-install odbc \
     && docker-php-source delete
 
-COPY --from=0 /tmp/snowflake-odbc.deb /tmp/snowflake-odbc.deb
-RUN dpkg -i /tmp/snowflake-odbc.deb
-ADD ./driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
+#snoflake download + verify package
+ADD driver/snowflake-policy.pol /etc/debsig/policies/$SNOWFLAKE_GPG_KEY/generic.pol
+ADD https://sfc-repo.snowflakecomputing.com/odbc/linux/$SNOWFLAKE_ODBC_VERSION/snowflake-odbc-$SNOWFLAKE_ODBC_VERSION.x86_64.deb /tmp/snowflake-odbc.deb
+ADD http://s3-us-west-2.amazonaws.com/sfc-snowsql-updates/bootstrap/1.1/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
+ADD http://sfc-snowsql-updates.s3.us-west-2.amazonaws.com/bootstrap/1.1/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig /tmp/snowsql-linux_x86_64.bash.sig
 
 # snowflake - charset settings
 ENV LANG en_US.UTF-8
 ENV LC_ALL=C.UTF-8
 
-# install snowsql
-COPY --from=0 /tmp/snowsql-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
-RUN SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
-RUN rm /usr/bin/snowsql-linux_x86_64.bash
-RUN snowsql -v 1.1.49
+RUN mkdir -p ~/.gnupg \
+    && chmod 700 ~/.gnupg \
+    && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf \
+    && mkdir /usr/share/debsig/keyrings/$SNOWFLAKE_GPG_KEY \
+    && gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_GPG_KEY \
+    && gpg --export $SNOWFLAKE_GPG_KEY > /usr/share/debsig/keyrings/$SNOWFLAKE_GPG_KEY/debsig.gpg \
+    && debsig-verify /tmp/snowflake-odbc.deb \
+    && gpg --verify /tmp/snowsql-linux_x86_64.bash.sig /usr/bin/snowsql-linux_x86_64.bash \
+    && gpg --batch --delete-key --yes $SNOWFLAKE_GPG_KEY \
+    && dpkg -i /tmp/snowflake-odbc.deb \
+    && SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
+
+ADD ./driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
+
 
 # install composer
 RUN cd \

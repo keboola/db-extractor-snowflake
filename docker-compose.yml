@@ -3,9 +3,6 @@ services:
   app: &base
     build:
       context: .
-      args:
-        - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
-        - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
     image: keboola/ex-db-snowflake
     environment:
       - STORAGE_API_TOKEN
