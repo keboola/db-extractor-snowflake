@@ -23,14 +23,10 @@ class Snowflake extends Extractor
 
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
-    /**
-     * @var Connection
-     */
+    /** @var Connection */
     protected $db;
 
-    /**
-     * @var \SplFileInfo
-     */
+    /** @var \SplFileInfo */
     private $snowSqlConfig;
 
     /** @var string */
@@ -40,15 +36,12 @@ class Snowflake extends Extractor
     private $database;
 
     /** @var string */
-
     private $schema;
 
     /** @var string */
     private $user;
 
-    /**
-     * @var Temp
-     */
+    /** @var Temp */
     private $temp;
 
     public function __construct(array $parameters, array $state, Logger $logger)
