@@ -6,7 +6,7 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
-use Keboola\DbExtractor\Logger;
+use Keboola\DbExtractorLogger\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
@@ -40,6 +40,7 @@ class Snowflake extends Extractor
     private $database;
 
     /** @var string */
+
     private $schema;
 
     /** @var string */
