@@ -12,14 +12,13 @@
     ],
     "require": {
         "php": ">=7.1",
-        "keboola/db-extractor-common": "^9.4.0",
+        "keboola/db-extractor-common": "^9.4.1",
         "keboola/php-csv-db-import": "~2.3.0",
         "keboola/php-temp": "^1.0"
     },
     "require-dev": {
         "codeclimate/php-test-reporter": "^0.3",
         "keboola/coding-standard": "^6.0",
-        "keboola/db-extractor-logger": "^1.0",
         "keboola/storage-api-client": "^4.14",
         "phpstan/phpstan-shim": "^0.10",
         "phpunit/phpunit": "^7.0"
