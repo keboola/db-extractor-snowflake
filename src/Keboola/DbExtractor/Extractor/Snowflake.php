@@ -28,11 +28,6 @@ class Snowflake extends Extractor
      */
     protected $db;
 
-    /**
-     * @var \SplFileInfo
-     */
-    private $snowSqlConfig;
-
     /** @var string */
     private $warehouse;
 
@@ -59,8 +54,6 @@ class Snowflake extends Extractor
 
     public function createConnection(array $dbParams): Connection
     {
-        $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
-
         $connection = new Connection($dbParams);
 
         $this->user = $dbParams['user'];
@@ -113,7 +106,9 @@ class Snowflake extends Extractor
 
         $this->logger->info("Exporting to " . $outputTable);
 
-        $rowCount = $this->exportAndDownload($table);
+        $rowCount = $this->exportToS3($table);
+
+        $this->downloadFromS3();
 
         return [
             "outputTable"=> $outputTable,
@@ -142,7 +137,7 @@ class Snowflake extends Extractor
         return $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()");
     }
 
-    private function exportAndDownload(array $table): int
+    private function exportToS3(array $table): int
     {
         if (!isset($table['query']) || $table['query'] === '') {
             $query = $this->simpleQuery($table['table'], $table['columns']);
@@ -172,14 +167,18 @@ class Snowflake extends Extractor
             );
         }
 
-        if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
+        if (count($res) > 0 && (int)$res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
             return 0;
         }
 
-        $rowCount = (int) $res[0]['rows_unloaded'];
+        $rowCount = (int)$res[0]['rows_unloaded'];
 
-        $this->logger->info("Downloading data from Snowflake");
+    }
+
+    private function downloadFromS3(array $table)
+    {
+        $this->logger->info("Downloading data from S3");
 
         $outputDataDir = $this->dataDir . '/out/tables/' . $tmpTableName . ".csv.gz";
 
@@ -196,33 +195,15 @@ class Snowflake extends Extractor
             $sql[] = sprintf('USE WAREHOUSE %s;', $this->db->quoteIdentifier($this->warehouse));
         }
 
-        $sql[] = sprintf(
-            'GET @~/%s file://%s;',
-            $tmpTableName,
-            $outputDataDir
-        );
-
-        $snowSql = $this->temp->createTmpFile('snowsql.sql');
-        file_put_contents($snowSql->getPathname(), implode("\n", $sql));
-
-        $this->logger->debug(trim(implode("\n", $sql)));
-
-        // execute external
-        $command = sprintf(
-            "snowsql --noup --config %s -c downloader -f %s",
-            $this->snowSqlConfig,
-            $snowSql
-        );
-
-        $this->logger->debug(trim($command));
-
+        //@todo create download from s3 command
+        $command = ""
         $process = new Process($command);
         $process->setTimeout(null);
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->logger->error(sprintf("Snowsql error, process output %s", $process->getOutput()));
-            $this->logger->error(sprintf("Snowsql error: %s", $process->getErrorOutput()));
+            $this->logger->error(sprintf("Download error, process output %s", $process->getOutput()));
+            $this->logger->error(sprintf("Download error: %s", $process->getErrorOutput()));
             throw new \Exception(sprintf("File download error occurred processing [%s]", $table['name']));
         }
 
@@ -513,76 +494,9 @@ class Snowflake extends Extractor
         );
     }
 
-    private function parseFiles(string $output, string $path): array
-    {
-        $files = [];
-        $lines = explode("\n", $output);
-
-        $lines = array_map(
-            function ($item): array {
-                $item = trim($item, '|');
-                return array_map('trim', explode('|', $item));
-            },
-            array_filter(
-                $lines,
-                function ($item): bool {
-                    $item = trim($item);
-                    return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([a-z0-9\_\-\.]+\.gz)/ui', $item);
-                }
-            )
-        );
-
-        foreach ($lines as $line) {
-            if (!preg_match('/^downloaded$/ui', $line[2])) {
-                throw new \Exception(sprintf(
-                    "Cannot download file: %s Status: %s Size: %s Message: %s",
-                    $line[0],
-                    $line[2],
-                    $line[1],
-                    $line[3]
-                ));
-            }
-
-            $file = new \SplFileInfo($path . '/' . $line[0]);
-            if ($file->isFile()) {
-                $files[] = $file;
-            } else {
-                throw new \Exception("Missing file: " . $line[0]);
-            }
-        }
-
-        return $files;
-    }
-
     private function quote(string $value): string
     {
         return "'" . addslashes($value) . "'";
-    }
-
-    private function createSnowSqlConfig(array $dbParams): \SplFileInfo
-    {
-        $cliConfig[] = '';
-        $cliConfig[] = '[options]';
-        $cliConfig[] = 'exit_on_error = true';
-        $cliConfig[] = '';
-        $cliConfig[] = '[connections.downloader]';
-        $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($dbParams['host']));
-        $cliConfig[] = sprintf('username = "%s"', $dbParams['user']);
-        $cliConfig[] = sprintf('password = "%s"', $dbParams['password']);
-        $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
-
-        if (isset($dbParams['warehouse'])) {
-            $cliConfig[] = sprintf('warehousename = "%s"', $dbParams['warehouse']);
-        }
-
-        if (isset($dbParams['schema'])) {
-            $cliConfig[] = sprintf('schemaname = "%s"', $dbParams['schema']);
-        }
-
-        $file = $this->temp->createFile('snowsql.config');
-        file_put_contents($file->getPathname(), implode("\n", $cliConfig));
-
-        return $file;
     }
 
     private function getUserDefaultWarehouse(): ?string
