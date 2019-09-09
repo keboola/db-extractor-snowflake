@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor;
 
 use Keboola\DbExtractor\Configuration\SnowflakeConfigDefinition;
+use Keboola\DbExtractorLogger\Logger;
 
 class SnowflakeApplication extends Application
 {
