@@ -89,9 +89,9 @@ class Snowflake extends Extractor
             throw new UserException('Specify "warehouse" parameter');
         }
 
-        $warehouse = $defaultWarehouse;
+        $warehouse = (string) $defaultWarehouse;
         if ($this->warehouse) {
-            $warehouse = $this->warehouse;
+            $warehouse = (string) $this->warehouse;
         }
 
         try {
@@ -217,7 +217,7 @@ class Snowflake extends Extractor
 
         $this->logger->debug(trim($command));
 
-        $process = new Process($command);
+        $process = Process::fromShellCommandline($command);
         $process->setTimeout(null);
         $process->run();
 

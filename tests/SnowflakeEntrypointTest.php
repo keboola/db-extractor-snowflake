@@ -61,7 +61,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->createConfigFile($dataPath, $configType);
 
-        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->setTimeout(300);
         $process->run();
 
@@ -84,7 +84,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->createConfigFile($dataPath, $configType);
 
-        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->run();
 
         $output = $process->getOutput();
@@ -104,7 +104,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         @unlink($this->dataDir . '/config.yml');
         file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
 
-        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
         $process->setTimeout(300);
         $process->run();
 
@@ -121,7 +121,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         $this->createConfigFile($dataPath, $configType);
 
-        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath);
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath);
         $process->setTimeout(300);
         $process->run();
 
@@ -143,7 +143,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         @unlink($this->dataDir . '/config.yml');
         file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
 
-        $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
         $process->setTimeout(300);
         $process->run();
 
