@@ -39,6 +39,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $config = $this->getConfig();
 
+        $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];
         $this->connection = new Connection($config['parameters']['db']);
 
         $this->connection->query(
@@ -72,9 +73,6 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $config['parameters']['db']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
         $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
 
-        if (!empty($config['parameters']['db']['#password'])) {
-            $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];
-        }
         $config['parameters']['extractor_class'] = 'Snowflake';
         $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
 

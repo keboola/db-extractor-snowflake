@@ -59,6 +59,7 @@ class Snowflake extends Extractor
 
     public function createConnection(array $dbParams): Connection
     {
+        $dbParams['password'] = $dbParams['#password'];
         $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
 
         $connection = new Connection($dbParams);
@@ -568,7 +569,7 @@ class Snowflake extends Extractor
         $cliConfig[] = '[connections.downloader]';
         $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($dbParams['host']));
         $cliConfig[] = sprintf('username = "%s"', $dbParams['user']);
-        $cliConfig[] = sprintf('password = "%s"', $dbParams['password']);
+        $cliConfig[] = sprintf('password = "%s"', $dbParams['#password']);
         $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
 
         if (isset($dbParams['warehouse'])) {
