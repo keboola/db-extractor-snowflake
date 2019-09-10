@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor;
 
-use Keboola\DbExtractor\Configuration\SnowflakeConfigDefinition;
+use Keboola\DbExtractor\Configuration\NodeDefinition\SnowflakeDbNode;
+use Keboola\DbExtractorConfig\Config;
+use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
 use Keboola\DbExtractorLogger\Logger;
 
 class SnowflakeApplication extends Application
@@ -15,7 +17,10 @@ class SnowflakeApplication extends Application
         $config['parameters']['extractor_class'] = 'Snowflake';
 
         parent::__construct($config, $logger, $state);
+    }
 
-        $this->setConfigDefinition(new SnowflakeConfigDefinition());
+    protected function buildConfig(array $config): void
+    {
+        $this->config = new Config($config, new ConfigDefinition(new SnowflakeDbNode()));
     }
 }
