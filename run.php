@@ -35,8 +35,8 @@ try {
 
     $app = new SnowflakeApplication($config, $logger, [], $arguments['data']);
 
-    if ($app->getAction() !== 'run') {
-        $app->getLogger()->setHandlers(array(new NullHandler(Logger::INFO)));
+    if ($app['action'] !== 'run') {
+        $app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));
         $runAction = false;
     }
 
@@ -46,7 +46,7 @@ try {
         echo json_encode($result);
     }
 
-    $app->getLogger()->log('info', 'Extractor finished successfully.');
+    $app['logger']->log('info', 'Extractor finished successfully.');
     exit(0);
 } catch (UserException $e) {
     $logger->log('error', $e->getMessage(), (array) $e->getData());
