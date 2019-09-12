@@ -46,6 +46,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         );
 
         $this->storageApiClient = new Client([
+            'url' => 'https://connection.keboola.com',
             'token' => getenv('STORAGE_API_TOKEN'),
         ]);
 
