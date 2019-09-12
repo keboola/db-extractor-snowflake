@@ -20,7 +20,7 @@
         "codeclimate/php-test-reporter": "^0.4",
         "keboola/coding-standard": "^8.0",
         "keboola/storage-api-client": "^10.7",
-        "phpstan/phpstan-shim": "^0.10",
+        "phpstan/phpstan-shim": "^0.11.15",
         "phpunit/phpunit": "^8.3"
     },
     "autoload": {
