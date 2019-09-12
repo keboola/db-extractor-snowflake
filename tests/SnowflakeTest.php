@@ -187,7 +187,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             $result = $app->run();
             $this->fail('The query does not specify schema and no schema is specified in the connection.');
         } catch (\Throwable $e) {
-            $this->assertContains('no schema is specified', $e->getMessage());
+            $this->assertStringContainsString('no schema is specified', $e->getMessage());
         }
 
         // add schema to db query

@@ -148,8 +148,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->run();
 
         // make sure we tried 4 additional times
-        $this->assertContains('[4x]', $process->getOutput());
-        $this->assertContains('failed with message:', $process->getErrorOutput());
+        $this->assertStringContainsString('[4x]', $process->getOutput());
+        $this->assertStringContainsString('failed with message:', $process->getErrorOutput());
         $this->assertEquals(1, $process->getExitCode());
     }
 }

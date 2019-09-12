@@ -20,3 +20,4 @@ snowflake_linux_x8664_odbc.tgz
 snowsql-linux_x86_64.bash
 snowflake-odbc-x86_64.deb
 .env
+.phpunit.result.cache
