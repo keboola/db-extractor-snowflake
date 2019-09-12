@@ -230,8 +230,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // add a table to a different schema (should not be fetched)
         $this->createTextTable(
             new CsvFile($this->dataDir . '/snowflake/escaping.csv'),
-            "escaping",
-            "PUBLIC"
+            'escaping',
+            'PUBLIC'
         );
 
         $app = $this->createApplication($config);
@@ -522,8 +522,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // add a table to a different schema
         $this->createTextTable(
             new CsvFile($this->dataDir . '/snowflake/escaping.csv'),
-            "escaping",
-            "PUBLIC"
+            'escaping',
+            'PUBLIC'
         );
 
         $app = $this->createApplication($config);
@@ -1045,7 +1045,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         // validate the output
         $archiveFile = $this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv.gz';
-        exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
+        exec('gunzip -d ' . escapeshellarg($archiveFile), $output, $return);
         $this->assertEquals(0, $return);
 
         $rawFile = $this->dataDir . '/out/tables/in_c-main_semi-structured.csv.gz/part_0_0_0.csv';
@@ -1058,7 +1058,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
     private function getUserDefaultWarehouse(string $user): ?string
     {
         $sql = sprintf(
-            "DESC USER %s;",
+            'DESC USER %s;',
             $this->connection->quoteIdentifier($user)
         );
 
@@ -1077,7 +1077,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
     {
         if ($warehouse) {
             $sql = sprintf(
-                "ALTER USER %s SET DEFAULT_WAREHOUSE = %s;",
+                'ALTER USER %s SET DEFAULT_WAREHOUSE = %s;',
                 $this->connection->quoteIdentifier($user),
                 $this->connection->quoteIdentifier($warehouse)
             );
@@ -1086,7 +1086,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             $this->assertEquals($warehouse, $this->getUserDefaultWarehouse($user));
         } else {
             $sql = sprintf(
-                "ALTER USER %s SET DEFAULT_WAREHOUSE = null;",
+                'ALTER USER %s SET DEFAULT_WAREHOUSE = null;',
                 $this->connection->quoteIdentifier($user)
             );
             $this->connection->query($sql);
@@ -1158,14 +1158,14 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
             foreach (array_diff((array) scandir($csvDir), array('..', '.')) as $csvFile) {
                 // archive validation
-                $archiveFile = $csvDir . "/" . $csvFile;
-                $pos = strrpos($archiveFile, ".gz");
-                $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen(".gz")));
+                $archiveFile = $csvDir . '/' . $csvFile;
+                $pos = strrpos($archiveFile, '.gz');
+                $rawFile = new \SplFileInfo(substr_replace($archiveFile, '', $pos, strlen('.gz')));
 
                 clearstatcache();
                 $this->assertFalse($rawFile->isFile());
 
-                exec("gunzip -d " . escapeshellarg($archiveFile), $output, $return);
+                exec('gunzip -d ' . escapeshellarg($archiveFile), $output, $return);
                 $this->assertEquals(0, $return);
 
                 clearstatcache();
