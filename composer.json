@@ -17,7 +17,7 @@
         "keboola/php-temp": "^1.0"
     },
     "require-dev": {
-        "codeclimate/php-test-reporter": "^0.3",
+        "codeclimate/php-test-reporter": "^0.4",
         "keboola/coding-standard": "^8.0",
         "keboola/storage-api-client": "^4.14",
         "phpstan/phpstan-shim": "^0.10",
