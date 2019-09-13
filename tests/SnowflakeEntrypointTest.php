@@ -38,7 +38,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         } else if ($configType === 'json') {
             file_put_contents($rootPath . '/config.json', json_encode($config));
         } else {
-            throw new UserException(sprintf("Unsupported configType [%s]", $configType));
+            throw new UserException(sprintf('Unsupported configType [%s]', $configType));
         }
     }
 
@@ -50,14 +50,14 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     {
         $dataPath = __DIR__ . '/data/runAction';
 
-        @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz");
-        @unlink($dataPath . "/out/tables/in.c-main_sales.csv.gz.manifest");
+        @unlink($dataPath . '/out/tables/in.c-main_sales.csv.gz');
+        @unlink($dataPath . '/out/tables/in.c-main_sales.csv.gz.manifest');
 
-        @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz");
-        @unlink($dataPath . "/out/tables/in.c-main_escaping.csv.gz.manifest");
+        @unlink($dataPath . '/out/tables/in.c-main_escaping.csv.gz');
+        @unlink($dataPath . '/out/tables/in.c-main_escaping.csv.gz.manifest');
 
-        @unlink($dataPath . "/out/tables/in.c-main_tableColumns.csv.gz");
-        @unlink($dataPath . "/out/tables/in.c-main_tableColumns.csv.gz.manifest");
+        @unlink($dataPath . '/out/tables/in.c-main_tableColumns.csv.gz');
+        @unlink($dataPath . '/out/tables/in.c-main_tableColumns.csv.gz.manifest');
 
         $this->createConfigFile($dataPath, $configType);
 
@@ -66,12 +66,12 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->run();
 
         $this->assertEquals(0, $process->getExitCode(), sprintf('error output: %s', $process->getErrorOutput()));
-        $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz");
-        $this->assertFileExists($dataPath . "/out/tables/in_c-main_sales.csv.gz.manifest");
-        $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz");
-        $this->assertFileExists($dataPath . "/out/tables/in_c-main_escaping.csv.gz.manifest");
-        $this->assertFileExists($dataPath . "/out/tables/in_c-main_tableColumns.csv.gz");
-        $this->assertFileExists($dataPath . "/out/tables/in_c-main_tableColumns.csv.gz.manifest");
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_sales.csv.gz');
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_sales.csv.gz.manifest');
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_escaping.csv.gz');
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_escaping.csv.gz.manifest');
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_tableColumns.csv.gz');
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_tableColumns.csv.gz.manifest');
     }
 
     /**
@@ -100,7 +100,7 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
     public function testNonexistingTable(): void
     {
         $config = $this->getConfig();
-        $config['parameters']['tables'][0]['query'] = "SELECT * FROM non_existing_table";
+        $config['parameters']['tables'][0]['query'] = 'SELECT * FROM non_existing_table';
         @unlink($this->dataDir . '/config.yml');
         file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
 
@@ -120,14 +120,14 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $dataPath = __DIR__ . '/data/getTablesAction';
 
         $this->createConfigFile($dataPath, $configType);
-        
+
         $process = new Process('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath);
         $process->setTimeout(300);
         $process->run();
 
         $this->assertJson($process->getOutput());
         $this->assertEquals(0, $process->getExitCode());
-        $this->assertEquals("", $process->getErrorOutput());
+        $this->assertEquals('', $process->getErrorOutput());
     }
 
     public function testBadTypesRetries(): void
@@ -148,8 +148,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $process->run();
 
         // make sure we tried 4 additional times
-        $this->assertContains('[4x]', $process->getOutput());
-        $this->assertContains('failed with message:', $process->getErrorOutput());
+        $this->assertStringContainsString('[4x]', $process->getOutput());
+        $this->assertStringContainsString('failed with message:', $process->getErrorOutput());
         $this->assertEquals(1, $process->getExitCode());
     }
 }

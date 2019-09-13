@@ -42,10 +42,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection = new Connection($config['parameters']['db']);
 
         $this->connection->query(
-            sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
+            sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
         );
 
         $this->storageApiClient = new Client([
+            'url' => 'https://connection.keboola.com',
             'token' => getenv('STORAGE_API_TOKEN'),
         ]);
 
@@ -166,11 +167,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     {
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));
-        $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote($csv->getEnclosure()));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->connection->quoteIdentifier("\\"));
+        $csvOptions[] = sprintf('FIELD_OPTIONALLY_ENCLOSED_BY = %s', $this->quote($csv->getEnclosure()));
+        $csvOptions[] = sprintf('ESCAPE_UNENCLOSED_FIELD = %s', $this->connection->quoteIdentifier('\\'));
 
         if (!$fileInfo['isSliced']) {
-            $csvOptions[] = "SKIP_HEADER = 1";
+            $csvOptions[] = 'SKIP_HEADER = 1';
         }
 
         return sprintf(
@@ -205,7 +206,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         if ($schemaName) {
             $this->connection->query(
-                sprintf("USE SCHEMA %s", $this->connection->quoteIdentifier($schemaName))
+                sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($schemaName))
             );
         }
 

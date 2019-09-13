@@ -73,7 +73,7 @@ class Snowflake extends Extractor
 
         if (!empty($dbParams['schema'])) {
             $this->schema = $dbParams['schema'];
-            $connection->query(sprintf("USE SCHEMA %s", $connection->quoteIdentifier($this->schema)));
+            $connection->query(sprintf('USE SCHEMA %s', $connection->quoteIdentifier($this->schema)));
         }
 
         return $connection;
@@ -111,13 +111,13 @@ class Snowflake extends Extractor
     {
         $outputTable = $table['outputTable'];
 
-        $this->logger->info("Exporting to " . $outputTable);
+        $this->logger->info('Exporting to ' . $outputTable);
 
         $rowCount = $this->exportAndDownload($table);
 
         return [
-            "outputTable"=> $outputTable,
-            "rows" => $rowCount,
+            'outputTable'=> $outputTable,
+            'rows' => $rowCount,
         ];
     }
 
@@ -125,7 +125,7 @@ class Snowflake extends Extractor
     {
         // Create temporary view from the supplied query
         $sql = sprintf(
-            "SELECT * FROM (%s) LIMIT 0;",
+            'SELECT * FROM (%s) LIMIT 0;',
             rtrim(trim($query), ';')
         );
 
@@ -139,7 +139,7 @@ class Snowflake extends Extractor
             );
         }
 
-        return $this->db->fetchAll("DESC RESULT LAST_QUERY_ID()");
+        return $this->db->fetchAll('DESC RESULT LAST_QUERY_ID()');
     }
 
     private function exportAndDownload(array $table): int
@@ -179,9 +179,9 @@ class Snowflake extends Extractor
 
         $rowCount = (int) $res[0]['rows_unloaded'];
 
-        $this->logger->info("Downloading data from Snowflake");
+        $this->logger->info('Downloading data from Snowflake');
 
-        $outputDataDir = $this->dataDir . '/out/tables/' . $tmpTableName . ".csv.gz";
+        $outputDataDir = $this->dataDir . '/out/tables/' . $tmpTableName . '.csv.gz';
 
         @mkdir($outputDataDir, 0755, true);
 
@@ -209,7 +209,7 @@ class Snowflake extends Extractor
 
         // execute external
         $command = sprintf(
-            "snowsql --noup --config %s -c downloader -f %s",
+            'snowsql --noup --config %s -c downloader -f %s',
             $this->snowSqlConfig,
             $snowSql
         );
@@ -221,9 +221,9 @@ class Snowflake extends Extractor
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->logger->error(sprintf("Snowsql error, process output %s", $process->getOutput()));
-            $this->logger->error(sprintf("Snowsql error: %s", $process->getErrorOutput()));
-            throw new \Exception(sprintf("File download error occurred processing [%s]", $table['name']));
+            $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
+            $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
+            throw new \Exception(sprintf('File download error occurred processing [%s]', $table['name']));
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
@@ -248,7 +248,7 @@ class Snowflake extends Extractor
         );
 
         $this->logger->info(sprintf(
-            "%d files (%s) downloaded",
+            '%d files (%s) downloaded',
             count($csvFiles),
             $this->dataSizeFormatted((int) $bytesDownloaded)
         ));
@@ -262,13 +262,13 @@ class Snowflake extends Extractor
     {
         $csvOptions = [];
         $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->quote(CsvFile::DEFAULT_DELIMITER));
-        $csvOptions[] = sprintf("FIELD_OPTIONALLY_ENCLOSED_BY = %s", $this->quote(CsvFile::DEFAULT_ENCLOSURE));
-        $csvOptions[] = sprintf("ESCAPE_UNENCLOSED_FIELD = %s", $this->quote('\\'));
-        $csvOptions[] = sprintf("COMPRESSION = %s", $this->quote('GZIP'));
-        $csvOptions[] = sprintf("NULL_IF=()");
+        $csvOptions[] = sprintf('FIELD_OPTIONALLY_ENCLOSED_BY = %s', $this->quote(CsvFile::DEFAULT_ENCLOSURE));
+        $csvOptions[] = sprintf('ESCAPE_UNENCLOSED_FIELD = %s', $this->quote('\\'));
+        $csvOptions[] = sprintf('COMPRESSION = %s', $this->quote('GZIP'));
+        $csvOptions[] = sprintf('NULL_IF=()');
 
         return sprintf(
-            "
+            '
             COPY INTO @~/%s/part
             FROM (%s)
 
@@ -277,7 +277,7 @@ class Snowflake extends Extractor
             MAX_FILE_SIZE=50000000
             OVERWRITE = TRUE
             ;
-            ",
+            ',
             $stageTmpPath,
             rtrim(trim($query), ';'),
             implode(' ', $csvOptions)
@@ -301,7 +301,7 @@ class Snowflake extends Extractor
                     return $this->db->fetchAll($copyCommand);
                 } catch (\Throwable $e) {
                     $lastException = new UserException(
-                        sprintf("Copy Command failed: %s", $e->getMessage()),
+                        sprintf('Copy Command failed: %s', $e->getMessage()),
                         0,
                         $e
                     );
@@ -347,7 +347,7 @@ class Snowflake extends Extractor
                     } catch (InvalidTypeException $e) {
                         if (!in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
                             $this->logger->warning(
-                                "Encountered irregular type: " . $column['type'] . " for culumn " . $column['name']
+                                'Encountered irregular type: ' . $column['type'] . ' for culumn ' . $column['name']
                             );
                         }
                         $datatype = new GenericDatatype(
@@ -361,7 +361,7 @@ class Snowflake extends Extractor
                     foreach ($nonDatatypeKeys as $key => $value) {
                         if ($key !== 'name') {
                             $columnMetadata[$column['name']][] = [
-                                'key' => "KBC." . $key,
+                                'key' => 'KBC.' . $key,
                                 'value'=> $value,
                             ];
                         }
@@ -370,8 +370,8 @@ class Snowflake extends Extractor
                 unset($tableDetails['columns']);
                 foreach ($tableDetails as $key => $value) {
                     $manifestData['metadata'][] = [
-                        "key" => "KBC." . $key,
-                        "value" => $value,
+                        'key' => 'KBC.' . $key,
+                        'value' => $value,
                     ];
                 }
                 $manifestData['column_metadata'] = $columnMetadata;
@@ -390,10 +390,10 @@ class Snowflake extends Extractor
 
     public function getTables(?array $tables = null): array
     {
-        $sql = $this->schema ? "SHOW TABLES IN SCHEMA" : "SHOW TABLES IN DATABASE";
+        $sql = $this->schema ? 'SHOW TABLES IN SCHEMA' : 'SHOW TABLES IN DATABASE';
         $arr = $this->db->fetchAll($sql);
 
-        $sql = $this->schema ? "SHOW VIEWS IN SCHEMA" : "SHOW VIEWS IN DATABASE";
+        $sql = $this->schema ? 'SHOW VIEWS IN SCHEMA' : 'SHOW VIEWS IN DATABASE';
         $views = $this->db->fetchAll($sql);
         $arr = array_merge($arr, $views);
 
@@ -427,16 +427,16 @@ class Snowflake extends Extractor
         $sqlWhereElements = [];
         foreach ($tableDefs as $fullTableId => $tableDef) {
             $sqlWhereElements[] = sprintf(
-                "(table_schema = %s AND table_name = %s)",
+                '(table_schema = %s AND table_name = %s)',
                 $this->quote($tableDef['schema']),
                 $this->quote($tableDef['name'])
             );
         }
-        $sqlWhereClause = sprintf("WHERE %s", implode(" OR ", $sqlWhereElements));
+        $sqlWhereClause = sprintf('WHERE %s', implode(' OR ', $sqlWhereElements));
 
-        $sql = "SELECT * FROM information_schema.columns "
+        $sql = 'SELECT * FROM information_schema.columns '
             . $sqlWhereClause
-            . " ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION";
+            . ' ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION';
 
         $columns = $this->db->fetchAll($sql);
         foreach ($columns as $i => $column) {
@@ -444,19 +444,19 @@ class Snowflake extends Extractor
             $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
             if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
                 if (is_numeric($column['NUMERIC_SCALE'])) {
-                    $length = $column['NUMERIC_PRECISION'] . "," . $column['NUMERIC_SCALE'];
+                    $length = $column['NUMERIC_PRECISION'] . ',' . $column['NUMERIC_SCALE'];
                 } else {
                     $length = $column['NUMERIC_PRECISION'];
                 }
             }
 
             $curColumn = [
-                "name" => $column['COLUMN_NAME'],
-                "default" => $column['COLUMN_DEFAULT'],
-                "length" => $length,
-                "nullable" => (trim($column['IS_NULLABLE']) === "NO") ? false : true,
-                "type" => $column['DATA_TYPE'],
-                "ordinalPosition" => $column['ORDINAL_POSITION'],
+                'name' => $column['COLUMN_NAME'],
+                'default' => $column['COLUMN_DEFAULT'],
+                'length' => $length,
+                'nullable' => (trim($column['IS_NULLABLE']) === 'NO') ? false : true,
+                'type' => $column['DATA_TYPE'],
+                'ordinalPosition' => $column['ORDINAL_POSITION'],
             ];
 
             if (!array_key_exists('columns', $tableDefs[$curTable])) {
@@ -478,7 +478,7 @@ class Snowflake extends Extractor
     {
         if (count($columns) > 0) {
             return sprintf(
-                "SELECT %s FROM %s.%s",
+                'SELECT %s FROM %s.%s',
                 implode(', ', array_map(function ($column): string {
                     return $this->db->quoteIdentifier($column);
                 }, $columns)),
@@ -487,17 +487,17 @@ class Snowflake extends Extractor
             );
         } else {
             return sprintf(
-                "SELECT * FROM %s.%s",
+                'SELECT * FROM %s.%s',
                 $this->db->quoteIdentifier($table['schema']),
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
     }
 
-    private function simpleQueryWithCasting(array $table, array $columnInfo) : string
+    private function simpleQueryWithCasting(array $table, array $columnInfo): string
     {
         return sprintf(
-            "SELECT %s FROM %s.%s",
+            'SELECT %s FROM %s.%s',
             implode(', ', array_map(function ($column): string {
                 if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
                     return sprintf(
@@ -535,7 +535,7 @@ class Snowflake extends Extractor
         foreach ($lines as $line) {
             if (!preg_match('/^downloaded$/ui', $line[2])) {
                 throw new \Exception(sprintf(
-                    "Cannot download file: %s Status: %s Size: %s Message: %s",
+                    'Cannot download file: %s Status: %s Size: %s Message: %s',
                     $line[0],
                     $line[2],
                     $line[1],
@@ -547,7 +547,7 @@ class Snowflake extends Extractor
             if ($file->isFile()) {
                 $files[] = $file;
             } else {
-                throw new \Exception("Missing file: " . $line[0]);
+                throw new \Exception('Missing file: ' . $line[0]);
             }
         }
 
@@ -588,7 +588,7 @@ class Snowflake extends Extractor
     private function getUserDefaultWarehouse(): ?string
     {
         $sql = sprintf(
-            "DESC USER %s;",
+            'DESC USER %s;',
             $this->db->quoteIdentifier($this->user)
         );
 
@@ -608,13 +608,13 @@ class Snowflake extends Extractor
         try {
             $this->db->query($query);
         } catch (\Throwable $e) {
-            throw new UserException("Query execution error: " . $e->getMessage(), 0, $e);
+            throw new UserException('Query execution error: ' . $e->getMessage(), 0, $e);
         }
     }
 
     private function cleanupTableStage(string $tmpTableName): void
     {
-        $sql = sprintf("REMOVE @~/%s;", $tmpTableName);
+        $sql = sprintf('REMOVE @~/%s;', $tmpTableName);
         $this->execQuery($sql);
     }
 }
