@@ -12,7 +12,8 @@
     ],
     "require": {
         "php": "^7.3",
-        "keboola/db-extractor-common": "~9.1",
+        "keboola/db-extractor-common": "^10.0",
+        "keboola/db-extractor-config": "^1.0",
         "keboola/php-csv-db-import": "~2.3.0",
         "keboola/php-temp": "^1.0"
     },

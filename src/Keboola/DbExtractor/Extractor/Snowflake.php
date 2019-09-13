@@ -6,7 +6,7 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
-use Keboola\DbExtractor\Logger;
+use Keboola\DbExtractorLogger\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
@@ -59,6 +59,7 @@ class Snowflake extends Extractor
 
     public function createConnection(array $dbParams): Connection
     {
+        $dbParams['password'] = $dbParams['#password'];
         $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
 
         $connection = new Connection($dbParams);
@@ -568,7 +569,7 @@ class Snowflake extends Extractor
         $cliConfig[] = '[connections.downloader]';
         $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($dbParams['host']));
         $cliConfig[] = sprintf('username = "%s"', $dbParams['user']);
-        $cliConfig[] = sprintf('password = "%s"', $dbParams['password']);
+        $cliConfig[] = sprintf('password = "%s"', $dbParams['#password']);
         $cliConfig[] = sprintf('dbname = "%s"', $dbParams['database']);
 
         if (isset($dbParams['warehouse'])) {
