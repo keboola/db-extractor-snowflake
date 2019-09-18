@@ -12,10 +12,16 @@
     ],
     "require": {
         "php": "^7.3",
+        "ext-json": "*",
+        "keboola/csv": "^1.1",
         "keboola/db-extractor-common": "^10.0",
         "keboola/db-extractor-config": "^1.0",
+        "keboola/db-extractor-logger": "^1.0",
         "keboola/php-csv-db-import": "~2.3.0",
-        "keboola/php-temp": "^1.0"
+        "keboola/php-datatypes": "^4.2",
+        "keboola/php-temp": "^1.0",
+        "keboola/retry": "^0.4.1",
+        "symfony/process": "^4.3"
     },
     "require-dev": {
         "codeclimate/php-test-reporter": "^0.4",
