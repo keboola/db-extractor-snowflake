@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Keboola\DbExtractor\SnowflakeApplication;
 use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractorConfig\Exception\UserException as ConfigUserException;
 use Keboola\DbExtractorLogger\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\Yaml\Yaml;
@@ -48,7 +49,7 @@ try {
 
     $app['logger']->log('info', 'Extractor finished successfully.');
     exit(0);
-} catch (UserException $e) {
+} catch (UserException|ConfigUserException $e) {
     $logger->log('error', $e->getMessage(), (array) $e->getData());
     if (!$runAction) {
         echo $e->getMessage();
