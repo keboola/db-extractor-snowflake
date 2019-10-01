@@ -66,7 +66,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $fileSystem->remove($this->dataDir . '/getTablesAction/out');
     }
 
-    public function getConfig(string $driver = 'snowflake', string $format = 'json'): array
+    public function getConfig(string $driver = 'snowflake'): array
     {
         $config = parent::getConfig($driver);
 
@@ -257,13 +257,5 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         }
 
         return $linesCount;
-    }
-
-    public function configTypesProvider(): array
-    {
-        return [
-            ['yaml'],
-            ['json'],
-        ];
     }
 }
