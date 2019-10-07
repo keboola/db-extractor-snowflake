@@ -74,6 +74,20 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertFileExists($dataPath . '/out/tables/in_c-main_tableColumns.csv.gz.manifest');
     }
 
+    public function testRunInvalidConfig(): void
+    {
+        $config = $this->getConfig();
+        unset($config['parameters']['tables'][0]['id']);
+        @unlink($this->dataDir . '/config.json');
+        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir . ' 2>&1');
+        $process->run();
+
+        $this->assertEquals(1, $process->getExitCode());
+        $this->assertEquals($process->getOutput(), "The child node \"id\" at path \"root.parameters.tables.0\" must be configured.\n");
+    }
+
     /**
      * @dataProvider configTypesProvider
      * @param string $configType
