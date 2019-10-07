@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor;
 
 use Keboola\DbExtractor\Configuration\NodeDefinition\SnowflakeDbNode;
+use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
 use Keboola\DbExtractorLogger\Logger;
+use Keboola\DbExtractorConfig\Exception\UserException as ConfigUserException;
 
 class SnowflakeApplication extends Application
 {
@@ -21,6 +23,10 @@ class SnowflakeApplication extends Application
 
     protected function buildConfig(array $config): void
     {
-        $this->config = new Config($config, new ConfigDefinition(new SnowflakeDbNode()));
+        try {
+            $this->config = new Config($config, new ConfigDefinition(new SnowflakeDbNode()));
+        } catch (ConfigUserException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }
