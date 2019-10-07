@@ -81,11 +81,16 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         @unlink($this->dataDir . '/config.json');
         file_put_contents($this->dataDir . '/config.json', json_encode($config));
 
-        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir . ' 2>&1');
+        $process = Process::fromShellCommandline(
+            'php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir . ' 2>&1'
+        );
         $process->run();
 
         $this->assertEquals(1, $process->getExitCode());
-        $this->assertEquals($process->getOutput(), "The child node \"id\" at path \"root.parameters.tables.0\" must be configured.\n");
+        $this->assertEquals(
+            $process->getOutput(),
+            "The child node \"id\" at path \"root.parameters.tables.0\" must be configured.\n"
+        );
     }
 
     /**
