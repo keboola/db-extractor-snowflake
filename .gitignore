@@ -5,15 +5,12 @@ vendor/
 composer.phar
 runtests.sh
 test.php
-tests/data/config.yml
+tests/data/config.json
 tests/data/out/
-tests/data/connectionAction/config.yml
 tests/data/connectionAction/config.json
 tests/data/connectionAction/out/
-tests/data/runAction/config.yml
 tests/data/runAction/config.json
 tests/data/runAction/out/
-tests/data/getTablesAction/config.yml
 tests/data/getTablesAction/config.json
 tests/data/getTablesAction/out/
 snowflake_linux_x8664_odbc.tgz

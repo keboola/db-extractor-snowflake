@@ -6,7 +6,6 @@ namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
-use Symfony\Component\Yaml\Yaml;
 
 class SnowflakeTest extends AbstractSnowflakeTest
 {
@@ -847,8 +846,9 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $result = $app->run();
 
-        $outputManifest = Yaml::parse(
-            (string) file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest')
+        $outputManifest = json_decode(
+            (string) file_get_contents($this->dataDir . '/out/tables/in_c-main_tableColumns.csv.gz.manifest'),
+            true
         );
 
         $this->assertArrayHasKey('destination', $outputManifest);
@@ -1118,7 +1118,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                         return false;
                     }
 
-                    $manifest = Yaml::parse((string) file_get_contents($file->getPathname()));
+                    $manifest = json_decode((string) file_get_contents($file->getPathname()), true);
                     return $manifest['destination'] === $outputTable;
                 }
             )
@@ -1132,7 +1132,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $columns = [];
         foreach ($manifestFiles as $file) {
             // manifest validation
-            $params = Yaml::parse((string) file_get_contents($file));
+            $params = json_decode((string) file_get_contents($file), true);
 
             $this->assertArrayHasKey('destination', $params);
             $this->assertArrayHasKey('incremental', $params);
