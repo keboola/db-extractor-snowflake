@@ -14,9 +14,9 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
     public const ROOT_PATH = __DIR__ . '/..';
 
-    private function createConfigFile(string $rootPath): void
+    private function createConfigFile(string $rootPath, string $file = 'config.template.json'): void
     {
-        $config = json_decode((string) file_get_contents($rootPath . '/config.template.json'), true);
+        $config = json_decode((string) file_get_contents($rootPath . '/' . $file), true);
         $config['parameters']['db']['user'] = $this->getEnv(self::DRIVER, 'DB_USER', true);
         $config['parameters']['db']['#password'] = $this->getEnv(self::DRIVER, 'DB_PASSWORD', true);
         $config['parameters']['db']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
@@ -66,6 +66,24 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertFileExists($dataPath . '/out/tables/in_c-main_tableColumns.csv.gz.manifest');
     }
 
+    public function testRunRowAction(): void
+    {
+        $dataPath = __DIR__ . '/data/runAction';
+
+        @unlink($dataPath . '/out/tables/in.c-main_escaping.csv.gz');
+        @unlink($dataPath . '/out/tables/in.c-main_escaping.csv.gz.manifest');
+
+        $this->createConfigFile($dataPath, 'config.row.template.json');
+
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process->setTimeout(300);
+        $process->run();
+
+        $this->assertEquals(0, $process->getExitCode(), sprintf('error output: %s', $process->getErrorOutput()));
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_escaping.csv.gz');
+        $this->assertFileExists($dataPath . '/out/tables/in_c-main_escaping.csv.gz.manifest');
+    }
+
     public function testRunInvalidConfig(): void
     {
         $config = $this->getConfig();
@@ -90,6 +108,25 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $dataPath = __DIR__ . '/data/connectionAction';
 
         $this->createConfigFile($dataPath);
+
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
+        $process->run();
+
+        $output = $process->getOutput();
+
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertJson($output);
+
+        $data = json_decode($output, true);
+        $this->assertArrayHasKey('status', $data);
+        $this->assertEquals('success', $data['status']);
+    }
+
+    public function testRowConnectionAction(): void
+    {
+        $dataPath = __DIR__ . '/data/connectionAction';
+
+        $this->createConfigFile($dataPath, 'config.row.template.json');
 
         $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->run();
