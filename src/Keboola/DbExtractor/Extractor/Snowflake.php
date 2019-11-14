@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
+use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorLogger\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
@@ -20,17 +21,15 @@ use Symfony\Component\Process\Process;
 
 class Snowflake extends Extractor
 {
-
+    public const INCREMENT_TYPE_NUMERIC = 'numeric';
+    public const INCREMENT_TYPE_TIMESTAMP = 'timestamp';
+    public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
-    /**
-     * @var Connection
-     */
+    /** @var Connection */
     protected $db;
 
-    /**
-     * @var \SplFileInfo
-     */
+    /** @var \SplFileInfo */
     private $snowSqlConfig;
 
     /** @var string */
@@ -45,9 +44,7 @@ class Snowflake extends Extractor
     /** @var string */
     private $user;
 
-    /**
-     * @var Temp
-     */
+    /** @var Temp */
     private $temp;
 
     public function __construct(array $parameters, array $state, Logger $logger)
@@ -475,10 +472,66 @@ class Snowflake extends Extractor
         return $isFromDifferentSchema || $isFromInformationSchema;
     }
 
+    public function validateIncrementalFetching(array $table, string $columnName, ?int $limit = null): void
+    {
+        $columns = $this->db->fetchAll(
+            sprintf(
+                'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
+                            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
+                $this->db->quoteIdentifier($table['schema']),
+                $this->db->quoteIdentifier($table['tableName']),
+                $this->db->quoteIdentifier($columnName)
+            )
+        );
+        if (count($columns) === 0) {
+            throw new UserException(
+                sprintf(
+                    'Column [%s] specified for incremental fetching was not found in the table',
+                    $columnName
+                )
+            );
+        }
+
+        try {
+            $datatype = new SnowflakeDatatype($columns[0]['DATA_TYPE']);
+            if (in_array($datatype->getBasetype(), self::NUMERIC_BASE_TYPES)) {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_NUMERIC;
+            } else if ($datatype->getBasetype() === 'TIMESTAMP') {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_TIMESTAMP;
+            } else {
+                throw new UserException('invalid incremental fetching column type');
+            }
+        } catch (InvalidLengthException | UserException $exception) {
+            throw new UserException(
+                sprintf(
+                    'Column [%s] specified for incremental fetching is not a numeric or timestamp type column',
+                    $columnName
+                )
+            );
+        }
+
+        if ($limit) {
+            $this->incrementalFetching['limit'] = $limit;
+        }
+    }
+
     public function simpleQuery(array $table, array $columns = array()): string
     {
+        $incrementalAddon = null;
+        if ($this->incrementalFetching && isset($this->incrementalFetching['column'])) {
+            if (isset($this->state['lastFetchedRow'])) {
+                $incrementalAddon = sprintf(
+                    ' WHERE %s >= %s',
+                    $this->quote($this->incrementalFetching['column']),
+                    $this->db->quoteIdentifier((string) $this->state['lastFetchedRow'])
+                );
+            }
+            $incrementalAddon .= sprintf(' ORDER BY %s', $this->quote($this->incrementalFetching['column']));
+        }
         if (count($columns) > 0) {
-            return sprintf(
+            $query = sprintf(
                 'SELECT %s FROM %s.%s',
                 implode(', ', array_map(function ($column): string {
                     return $this->db->quoteIdentifier($column);
@@ -487,12 +540,22 @@ class Snowflake extends Extractor
                 $this->db->quoteIdentifier($table['tableName'])
             );
         } else {
-            return sprintf(
+            $query = sprintf(
                 'SELECT * FROM %s.%s',
                 $this->db->quoteIdentifier($table['schema']),
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
+        if ($incrementalAddon) {
+            $query .= $incrementalAddon;
+        }
+        if (isset($this->incrementalFetching['limit'])) {
+            $query .= sprintf(
+                ' LIMIT %d',
+                $this->incrementalFetching['limit']
+            );
+        }
+        return $query;
     }
 
     private function simpleQueryWithCasting(array $table, array $columnInfo): string
