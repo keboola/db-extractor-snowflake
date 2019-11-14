@@ -45,6 +45,9 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection->query(
             sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
         );
+        $this->connection->query(
+            'alter session set client_timestamp_type_mapping=\'timestamp_ntz\''
+        );
 
         $this->storageApiClient = new Client([
             'url' => 'https://connection.keboola.com',
