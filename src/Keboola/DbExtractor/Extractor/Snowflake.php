@@ -110,13 +110,43 @@ class Snowflake extends Extractor
         $outputTable = $table['outputTable'];
 
         $this->logger->info('Exporting to ' . $outputTable);
-
+        $isAdvancedQuery = true;
+        if (array_key_exists('table', $table) && !array_key_exists('query', $table)) {
+            $isAdvancedQuery = false;
+        }
+        $maxValue = null;
+        if ($this->canFetchMaxIncrementalValueSeparately($isAdvancedQuery)) {
+            $maxValue = $this->getMaxOfIncrementalFetchingColumn($table['table']);
+        }
         $rowCount = $this->exportAndDownload($table);
 
-        return [
-            'outputTable'=> $outputTable,
+        $output = [
+            'outputTable' => $outputTable,
             'rows' => $rowCount,
         ];
+        // output state
+        if ($maxValue) {
+            $output['state']['lastFetchedRow'] = $maxValue;
+        }
+
+        return $output;
+    }
+
+    public function getMaxOfIncrementalFetchingColumn(array $table): ?string
+    {
+        $sql = 'SELECT MAX(%s) as %s FROM %s.%s';
+        $fullsql = sprintf(
+            $sql,
+            $this->db->quoteIdentifier($this->incrementalFetching['column']),
+            $this->db->quoteIdentifier($this->incrementalFetching['column']),
+            $this->db->quoteIdentifier($table['schema']),
+            $this->db->quoteIdentifier($table['tableName'])
+        );
+        $result = $this->db->fetchAll($fullsql);
+        if (count($result) > 0) {
+            return $result[0][$this->incrementalFetching['column']];
+        }
+        return null;
     }
 
     private function getColumnInfo(string $query): array
@@ -478,9 +508,9 @@ class Snowflake extends Extractor
             sprintf(
                 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
                             WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
-                $this->db->quoteIdentifier($table['schema']),
-                $this->db->quoteIdentifier($table['tableName']),
-                $this->db->quoteIdentifier($columnName)
+                $this->quote($table['schema']),
+                $this->quote($table['tableName']),
+                $this->quote($columnName)
             )
         );
         if (count($columns) === 0) {
