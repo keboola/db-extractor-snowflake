@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Keboola\DbExtractor\Tests;
 
 class SnowflakeIncrementalTest extends AbstractSnowflakeTest
@@ -21,58 +23,49 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
     private function getIncrementalConfig(): array
     {
-        $config = $this->getConfig(self::DRIVER);
-        $tables = $config['parameters']['tables'];
-        $tables = array_filter($tables, function ($k) {
-            if ($k > 0) {
-                return false;
-            }
-            return true;
-        }, ARRAY_FILTER_USE_KEY);
+        $config = $this->getConfigRow(self::DRIVER);
+        unset($config['parameters']['query']);
+        unset($config['parameters']['columns']);
+        $config['parameters']['table'] = [
+            'tableName' => 'auto_increment_timestamp',
+            'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+        ];
+        $config['parameters']['incremental'] = true;
+        $config['parameters']['name'] = 'auto-increment-timestamp';
+        $config['parameters']['outputTable'] = 'in.c-main.auto-increment-timestamp';
+        $config['parameters']['primaryKey'] = ['id'];
+        $config['parameters']['incrementalFetchingColumn'] = 'id';
 
-        $tables = array_map(function ($item) {
-            unset($item['query']);
-            unset($item['columns']);
-            $item['table'] = [
-                'tableName' => 'auto_increment_timestamp',
-                'schema' => 'testdb',
-            ];
-            $item['incremental'] = true;
-            $item['name'] = 'auto-increment-timestamp';
-            $item['outputTable'] = 'in.c-main.auto-increment-timestamp';
-            $item['primaryKey'] = ['id'];
-            $item['incrementalFetchingColumn'] = 'id';
-            return $item;
-        }, $tables);
-
-        $config['parameters']['tables'] = $tables;
         return $config;
     }
 
     private function createAutoIncrementAndTimestampTable(array $config): void
     {
-        $this->connection->query(sprintf(
+        $dropQuery = sprintf(
             'DROP TABLE IF EXISTS %s.%s',
-            $this->connection->quoteIdentifier($config['parameters']['db']['schema']),
-            $config['parameters']['tables'][0]['table']['tableName']
-        ));
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($dropQuery);
 
-        $this->connection->query(sprintf(
-    'CREATE TABLE %s.%s (
-            `id` INT NOT NULL AUTOINCREMENT,
-            `name` VARCHAR(30) NOT NULL DEFAULT \'pam\',
-            `number` FLOAT NOT NULL DEFAULT 0.0,
-            `timestamp` TIMESTAMP DEFAULT to_timestamp_ntz(current_timestamp()),
-            PRIMARY KEY (`id`)
+        $createQuery = sprintf(
+            'CREATE TABLE %s.%s (
+            "id" INT NOT NULL AUTOINCREMENT,
+            "name" VARCHAR(30) NOT NULL DEFAULT \'pam\',
+            "number" FLOAT NOT NULL DEFAULT 0.0,
+            "timestamp" TIMESTAMP DEFAULT to_timestamp_ntz(current_timestamp()),
+            PRIMARY KEY ("id")
             )',
-            $this->connection->quoteIdentifier($config['parameters']['db']['schema']),
-            $config['parameters']['tables'][0]['table']['tableName']
-        ));
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($createQuery);
 
-        $this->connection->query(sprintf(
-            'INSERT INTO %s.%s (`name`) VALUES (\'george\'), (\'henry\')',
-            $this->connection->quoteIdentifier($config['parameters']['db']['schema']),
-            $config['parameters']['tables'][0]['table']['tableName']
-        ));
+        $insertQuery = sprintf(
+            'INSERT INTO %s.%s ("name") VALUES (\'george\'), (\'henry\')',
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($insertQuery);
     }
 }
