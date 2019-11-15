@@ -552,13 +552,18 @@ class Snowflake extends Extractor
         $incrementalAddon = null;
         if ($this->incrementalFetching && isset($this->incrementalFetching['column'])) {
             if (isset($this->state['lastFetchedRow'])) {
+                if ($this->incrementalFetching['type'] === self::INCREMENT_TYPE_NUMERIC) {
+                    $lastFetchedRow = $this->state['lastFetchedRow'];
+                } else {
+                    $lastFetchedRow = $this->db->quoteIdentifier((string) $this->state['lastFetchedRow']);
+                }
                 $incrementalAddon = sprintf(
                     ' WHERE %s >= %s',
-                    $this->quote($this->incrementalFetching['column']),
-                    $this->db->quoteIdentifier((string) $this->state['lastFetchedRow'])
+                    $this->db->quoteIdentifier($this->incrementalFetching['column']),
+                    $lastFetchedRow
                 );
             }
-            $incrementalAddon .= sprintf(' ORDER BY %s', $this->quote($this->incrementalFetching['column']));
+            $incrementalAddon .= sprintf(' ORDER BY %s', $this->db->quoteIdentifier($this->incrementalFetching['column']));
         }
         if (count($columns) > 0) {
             $query = sprintf(
