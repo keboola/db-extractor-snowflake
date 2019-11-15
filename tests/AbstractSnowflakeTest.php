@@ -82,6 +82,19 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $config;
     }
 
+    public function getConfigRow(string $driver = 'snowflake'): array
+    {
+        $config = parent::getConfig($driver);
+
+        $config['parameters']['db']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+        $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
+
+        $config['parameters']['extractor_class'] = 'Snowflake';
+        $config['parameters']['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+
+        return $config;
+    }
+
     public function createApplication(array $config, array $state = []): SnowflakeApplication
     {
         $logger = new Logger('ex-db-snowflake-tests');
