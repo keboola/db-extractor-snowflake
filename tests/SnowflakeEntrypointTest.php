@@ -27,6 +27,8 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
 
         if (isset($config['parameters']['tables'][2]['table'])) {
             $config['parameters']['tables'][2]['table']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
+        } elseif (isset($config['parameters']['table'])) {
+            $config['parameters']['table']['schema'] = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
         }
 
         $this->putConfigFile($rootPath, $config);
@@ -66,14 +68,17 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertFileExists($dataPath . '/out/tables/in_c-main_tableColumns.csv.gz.manifest');
     }
 
-    public function testRunRowAction(): void
+    /**
+     * @dataProvider getRowFilesProvider
+     */
+    public function testRunRowAction(string $rowFile): void
     {
         $dataPath = __DIR__ . '/data/runAction';
 
         @unlink($dataPath . '/out/tables/in.c-main_escaping.csv.gz');
         @unlink($dataPath . '/out/tables/in.c-main_escaping.csv.gz.manifest');
 
-        $this->createConfigFile($dataPath, 'config.row.template.json');
+        $this->createConfigFile($dataPath, $rowFile);
 
         $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $dataPath . ' 2>&1');
         $process->setTimeout(300);
@@ -190,5 +195,13 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertStringContainsString('[4x]', $process->getOutput());
         $this->assertStringContainsString('failed with message:', $process->getErrorOutput());
         $this->assertEquals(1, $process->getExitCode());
+    }
+
+    public function getRowFilesProvider(): array
+    {
+        return [
+            ['config.row.template.json'],
+            ['config.rowTable.template.json'],
+        ];
     }
 }
