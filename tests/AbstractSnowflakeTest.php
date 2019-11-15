@@ -82,10 +82,10 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $config;
     }
 
-    public function createApplication(array $config): SnowflakeApplication
+    public function createApplication(array $config, array $state = []): SnowflakeApplication
     {
         $logger = new Logger('ex-db-snowflake-tests');
-        $app = new SnowflakeApplication($config, $logger, [], $this->dataDir);
+        $app = new SnowflakeApplication($config, $logger, $state, $this->dataDir);
 
         return $app;
     }
