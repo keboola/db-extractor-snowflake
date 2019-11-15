@@ -57,6 +57,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
             $newResult['state']['lastFetchedRow'],
         );
         $this->assertEquals(3, $newResult['imported']['rows']);
+
+        $this->dropAutoIncrementTable($config);
     }
 
     private function getIncrementalConfig(): array
@@ -79,12 +81,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
     private function createAutoIncrementAndTimestampTable(array $config): void
     {
-        $dropQuery = sprintf(
-            'DROP TABLE IF EXISTS %s.%s',
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
-        );
-        $this->connection->query($dropQuery);
+        $this->dropAutoIncrementTable($config);
 
         $createQuery = sprintf(
             'CREATE TABLE %s.%s (
@@ -105,5 +102,15 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
             $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
         );
         $this->connection->query($insertQuery);
+    }
+
+    private function dropAutoIncrementTable(array $config): void
+    {
+        $dropQuery = sprintf(
+            'DROP TABLE IF EXISTS %s.%s',
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($dropQuery);
     }
 }
