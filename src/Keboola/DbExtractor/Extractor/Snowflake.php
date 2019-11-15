@@ -563,7 +563,10 @@ class Snowflake extends Extractor
                     $lastFetchedRow
                 );
             }
-            $incrementalAddon .= sprintf(' ORDER BY %s', $this->db->quoteIdentifier($this->incrementalFetching['column']));
+            $incrementalAddon .= sprintf(
+                ' ORDER BY %s',
+                $this->db->quoteIdentifier($this->incrementalFetching['column'])
+            );
         }
         if (count($columns) > 0) {
             $query = sprintf(

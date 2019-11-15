@@ -21,7 +21,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertEquals(
             [
                 'outputTable' => 'in.c-main.auto-increment-timestamp',
-                'rows' => 2
+                'rows' => 2,
             ],
             $result['imported']
         );
@@ -35,7 +35,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertEquals(
             [
                 'outputTable' => 'in.c-main.auto-increment-timestamp',
-                'rows' => 1
+                'rows' => 1,
             ],
             $emtpyResult['imported']
         );
@@ -54,7 +54,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertEquals(4, $newResult['state']['lastFetchedRow']);
         $this->assertGreaterThan(
             $result['state']['lastFetchedRow'],
-            $newResult['state']['lastFetchedRow']
+            $newResult['state']['lastFetchedRow'],
         );
         $this->assertEquals(3, $newResult['imported']['rows']);
     }
