@@ -368,16 +368,16 @@
         },
         {
             "name": "keboola/db-extractor-config",
-            "version": "1.1.0",
+            "version": "1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-config.git",
-                "reference": "58ecc96e387ede75b31bf90ce7c0abcd5f49e610"
+                "reference": "768ce2728b71a72e4b5bb13ef95d5a2fa58aaad1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-config/zipball/58ecc96e387ede75b31bf90ce7c0abcd5f49e610",
-                "reference": "58ecc96e387ede75b31bf90ce7c0abcd5f49e610",
+                "url": "https://api.github.com/repos/keboola/db-extractor-config/zipball/768ce2728b71a72e4b5bb13ef95d5a2fa58aaad1",
+                "reference": "768ce2728b71a72e4b5bb13ef95d5a2fa58aaad1",
                 "shasum": ""
             },
             "require": {
@@ -400,7 +400,7 @@
                 "MIT"
             ],
             "description": "Config definition for database extractor",
-            "time": "2019-09-20T12:49:58+00:00"
+            "time": "2019-10-02T07:21:39+00:00"
         },
         {
             "name": "keboola/db-extractor-logger",
