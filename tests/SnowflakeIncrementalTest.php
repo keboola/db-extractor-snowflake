@@ -66,10 +66,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $config = $this->getConfigRow(self::DRIVER);
         unset($config['parameters']['query']);
         unset($config['parameters']['columns']);
-        $config['parameters']['table'] = [
-            'tableName' => 'auto_increment_timestamp',
-            'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
-        ];
+        $config['parameters']['table']['tableName'] = 'auto_increment_timestamp';
         $config['parameters']['incremental'] = true;
         $config['parameters']['name'] = 'auto-increment-timestamp';
         $config['parameters']['outputTable'] = 'in.c-main.auto-increment-timestamp';
