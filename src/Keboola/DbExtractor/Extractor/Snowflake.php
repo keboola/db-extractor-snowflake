@@ -555,7 +555,7 @@ class Snowflake extends Extractor
                 if ($this->incrementalFetching['type'] === self::INCREMENT_TYPE_NUMERIC) {
                     $lastFetchedRow = $this->state['lastFetchedRow'];
                 } else {
-                    $lastFetchedRow = $this->db->quoteIdentifier((string) $this->state['lastFetchedRow']);
+                    $lastFetchedRow = $this->quote((string) $this->state['lastFetchedRow']);
                 }
                 $incrementalAddon = sprintf(
                     ' WHERE %s >= %s',

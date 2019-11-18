@@ -10,7 +10,59 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
     public const ROOT_PATH = __DIR__ . '/..';
 
-    public function testIncrementalFetching(): void
+    public function testIncrementalFetchingByDatetime(): void
+    {
+        $config = $this->getIncrementalConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'timestamp';
+        $this->createAutoIncrementAndTimestampTable($config);
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertNotEmpty($result['state']['lastFetchedRow']);
+
+        $app = $this->createApplication($config, $result['state']);
+        $emtpyResult = $app->run();
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $emtpyResult['imported']
+        );
+
+        $this->connection->query(sprintf(
+            "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        ));
+
+        $app = $this->createApplication($config, $result['state']);
+        $newResult = $app->run();
+
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertNotEmpty($newResult['state']['lastFetchedRow']);
+        $this->assertGreaterThan(
+            $result['state']['lastFetchedRow'],
+            $newResult['state']['lastFetchedRow'],
+            );
+        $this->assertEquals(4, $newResult['imported']['rows']);
+
+        $this->dropAutoIncrementTable($config);
+    }
+
+    public function testIncrementalFetchingByAutoIncrement(): void
     {
         $config = $this->getIncrementalConfig();
         $this->createAutoIncrementAndTimestampTable($config);
@@ -55,8 +107,61 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertGreaterThan(
             $result['state']['lastFetchedRow'],
             $newResult['state']['lastFetchedRow'],
-        );
+            );
         $this->assertEquals(3, $newResult['imported']['rows']);
+
+        $this->dropAutoIncrementTable($config);
+    }
+
+    public function testIncrementalFetchingByDecimal(): void
+    {
+        $config = $this->getIncrementalConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'number';
+        $this->createAutoIncrementAndTimestampTable($config);
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertNotEmpty($result['state']['lastFetchedRow']);
+
+        $app = $this->createApplication($config, $result['state']);
+        $emtpyResult = $app->run();
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $emtpyResult['imported']
+        );
+
+        $this->connection->query(sprintf(
+            "INSERT INTO %s.%s (\"name\", \"number\") VALUES ('wiliam', '20.548796'), ('charles', '35.5478524')",
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        ));
+
+        $app = $this->createApplication($config, $result['state']);
+        $newResult = $app->run();
+
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertNotEmpty($newResult['state']['lastFetchedRow']);
+        $this->assertGreaterThan(
+            $result['state']['lastFetchedRow'],
+            $newResult['state']['lastFetchedRow'],
+            );
+        $this->assertEquals(35.5478524, $newResult['state']['lastFetchedRow']);
+        $this->assertEquals(4, $newResult['imported']['rows']);
 
         $this->dropAutoIncrementTable($config);
     }
@@ -84,7 +189,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
             'CREATE TABLE %s.%s (
             "id" INT NOT NULL AUTOINCREMENT,
             "name" VARCHAR(30) NOT NULL DEFAULT \'pam\',
-            "number" FLOAT NOT NULL DEFAULT 0.0,
+            "number" DECIMAL(10,8) NOT NULL DEFAULT 0.0,
             "timestamp" TIMESTAMP DEFAULT to_timestamp_ntz(current_timestamp()),
             PRIMARY KEY ("id")
             )',
