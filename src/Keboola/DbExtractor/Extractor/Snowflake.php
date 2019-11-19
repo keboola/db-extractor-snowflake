@@ -110,14 +110,7 @@ class Snowflake extends Extractor
         $outputTable = $table['outputTable'];
 
         $this->logger->info('Exporting to ' . $outputTable);
-        $isAdvancedQuery = true;
-        if (array_key_exists('table', $table) && !array_key_exists('query', $table)) {
-            $isAdvancedQuery = false;
-        }
-        $maxValue = null;
-        if ($this->canFetchMaxIncrementalValueSeparately($isAdvancedQuery)) {
-            $maxValue = $this->getMaxOfIncrementalFetchingColumn($table['table']);
-        }
+        $maxValue = $this->getMaxOfIncrementalFetchingColumn($table['table']);
         $rowCount = $this->exportAndDownload($table);
 
         $output = [
@@ -134,14 +127,31 @@ class Snowflake extends Extractor
 
     public function getMaxOfIncrementalFetchingColumn(array $table): ?string
     {
-        $sql = 'SELECT MAX(%s) as %s FROM %s.%s';
-        $fullsql = sprintf(
-            $sql,
-            $this->db->quoteIdentifier($this->incrementalFetching['column']),
-            $this->db->quoteIdentifier($this->incrementalFetching['column']),
-            $this->db->quoteIdentifier($table['schema']),
-            $this->db->quoteIdentifier($table['tableName'])
-        );
+
+        if (isset($this->incrementalFetching['limit']) && $this->incrementalFetching['limit'] > 0) {
+            $fullsql = sprintf(
+                'SELECT %s FROM %s.%s',
+                $this->db->quoteIdentifier($this->incrementalFetching['column']),
+                $this->db->quoteIdentifier($table['schema']),
+                $this->db->quoteIdentifier($table['tableName'])
+            );
+
+            $fullsql .= $this->createIncrementalAddon();
+
+            $fullsql .= sprintf(
+                ' LIMIT %s OFFSET %s',
+                $this->incrementalFetching['limit'],
+                $this->incrementalFetching['limit'] - 1
+            );
+        } else {
+            $fullsql = sprintf(
+                'SELECT MAX(%s) as %s FROM %s.%s',
+                $this->db->quoteIdentifier($this->incrementalFetching['column']),
+                $this->db->quoteIdentifier($this->incrementalFetching['column']),
+                $this->db->quoteIdentifier($table['schema']),
+                $this->db->quoteIdentifier($table['tableName'])
+            );
+        }
         $result = $this->db->fetchAll($fullsql);
         if (count($result) > 0) {
             return $result[0][$this->incrementalFetching['column']];
@@ -551,22 +561,7 @@ class Snowflake extends Extractor
     {
         $incrementalAddon = null;
         if ($this->incrementalFetching && isset($this->incrementalFetching['column'])) {
-            if (isset($this->state['lastFetchedRow'])) {
-                if ($this->incrementalFetching['type'] === self::INCREMENT_TYPE_NUMERIC) {
-                    $lastFetchedRow = $this->state['lastFetchedRow'];
-                } else {
-                    $lastFetchedRow = $this->quote((string) $this->state['lastFetchedRow']);
-                }
-                $incrementalAddon = sprintf(
-                    ' WHERE %s >= %s',
-                    $this->db->quoteIdentifier($this->incrementalFetching['column']),
-                    $lastFetchedRow
-                );
-            }
-            $incrementalAddon .= sprintf(
-                ' ORDER BY %s',
-                $this->db->quoteIdentifier($this->incrementalFetching['column'])
-            );
+            $incrementalAddon = $this->createIncrementalAddon();
         }
         if (count($columns) > 0) {
             $query = sprintf(
@@ -594,6 +589,28 @@ class Snowflake extends Extractor
             );
         }
         return $query;
+    }
+
+    private function createIncrementalAddon(): string
+    {
+        $incrementalAddon = '';
+        if (isset($this->state['lastFetchedRow'])) {
+            if ($this->incrementalFetching['type'] === self::INCREMENT_TYPE_NUMERIC) {
+                $lastFetchedRow = $this->state['lastFetchedRow'];
+            } else {
+                $lastFetchedRow = $this->quote((string) $this->state['lastFetchedRow']);
+            }
+            $incrementalAddon = sprintf(
+                ' WHERE %s >= %s',
+                $this->db->quoteIdentifier($this->incrementalFetching['column']),
+                $lastFetchedRow
+            );
+        }
+        $incrementalAddon .= sprintf(
+            ' ORDER BY %s',
+            $this->db->quoteIdentifier($this->incrementalFetching['column'])
+        );
+        return $incrementalAddon;
     }
 
     private function simpleQueryWithCasting(array $table, array $columnInfo): string
