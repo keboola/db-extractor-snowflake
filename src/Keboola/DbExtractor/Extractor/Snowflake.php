@@ -110,7 +110,10 @@ class Snowflake extends Extractor
         $outputTable = $table['outputTable'];
 
         $this->logger->info('Exporting to ' . $outputTable);
-        $maxValue = $this->getMaxOfIncrementalFetchingColumn($table['table']);
+        $maxValue = null;
+        if (isset($table['table']) && isset($this->incrementalFetching)) {
+            $maxValue = $this->getMaxOfIncrementalFetchingColumn($table['table']);
+        }
         $rowCount = $this->exportAndDownload($table);
 
         $output = [
