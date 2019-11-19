@@ -1163,7 +1163,9 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'incrementalFetchingColumn' => 'timestamp',
                 ],
                 [],
-                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" ORDER BY "timestamp" LIMIT 10',
+                'SELECT "id", "name", "number", "timestamp"' .
+                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
+                ' ORDER BY "timestamp" LIMIT 10',
             ],
             'test simplePDO query with limit and idp column and previos state' => [
                 [
@@ -1183,7 +1185,10 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'lastFetchedRow' => 4,
                 ],
-                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" WHERE "id" >= 4 ORDER BY "id" LIMIT 10',
+                'SELECT "id", "name", "number", "timestamp"' .
+                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
+                ' WHERE "id" >= 4' .
+                ' ORDER BY "id" LIMIT 10',
             ],
             'test simplePDO query datetime column but no state and no limit' => [
                 [
@@ -1201,7 +1206,9 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'incrementalFetchingColumn' => 'timestamp',
                 ],
                 [],
-                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" ORDER BY "timestamp"',
+                'SELECT "id", "name", "number", "timestamp"' .
+                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
+                ' ORDER BY "timestamp"',
             ],
             'test simplePDO query id column and previos state and no limit' => [
                 [
@@ -1221,7 +1228,10 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'lastFetchedRow' => 4,
                 ],
-                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" WHERE "id" >= 4 ORDER BY "id"',
+                'SELECT "id", "name", "number", "timestamp"' .
+                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
+                ' WHERE "id" >= 4' .
+                ' ORDER BY "id"',
             ],
             'test simplePDO query datetime column and previos state and limit' => [
                 [
@@ -1241,7 +1251,11 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'lastFetchedRow' => '2018-10-26 10:52:32',
                 ],
-                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" WHERE "timestamp" >= \'2018-10-26 10:52:32\' ORDER BY "timestamp" LIMIT 1000',
+                'SELECT "id", "name", "number", "timestamp"' .
+                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
+                ' WHERE "timestamp" >= \'2018-10-26 10:52:32\'' .
+                ' ORDER BY "timestamp"' .
+                ' LIMIT 1000',
             ],
         ];
     }
