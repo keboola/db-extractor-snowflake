@@ -6,6 +6,8 @@ namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractor\Extractor\Snowflake;
+use Keboola\DbExtractorLogger\Logger;
 
 class SnowflakeTest extends AbstractSnowflakeTest
 {
@@ -1093,6 +1095,155 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
             $this->assertEmpty($this->getUserDefaultWarehouse($user));
         }
+    }
+
+    /**
+     * @dataProvider simpleTableColumnsDataProvider
+     */
+    public function testGetSimplifiedPdoQuery(array $params, array $state, string $expected): void
+    {
+        if (isset($params['incrementalFetchingColumn']) && $params['incrementalFetchingColumn'] !== '') {
+            $incrementalConfig = $this->getIncrementalConfig();
+            $this->createAutoIncrementAndTimestampTable($incrementalConfig);
+            $extractor = new Snowflake($incrementalConfig['parameters'], $state, new Logger('mssql-extractor-test'));
+            $extractor->validateIncrementalFetching(
+                $params['table'],
+                $params['incrementalFetchingColumn'],
+                isset($params['incrementalFetchingLimit']) ? $params['incrementalFetchingLimit'] : null
+            );
+        } else {
+            $config = $this->getConfig();
+            $extractor = new Snowflake($config['parameters'], $state, new Logger('mssql-extractor-test'));
+        }
+        $query = $extractor->simpleQuery($params['table'], $params['columns']);
+        $this->assertEquals($expected, $query);
+    }
+
+    public function simpleTableColumnsDataProvider(): array
+    {
+        return [
+            'simple table select with no column metadata' => [
+                [
+                    'table' => [
+                        'tableName' => 'test',
+                        'schema' => 'testSchema',
+                    ],
+                    'columns' => [],
+                ],
+                [],
+                'SELECT * FROM "testSchema"."test"',
+            ],
+            'simple table with 2 columns selected' => [
+                [
+                    'table' => [
+                        'tableName' => 'test',
+                        'schema' => 'testSchema',
+                    ],
+                    'columns' => [
+                        'col1',
+                        'col2',
+                    ],
+                ],
+                [],
+                'SELECT "col1", "col2" FROM "testSchema"."test"',
+            ],
+            'test simplePDO query with limit and datetime column but no state' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto_increment_timestamp',
+                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                    ],
+                    'columns' => [
+                        'id',
+                        'name',
+                        'number',
+                        'timestamp',
+                    ],
+                    'incrementalFetchingLimit' => 10,
+                    'incrementalFetchingColumn' => 'timestamp',
+                ],
+                [],
+                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" ORDER BY "timestamp" LIMIT 10',
+            ],
+            'test simplePDO query with limit and idp column and previos state' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto_increment_timestamp',
+                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                    ],
+                    'columns' => [
+                        'id',
+                        'name',
+                        'number',
+                        'timestamp',
+                    ],
+                    'incrementalFetchingLimit' => 10,
+                    'incrementalFetchingColumn' => 'id',
+                ],
+                [
+                    'lastFetchedRow' => 4,
+                ],
+                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" WHERE "id" >= 4 ORDER BY "id" LIMIT 10',
+            ],
+            'test simplePDO query datetime column but no state and no limit' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto_increment_timestamp',
+                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                    ],
+                    'columns' => [
+                        'id',
+                        'name',
+                        'number',
+                        'timestamp',
+                    ],
+                    'incrementalFetchingLimit' => null,
+                    'incrementalFetchingColumn' => 'timestamp',
+                ],
+                [],
+                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" ORDER BY "timestamp"',
+            ],
+            'test simplePDO query id column and previos state and no limit' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto_increment_timestamp',
+                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                    ],
+                    'columns' => [
+                        'id',
+                        'name',
+                        'number',
+                        'timestamp',
+                    ],
+                    'incrementalFetchingLimit' => 0,
+                    'incrementalFetchingColumn' => 'id',
+                ],
+                [
+                    'lastFetchedRow' => 4,
+                ],
+                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" WHERE "id" >= 4 ORDER BY "id"',
+            ],
+            'test simplePDO query datetime column and previos state and limit' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto_increment_timestamp',
+                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                    ],
+                    'columns' => [
+                        'id',
+                        'name',
+                        'number',
+                        'timestamp',
+                    ],
+                    'incrementalFetchingLimit' => 1000,
+                    'incrementalFetchingColumn' => 'timestamp',
+                ],
+                [
+                    'lastFetchedRow' => '2018-10-26 10:52:32',
+                ],
+                'SELECT "id", "name", "number", "timestamp" FROM "EXTRACTOR"."auto_increment_timestamp" WHERE "timestamp" >= \'2018-10-26 10:52:32\' ORDER BY "timestamp" LIMIT 1000',
+            ],
+        ];
     }
 
     private function validateExtraction(array $query, int $expectedFiles = 1): ?array
