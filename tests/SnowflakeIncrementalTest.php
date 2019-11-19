@@ -112,6 +112,61 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->dropAutoIncrementTable($config);
     }
 
+    public function testIncrementalFetchingLimit(): void
+    {
+        $config = $this->getIncrementalConfig();
+        $config['parameters']['incrementalFetchingLimit'] = 1;
+        $this->createAutoIncrementAndTimestampTable($config);
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 1,
+            ],
+            $result['imported']
+        );
+
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertEquals(1, $result['state']['lastFetchedRow']);
+
+        // since it's >= we'll set limit to 2 to fetch the second row also
+        $config['parameters']['incrementalFetchingLimit'] = 2;
+        $app = $this->createApplication($config, $result['state']);
+        $result = $app->run();
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        $this->connection->query(sprintf(
+            "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        ));
+
+        $app = $this->createApplication($config, $result['state']);
+        $newResult = $app->run();
+
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertEquals(3, $newResult['state']['lastFetchedRow']);
+        $this->assertGreaterThan(
+            $result['state']['lastFetchedRow'],
+            $newResult['state']['lastFetchedRow'],
+        );
+        $this->assertEquals(2, $newResult['imported']['rows']);
+
+        $this->dropAutoIncrementTable($config);
+    }
+
     public function testIncrementalFetchingByDecimal(): void
     {
         $config = $this->getIncrementalConfig();
