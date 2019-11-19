@@ -56,7 +56,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertGreaterThan(
             $result['state']['lastFetchedRow'],
             $newResult['state']['lastFetchedRow'],
-            );
+        );
         $this->assertEquals(4, $newResult['imported']['rows']);
 
         $this->dropAutoIncrementTable($config);
@@ -107,7 +107,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertGreaterThan(
             $result['state']['lastFetchedRow'],
             $newResult['state']['lastFetchedRow'],
-            );
+        );
         $this->assertEquals(3, $newResult['imported']['rows']);
 
         $this->dropAutoIncrementTable($config);
@@ -159,7 +159,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->assertGreaterThan(
             $result['state']['lastFetchedRow'],
             $newResult['state']['lastFetchedRow'],
-            );
+        );
         $this->assertEquals(35.5478524, $newResult['state']['lastFetchedRow']);
         $this->assertEquals(4, $newResult['imported']['rows']);
 
