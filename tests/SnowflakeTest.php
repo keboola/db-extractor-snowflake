@@ -1121,6 +1121,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
     public function simpleTableColumnsDataProvider(): array
     {
+        $dbSchema = $this->getEnv(self::DRIVER, 'DB_SCHEMA');
         return [
             'simple table select with no column metadata' => [
                 [
@@ -1151,7 +1152,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'table' => [
                         'tableName' => 'auto_increment_timestamp',
-                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                        'schema' => $dbSchema,
                     ],
                     'columns' => [
                         'id',
@@ -1163,15 +1164,18 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'incrementalFetchingColumn' => 'timestamp',
                 ],
                 [],
-                'SELECT "id", "name", "number", "timestamp"' .
-                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
-                ' ORDER BY "timestamp" LIMIT 10',
+                sprintf(
+                    'SELECT "id", "name", "number", "timestamp"' .
+                    ' FROM "%s"."auto_increment_timestamp"' .
+                    ' ORDER BY "timestamp" LIMIT 10',
+                    $dbSchema
+                ),
             ],
             'test simplePDO query with limit and idp column and previos state' => [
                 [
                     'table' => [
                         'tableName' => 'auto_increment_timestamp',
-                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                        'schema' => $dbSchema,
                     ],
                     'columns' => [
                         'id',
@@ -1185,16 +1189,19 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'lastFetchedRow' => 4,
                 ],
-                'SELECT "id", "name", "number", "timestamp"' .
-                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
-                ' WHERE "id" >= 4' .
-                ' ORDER BY "id" LIMIT 10',
+                sprintf(
+                    'SELECT "id", "name", "number", "timestamp"' .
+                    ' FROM "%s"."auto_increment_timestamp"' .
+                    ' WHERE "id" >= 4' .
+                    ' ORDER BY "id" LIMIT 10',
+                    $dbSchema
+                ),
             ],
             'test simplePDO query datetime column but no state and no limit' => [
                 [
                     'table' => [
                         'tableName' => 'auto_increment_timestamp',
-                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                        'schema' => $dbSchema,
                     ],
                     'columns' => [
                         'id',
@@ -1206,15 +1213,18 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'incrementalFetchingColumn' => 'timestamp',
                 ],
                 [],
-                'SELECT "id", "name", "number", "timestamp"' .
-                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
-                ' ORDER BY "timestamp"',
+                sprintf(
+                    'SELECT "id", "name", "number", "timestamp"' .
+                    ' FROM "%s"."auto_increment_timestamp"' .
+                    ' ORDER BY "timestamp"',
+                    $dbSchema
+                ),
             ],
             'test simplePDO query id column and previos state and no limit' => [
                 [
                     'table' => [
                         'tableName' => 'auto_increment_timestamp',
-                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                        'schema' => $dbSchema,
                     ],
                     'columns' => [
                         'id',
@@ -1228,16 +1238,19 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'lastFetchedRow' => 4,
                 ],
-                'SELECT "id", "name", "number", "timestamp"' .
-                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
-                ' WHERE "id" >= 4' .
-                ' ORDER BY "id"',
+                sprintf(
+                    'SELECT "id", "name", "number", "timestamp"' .
+                    ' FROM "%s"."auto_increment_timestamp"' .
+                    ' WHERE "id" >= 4' .
+                    ' ORDER BY "id"',
+                    $dbSchema
+                ),
             ],
             'test simplePDO query datetime column and previos state and limit' => [
                 [
                     'table' => [
                         'tableName' => 'auto_increment_timestamp',
-                        'schema' => $this->getEnv(self::DRIVER, 'DB_SCHEMA'),
+                        'schema' => $dbSchema,
                     ],
                     'columns' => [
                         'id',
@@ -1251,11 +1264,14 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 [
                     'lastFetchedRow' => '2018-10-26 10:52:32',
                 ],
-                'SELECT "id", "name", "number", "timestamp"' .
-                ' FROM "EXTRACTOR"."auto_increment_timestamp"' .
-                ' WHERE "timestamp" >= \'2018-10-26 10:52:32\'' .
-                ' ORDER BY "timestamp"' .
-                ' LIMIT 1000',
+                sprintf(
+                    'SELECT "id", "name", "number", "timestamp"' .
+                    ' FROM "%s"."auto_increment_timestamp"' .
+                    ' WHERE "timestamp" >= \'2018-10-26 10:52:32\'' .
+                    ' ORDER BY "timestamp"' .
+                    ' LIMIT 1000',
+                    $dbSchema
+                ),
             ],
         ];
     }
