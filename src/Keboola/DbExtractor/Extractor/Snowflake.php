@@ -143,7 +143,7 @@ class Snowflake extends Extractor
 
             $fullsql .= sprintf(
                 ' LIMIT %s OFFSET %s',
-                $this->incrementalFetching['limit'],
+                1,
                 $this->incrementalFetching['limit'] - 1
             );
         } else {
