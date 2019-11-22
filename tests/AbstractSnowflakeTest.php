@@ -302,6 +302,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             "name" VARCHAR(30) NOT NULL DEFAULT \'pam\',
             "number" DECIMAL(10,8) NOT NULL DEFAULT 0.0,
             "timestamp" TIMESTAMP DEFAULT to_timestamp_ntz(current_timestamp()),
+            "datetime" DATETIME NOT NULL DEFAULT to_timestamp_ntz(current_timestamp()),
             PRIMARY KEY ("id")
             )',
             $this->connection->quoteIdentifier($config['parameters']['table']['schema']),

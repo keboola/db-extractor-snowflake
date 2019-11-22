@@ -9,7 +9,7 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
     public const ROOT_PATH = __DIR__ . '/..';
 
-    public function testIncrementalFetchingByDatetime(): void
+    public function testIncrementalFetchingByTimestamp(): void
     {
         $config = $this->getIncrementalConfig();
         $config['parameters']['incrementalFetchingColumn'] = 'timestamp';
@@ -56,6 +56,58 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
             $result['state']['lastFetchedRow'],
             $newResult['state']['lastFetchedRow'],
         );
+        $this->assertEquals(4, $newResult['imported']['rows']);
+
+        $this->dropAutoIncrementTable($config);
+    }
+
+    public function testIncrementalFetchingByDatetime(): void
+    {
+        $config = $this->getIncrementalConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'datetime';
+        $this->createAutoIncrementAndTimestampTable($config);
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertNotEmpty($result['state']['lastFetchedRow']);
+
+        $app = $this->createApplication($config, $result['state']);
+        $emtpyResult = $app->run();
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $emtpyResult['imported']
+        );
+
+        $this->connection->query(sprintf(
+            "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        ));
+
+        $app = $this->createApplication($config, $result['state']);
+        $newResult = $app->run();
+
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertNotEmpty($newResult['state']['lastFetchedRow']);
+        $this->assertGreaterThan(
+            $result['state']['lastFetchedRow'],
+            $newResult['state']['lastFetchedRow'],
+            );
         $this->assertEquals(4, $newResult['imported']['rows']);
 
         $this->dropAutoIncrementTable($config);
