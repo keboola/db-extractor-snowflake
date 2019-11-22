@@ -302,6 +302,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             "name" VARCHAR(30) NOT NULL DEFAULT \'pam\',
             "number" DECIMAL(10,8) NOT NULL DEFAULT 0.0,
             "timestamp" TIMESTAMP DEFAULT to_timestamp_ntz(current_timestamp()),
+            "date" DATE DEFAULT CURRENT_DATE,
             "datetime" DATETIME NOT NULL DEFAULT to_timestamp_ntz(current_timestamp()),
             PRIMARY KEY ("id")
             )',
@@ -311,7 +312,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $this->connection->query($createQuery);
 
         $insertQuery = sprintf(
-            'INSERT INTO %s.%s ("name") VALUES (\'george\'), (\'henry\')',
+            'INSERT INTO %s.%s ("name", "date") VALUES (\'george\', \'2019-11-20\'), (\'henry\', \'2019-11-21\')',
             $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
             $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
         );

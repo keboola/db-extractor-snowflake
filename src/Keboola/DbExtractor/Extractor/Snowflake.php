@@ -23,6 +23,7 @@ class Snowflake extends Extractor
 {
     public const INCREMENT_TYPE_NUMERIC = 'numeric';
     public const INCREMENT_TYPE_TIMESTAMP = 'timestamp';
+    public const INCREMENT_TYPE_DATE = 'date';
     public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
@@ -543,13 +544,16 @@ class Snowflake extends Extractor
             } else if ($datatype->getBasetype() === 'TIMESTAMP') {
                 $this->incrementalFetching['column'] = $columnName;
                 $this->incrementalFetching['type'] = self::INCREMENT_TYPE_TIMESTAMP;
+            } else if ($datatype->getBasetype() === 'DATE') {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_DATE;
             } else {
                 throw new UserException('invalid incremental fetching column type');
             }
         } catch (InvalidLengthException | UserException $exception) {
             throw new UserException(
                 sprintf(
-                    'Column [%s] specified for incremental fetching is not a numeric or timestamp type column',
+                    'Column [%s] specified for incremental fetching is not a numeric, date or timestamp type column',
                     $columnName
                 )
             );

@@ -61,6 +61,55 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
         $this->dropAutoIncrementTable($config);
     }
 
+    public function testIncrementalFetchingByDate(): void
+    {
+        $config = $this->getIncrementalConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'date';
+        $this->createAutoIncrementAndTimestampTable($config);
+
+        $app = $this->createApplication($config);
+        $result = $app->run();
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertEquals('2019-11-21', $result['state']['lastFetchedRow']);
+
+        $app = $this->createApplication($config, $result['state']);
+        $emtpyResult = $app->run();
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 1,
+            ],
+            $emtpyResult['imported']
+        );
+
+        $this->connection->query(sprintf(
+            "INSERT INTO %s.%s (\"name\", \"date\") VALUES ('wiliam', '2019-11-23'), ('charles', '2019-11-25')",
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        ));
+
+        $app = $this->createApplication($config, $result['state']);
+        $newResult = $app->run();
+
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertNotEmpty($newResult['state']['lastFetchedRow']);
+        $this->assertEquals('2019-11-25', $newResult['state']['lastFetchedRow']);
+        $this->assertEquals(3, $newResult['imported']['rows']);
+
+        $this->dropAutoIncrementTable($config);
+    }
+
     public function testIncrementalFetchingByDatetime(): void
     {
         $config = $this->getIncrementalConfig();
