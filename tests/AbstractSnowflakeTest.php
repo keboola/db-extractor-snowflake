@@ -16,6 +16,8 @@ use Symfony\Component\Filesystem\Filesystem;
 
 abstract class AbstractSnowflakeTest extends ExtractorTest
 {
+    public const DRIVER = 'snowflake';
+
     /**
      * @var Connection
      */
@@ -44,6 +46,9 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $this->connection->query(
             sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
+        );
+        $this->connection->query(
+            'alter session set client_timestamp_type_mapping=\'timestamp_ntz\''
         );
 
         $this->storageApiClient = new Client([
@@ -79,10 +84,23 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         return $config;
     }
 
-    public function createApplication(array $config): SnowflakeApplication
+    public function getConfigRow(string $driver = 'snowflake'): array
+    {
+        $config = parent::getConfigRow($driver);
+
+        $config['parameters']['db']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+        $config['parameters']['db']['warehouse'] = $this->getEnv($driver, 'DB_WAREHOUSE');
+
+        $config['parameters']['extractor_class'] = 'Snowflake';
+        $config['parameters']['table']['schema'] = $this->getEnv($driver, 'DB_SCHEMA');
+
+        return $config;
+    }
+
+    public function createApplication(array $config, array $state = []): SnowflakeApplication
     {
         $logger = new Logger('ex-db-snowflake-tests');
-        $app = new SnowflakeApplication($config, $logger, [], $this->dataDir);
+        $app = new SnowflakeApplication($config, $logger, $state, $this->dataDir);
 
         return $app;
     }
@@ -257,5 +275,57 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         }
 
         return $linesCount;
+    }
+
+    protected function getIncrementalConfig(): array
+    {
+        $config = $this->getConfigRow(self::DRIVER);
+        unset($config['parameters']['query']);
+        unset($config['parameters']['columns']);
+        $config['parameters']['table']['tableName'] = 'auto_increment_timestamp';
+        $config['parameters']['incremental'] = true;
+        $config['parameters']['name'] = 'auto-increment-timestamp';
+        $config['parameters']['outputTable'] = 'in.c-main.auto-increment-timestamp';
+        $config['parameters']['primaryKey'] = ['id'];
+        $config['parameters']['incrementalFetchingColumn'] = 'id';
+
+        return $config;
+    }
+
+    protected function createAutoIncrementAndTimestampTable(array $config): void
+    {
+        $this->dropAutoIncrementTable($config);
+
+        $createQuery = sprintf(
+            'CREATE TABLE %s.%s (
+            "id" INT NOT NULL AUTOINCREMENT,
+            "name" VARCHAR(30) NOT NULL DEFAULT \'pam\',
+            "number" DECIMAL(10,8) NOT NULL DEFAULT 0.0,
+            "timestamp" TIMESTAMP DEFAULT to_timestamp_ntz(current_timestamp()),
+            "date" DATE DEFAULT CURRENT_DATE,
+            "datetime" DATETIME NOT NULL DEFAULT to_timestamp_ntz(current_timestamp()),
+            PRIMARY KEY ("id")
+            )',
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($createQuery);
+
+        $insertQuery = sprintf(
+            'INSERT INTO %s.%s ("name", "date") VALUES (\'george\', \'2019-11-20\'), (\'henry\', \'2019-11-21\')',
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($insertQuery);
+    }
+
+    protected function dropAutoIncrementTable(array $config): void
+    {
+        $dropQuery = sprintf(
+            'DROP TABLE IF EXISTS %s.%s',
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        );
+        $this->connection->query($dropQuery);
     }
 }
