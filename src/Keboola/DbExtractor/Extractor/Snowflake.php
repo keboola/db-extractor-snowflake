@@ -199,7 +199,10 @@ class Snowflake extends Extractor
         // copy into internal staging
         $copyCommand = $this->generateCopyCommand($tmpTableName, $query);
 
-        $res = $this->runRetriableQueries($copyCommand, 'Copy Command failed');
+        $res = $this->runRetriableQueries(
+            $copyCommand,
+            sprintf('Copy Command: %s failed with message', $copyCommand)
+        );
 
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
@@ -696,7 +699,7 @@ class Snowflake extends Extractor
                 return $result;
             } catch (\Throwable $e) {
                 throw new UserException(
-                    sprintf($errorMessage . ': %s', $e->getMessage()),
+                    $errorMessage . ': ' . $e->getMessage(),
                     0,
                     $e
                 );
