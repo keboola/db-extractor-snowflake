@@ -154,7 +154,7 @@ class Snowflake extends Extractor
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
-        $result = $this->db->fetchAll($fullsql);
+        $result = $this->runRetriableQueries($fullsql);
         if (count($result) > 0) {
             return $result[0][$this->incrementalFetching['column']];
         }
@@ -474,7 +474,7 @@ class Snowflake extends Extractor
 
     public function validateIncrementalFetching(array $table, string $columnName, ?int $limit = null): void
     {
-        $columns = $this->db->fetchAll(
+        $columns = $this->runRetriableQueries(
             sprintf(
                 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
                             WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
