@@ -154,7 +154,7 @@ class Snowflake extends Extractor
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
-        $result = $this->runRetriableQuery($fullsql);
+        $result = $this->runRetriableQuery($fullsql, 'Error fetching maximum value');
         if (count($result) > 0) {
             return $result[0][$this->incrementalFetching['column']];
         }
@@ -174,7 +174,10 @@ class Snowflake extends Extractor
             sprintf('DB query "%s" failed: ', rtrim(trim($query), ';'))
         );
 
-        return $this->runRetriableQuery('DESC RESULT LAST_QUERY_ID()');
+        return $this->runRetriableQuery(
+            'DESC RESULT LAST_QUERY_ID()',
+            'Error fetching last query id'
+        );
     }
 
     private function exportAndDownload(array $table): int
@@ -389,10 +392,10 @@ class Snowflake extends Extractor
     public function getTables(?array $tables = null): array
     {
         $sql = $this->schema ? 'SHOW TABLES IN SCHEMA' : 'SHOW TABLES IN DATABASE';
-        $arr = $this->runRetriableQuery($sql);
+        $arr = $this->runRetriableQuery($sql, 'Error fetching show schema');
 
         $sql = $this->schema ? 'SHOW VIEWS IN SCHEMA' : 'SHOW VIEWS IN DATABASE';
-        $views = $this->runRetriableQuery($sql);
+        $views = $this->runRetriableQuery($sql, 'Error fetching show views');
         $arr = array_merge($arr, $views);
 
         $tableDefs = [];
@@ -436,7 +439,7 @@ class Snowflake extends Extractor
             . $sqlWhereClause
             . ' ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION';
 
-        $columns = $this->runRetriableQuery($sql);
+        $columns = $this->runRetriableQuery($sql, 'Error fetching table columns');
         foreach ($columns as $i => $column) {
             $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
             $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
@@ -481,7 +484,8 @@ class Snowflake extends Extractor
                 $this->quote($table['schema']),
                 $this->quote($table['tableName']),
                 $this->quote($columnName)
-            )
+            ),
+            'Error get column info'
         );
         if (count($columns) === 0) {
             throw new UserException(
@@ -674,7 +678,7 @@ class Snowflake extends Extractor
             $this->db->quoteIdentifier($this->user)
         );
 
-        $config = $this->runRetriableQuery($sql);
+        $config = $this->runRetriableQuery($sql, 'Error get user config');
 
         foreach ($config as $item) {
             if ($item['property'] === 'DEFAULT_WAREHOUSE') {
