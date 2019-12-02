@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Csv\CsvFile;
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
+use Keboola\DbExtractor\DbRetryProxy;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorLogger\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
@@ -14,9 +15,6 @@ use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\Datatype\Definition\Exception\InvalidTypeException;
 use Keboola\Temp\Temp;
-use Retry\BackOff\ExponentialBackOffPolicy;
-use Retry\Policy\SimpleRetryPolicy;
-use Retry\RetryProxy;
 use Symfony\Component\Process\Process;
 
 class Snowflake extends Extractor
@@ -156,7 +154,7 @@ class Snowflake extends Extractor
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
-        $result = $this->db->fetchAll($fullsql);
+        $result = $this->runRetriableQuery($fullsql, 'Error fetching maximum value');
         if (count($result) > 0) {
             return $result[0][$this->incrementalFetching['column']];
         }
@@ -171,17 +169,15 @@ class Snowflake extends Extractor
             rtrim(trim($query), ';')
         );
 
-        try {
-            $this->db->query($sql);
-        } catch (\Throwable $e) {
-            throw new UserException(
-                sprintf('DB query "%s" failed: %s', rtrim(trim($query), ';'), $e->getMessage()),
-                0,
-                $e
-            );
-        }
+        $this->runRetriableQuery(
+            $sql,
+            sprintf('DB query "%s" failed: ', rtrim(trim($query), ';'))
+        );
 
-        return $this->db->fetchAll('DESC RESULT LAST_QUERY_ID()');
+        return $this->runRetriableQuery(
+            'DESC RESULT LAST_QUERY_ID()',
+            'Error fetching last query id'
+        );
     }
 
     private function exportAndDownload(array $table): int
@@ -206,13 +202,10 @@ class Snowflake extends Extractor
         // copy into internal staging
         $copyCommand = $this->generateCopyCommand($tmpTableName, $query);
 
-        try {
-            $res = $this->executeCopyCommand($copyCommand);
-        } catch (\Throwable $e) {
-            throw new UserException(
-                sprintf('Copy Command: %s failed with message: %s', $copyCommand, $e->getMessage())
-            );
-        }
+        $res = $this->runRetriableQuery(
+            $copyCommand,
+            sprintf('Copy Command: %s failed with message', $copyCommand)
+        );
 
         if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
             // query resulted in no rows, nothing left to do
@@ -326,40 +319,6 @@ class Snowflake extends Extractor
         );
     }
 
-    private function executeCopyCommand(string $copyCommand, int $maxTries = 5): array
-    {
-        $retryPolicy = new SimpleRetryPolicy($maxTries, ['PDOException', 'ErrorException', 'Exception']);
-        $backOffPolicy = new ExponentialBackOffPolicy(1000);
-        $proxy = new RetryProxy($retryPolicy, $backOffPolicy);
-        $counter = 0;
-        /** @var \Exception $lastException */
-        $lastException = null;
-        try {
-            $ret = $proxy->call(function () use ($copyCommand, &$counter, &$lastException) {
-                if ($counter > 0) {
-                    $this->logger->info(sprintf('%s. Retrying... [%dx]', $lastException->getMessage(), $counter));
-                }
-                try {
-                    return $this->db->fetchAll($copyCommand);
-                } catch (\Throwable $e) {
-                    $lastException = new UserException(
-                        sprintf('Copy Command failed: %s', $e->getMessage()),
-                        0,
-                        $e
-                    );
-                    $counter++;
-                    throw $e;
-                }
-            });
-        } catch (\Throwable $e) {
-            if ($lastException !== null) {
-                throw $lastException;
-            }
-            throw $e;
-        }
-        return $ret;
-    }
-
     private function createTableManifest(array $table, array $columns): array
     {
         $manifestData = [
@@ -433,10 +392,10 @@ class Snowflake extends Extractor
     public function getTables(?array $tables = null): array
     {
         $sql = $this->schema ? 'SHOW TABLES IN SCHEMA' : 'SHOW TABLES IN DATABASE';
-        $arr = $this->db->fetchAll($sql);
+        $arr = $this->runRetriableQuery($sql, 'Error fetching show schema');
 
         $sql = $this->schema ? 'SHOW VIEWS IN SCHEMA' : 'SHOW VIEWS IN DATABASE';
-        $views = $this->db->fetchAll($sql);
+        $views = $this->runRetriableQuery($sql, 'Error fetching show views');
         $arr = array_merge($arr, $views);
 
         $tableDefs = [];
@@ -480,7 +439,7 @@ class Snowflake extends Extractor
             . $sqlWhereClause
             . ' ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION';
 
-        $columns = $this->db->fetchAll($sql);
+        $columns = $this->runRetriableQuery($sql, 'Error fetching table columns');
         foreach ($columns as $i => $column) {
             $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
             $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
@@ -518,14 +477,15 @@ class Snowflake extends Extractor
 
     public function validateIncrementalFetching(array $table, string $columnName, ?int $limit = null): void
     {
-        $columns = $this->db->fetchAll(
+        $columns = $this->runRetriableQuery(
             sprintf(
                 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
                             WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
                 $this->quote($table['schema']),
                 $this->quote($table['tableName']),
                 $this->quote($columnName)
-            )
+            ),
+            'Error get column info'
         );
         if (count($columns) === 0) {
             throw new UserException(
@@ -718,7 +678,7 @@ class Snowflake extends Extractor
             $this->db->quoteIdentifier($this->user)
         );
 
-        $config = $this->db->fetchAll($sql);
+        $config = $this->runRetriableQuery($sql, 'Error get user config');
 
         foreach ($config as $item) {
             if ($item['property'] === 'DEFAULT_WAREHOUSE') {
@@ -729,18 +689,31 @@ class Snowflake extends Extractor
         return null;
     }
 
-    private function execQuery(string $query): void
+    private function runRetriableQuery(string $query, string $errorMessage = '', string $type = 'fetchAll'): array
     {
-        try {
-            $this->db->query($query);
-        } catch (\Throwable $e) {
-            throw new UserException('Query execution error: ' . $e->getMessage(), 0, $e);
-        }
+        $retryProxy = new DbRetryProxy(
+            $this->logger,
+            DbRetryProxy::DEFAULT_MAX_TRIES,
+            [\PDOException::class, \ErrorException::class, \Throwable::class]
+        );
+        return $retryProxy->call(function () use ($query, $type, $errorMessage): array {
+            try {
+                /** @var array $result */
+                $result = (array) $this->db->{$type}($query);
+                return $result;
+            } catch (\Throwable $e) {
+                throw new UserException(
+                    $errorMessage . ': ' . $e->getMessage(),
+                    0,
+                    $e
+                );
+            }
+        });
     }
 
     private function cleanupTableStage(string $tmpTableName): void
     {
         $sql = sprintf('REMOVE @~/%s;', $tmpTableName);
-        $this->execQuery($sql);
+        $this->runRetriableQuery($sql, 'Query execution error', 'query');
     }
 }
