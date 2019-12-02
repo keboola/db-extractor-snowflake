@@ -154,7 +154,7 @@ class Snowflake extends Extractor
                 $this->db->quoteIdentifier($table['tableName'])
             );
         }
-        $result = $this->runRetriableQueries($fullsql);
+        $result = $this->runRetriableQuery($fullsql);
         if (count($result) > 0) {
             return $result[0][$this->incrementalFetching['column']];
         }
@@ -169,12 +169,12 @@ class Snowflake extends Extractor
             rtrim(trim($query), ';')
         );
 
-        $this->runRetriableQueries(
+        $this->runRetriableQuery(
             $sql,
             sprintf('DB query "%s" failed: ', rtrim(trim($query), ';'))
         );
 
-        return $this->runRetriableQueries('DESC RESULT LAST_QUERY_ID()');
+        return $this->runRetriableQuery('DESC RESULT LAST_QUERY_ID()');
     }
 
     private function exportAndDownload(array $table): int
@@ -199,7 +199,7 @@ class Snowflake extends Extractor
         // copy into internal staging
         $copyCommand = $this->generateCopyCommand($tmpTableName, $query);
 
-        $res = $this->runRetriableQueries(
+        $res = $this->runRetriableQuery(
             $copyCommand,
             sprintf('Copy Command: %s failed with message', $copyCommand)
         );
@@ -389,10 +389,10 @@ class Snowflake extends Extractor
     public function getTables(?array $tables = null): array
     {
         $sql = $this->schema ? 'SHOW TABLES IN SCHEMA' : 'SHOW TABLES IN DATABASE';
-        $arr = $this->runRetriableQueries($sql);
+        $arr = $this->runRetriableQuery($sql);
 
         $sql = $this->schema ? 'SHOW VIEWS IN SCHEMA' : 'SHOW VIEWS IN DATABASE';
-        $views = $this->runRetriableQueries($sql);
+        $views = $this->runRetriableQuery($sql);
         $arr = array_merge($arr, $views);
 
         $tableDefs = [];
@@ -436,7 +436,7 @@ class Snowflake extends Extractor
             . $sqlWhereClause
             . ' ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION';
 
-        $columns = $this->runRetriableQueries($sql);
+        $columns = $this->runRetriableQuery($sql);
         foreach ($columns as $i => $column) {
             $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
             $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
@@ -474,7 +474,7 @@ class Snowflake extends Extractor
 
     public function validateIncrementalFetching(array $table, string $columnName, ?int $limit = null): void
     {
-        $columns = $this->runRetriableQueries(
+        $columns = $this->runRetriableQuery(
             sprintf(
                 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
                             WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
@@ -674,7 +674,7 @@ class Snowflake extends Extractor
             $this->db->quoteIdentifier($this->user)
         );
 
-        $config = $this->runRetriableQueries($sql);
+        $config = $this->runRetriableQuery($sql);
 
         foreach ($config as $item) {
             if ($item['property'] === 'DEFAULT_WAREHOUSE') {
@@ -685,7 +685,7 @@ class Snowflake extends Extractor
         return null;
     }
 
-    private function runRetriableQueries(string $query, string $errorMessage = '', string $type = 'fetchAll'): array
+    private function runRetriableQuery(string $query, string $errorMessage = '', string $type = 'fetchAll'): array
     {
         $retryProxy = new DbRetryProxy(
             $this->logger,
@@ -710,6 +710,6 @@ class Snowflake extends Extractor
     private function cleanupTableStage(string $tmpTableName): void
     {
         $sql = sprintf('REMOVE @~/%s;', $tmpTableName);
-        $this->runRetriableQueries($sql, 'Query execution error', 'query');
+        $this->runRetriableQuery($sql, 'Query execution error', 'query');
     }
 }
