@@ -42,6 +42,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $config = $this->getConfig();
 
         $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];
+
+        if (getenv('KBC_RUNID')) {
+            $config['parameters']['db']['runId'] = getenv('KBC_RUNID');
+        }
+
         $this->connection = new Connection($config['parameters']['db']);
 
         $this->connection->query(

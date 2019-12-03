@@ -41,6 +41,27 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
+    public function testQueryTagging(): void
+    {
+        $this->connection->query('SELECT current_date;');
+
+        $queries = $this->connection->fetchAll(
+            '
+                SELECT 
+                    QUERY_TEXT, QUERY_TAG 
+                FROM 
+                    TABLE(INFORMATION_SCHEMA.QUERY_HISTORY_BY_SESSION())
+                WHERE QUERY_TEXT = \'SELECT current_date;\' 
+                ORDER BY START_TIME DESC 
+                LIMIT 1
+            '
+        );
+
+        $runId = sprintf('{"runId":"%s"}', getenv('KBC_RUNID'));
+
+        $this->assertEquals($runId, $queries[0]['QUERY_TAG']);
+    }
+
     public function testCredentials(): void
     {
         $config = $this->getConfig();

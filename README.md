@@ -74,6 +74,7 @@ Note that `GRANT SELECT ON ALL *` queries will grant permissions to objects exis
 2. Create snowflake resources (database, schema, role and user) [note that the test user/role must have permissions on the Public schema of the test database]
 3. Create `.env` file and fill in you Redshift and S3 credentials:
 ```
+KBC_RUNID=
 SNOWFLAKE_DB_HOST=
 SNOWFLAKE_DB_PORT=443
 SNOWFLAKE_DB_USER=
