@@ -40,4 +40,13 @@ class SnowflakeApplication extends Application
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
     }
+
+    protected function isRowConfiguration(array $config): bool
+    {
+        if (isset($config['parameters']['table']) || isset($config['parameters']['query'])) {
+            return true;
+        }
+
+        return false;
+    }
 }
