@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7f4d1df9a643252983924b10ca5265e3",
+    "content-hash": "1a91157434f5c3a154a33d96fdee405f",
     "packages": [
         {
             "name": "aws/aws-sdk-php",
@@ -533,16 +533,16 @@
         },
         {
             "name": "keboola/php-csv-db-import",
-            "version": "5.0.2",
+            "version": "5.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-db-import.git",
-                "reference": "18a1693c74feea97590bc0dfdef32a9d77a0c733"
+                "reference": "d52992baf0736789d32f04052f4b649c3aa0eaef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-db-import/zipball/18a1693c74feea97590bc0dfdef32a9d77a0c733",
-                "reference": "18a1693c74feea97590bc0dfdef32a9d77a0c733",
+                "url": "https://api.github.com/repos/keboola/php-db-import/zipball/d52992baf0736789d32f04052f4b649c3aa0eaef",
+                "reference": "d52992baf0736789d32f04052f4b649c3aa0eaef",
                 "shasum": ""
             },
             "require": {
@@ -568,7 +568,7 @@
                 "MIT"
             ],
             "description": "Handling of large bulk data into database tables.",
-            "time": "2019-12-09T10:42:34+00:00"
+            "time": "2019-12-11T15:30:41+00:00"
         },
         {
             "name": "keboola/php-datatypes",
@@ -2638,6 +2638,7 @@
                 "MIT"
             ],
             "description": "PHPStan Phar distribution",
+            "abandoned": "phpstan/phpstan",
             "time": "2019-09-17T11:49:39+00:00"
         },
         {
