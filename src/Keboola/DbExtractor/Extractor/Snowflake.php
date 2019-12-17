@@ -9,11 +9,11 @@ use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\DbRetryProxy;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorLogger\Logger;
-use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\Datatype\Definition\Exception\InvalidTypeException;
+use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 
@@ -58,6 +58,10 @@ class Snowflake extends Extractor
         $dbParams['password'] = $dbParams['#password'];
         $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
 
+        $this->schema = $dbParams['schema'];
+        unset($dbParams['schema']);
+        unset($dbParams['#password']);
+
         $connection = new Connection($dbParams);
 
         $this->user = $dbParams['user'];
@@ -69,7 +73,6 @@ class Snowflake extends Extractor
         }
 
         if (!empty($dbParams['schema'])) {
-            $this->schema = $dbParams['schema'];
             $connection->query(sprintf('USE SCHEMA %s', $connection->quoteIdentifier($this->schema)));
         }
 

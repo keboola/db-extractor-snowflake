@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
-use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractorLogger\Logger;
 use Keboola\DbExtractor\Test\ExtractorTest;
+use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Options\FileUploadOptions;
 use Keboola\StorageApi\Options\GetFileOptions;
@@ -41,11 +41,15 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $config = $this->getConfig();
 
+        $schema = $config['parameters']['db']['schema'];
         $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];
+        unset($config['parameters']['db']['#password']);
+        unset($config['parameters']['db']['schema']);
+
         $this->connection = new Connection($config['parameters']['db']);
 
         $this->connection->query(
-            sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
+            sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($schema))
         );
         $this->connection->query(
             'alter session set client_timestamp_type_mapping=\'timestamp_ntz\''
