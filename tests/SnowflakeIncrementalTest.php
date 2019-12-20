@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
+use Keboola\SnowflakeDbAdapter\QueryBuilder;
+
 class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 {
 
@@ -42,8 +44,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
         $this->connection->query(sprintf(
             "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         ));
 
         $app = $this->createApplication($config, $result['state']);
@@ -94,8 +96,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
         $this->connection->query(sprintf(
             "INSERT INTO %s.%s (\"name\", \"date\") VALUES ('wiliam', '2019-11-23'), ('charles', '2019-11-25')",
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         ));
 
         $app = $this->createApplication($config, $result['state']);
@@ -143,8 +145,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
         $this->connection->query(sprintf(
             "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         ));
 
         $app = $this->createApplication($config, $result['state']);
@@ -194,8 +196,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
         $this->connection->query(sprintf(
             "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         ));
 
         $app = $this->createApplication($config, $result['state']);
@@ -249,8 +251,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
         $this->connection->query(sprintf(
             "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         ));
 
         $app = $this->createApplication($config, $result['state']);
@@ -301,8 +303,8 @@ class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 
         $this->connection->query(sprintf(
             "INSERT INTO %s.%s (\"name\", \"number\") VALUES ('wiliam', '20.548796'), ('charles', '35.5478524')",
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         ));
 
         $app = $this->createApplication($config, $result['state']);

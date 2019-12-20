@@ -8,6 +8,7 @@ use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\Snowflake;
 use Keboola\DbExtractorLogger\Logger;
+use Keboola\SnowflakeDbAdapter\QueryBuilder;
 
 class SnowflakeTest extends AbstractSnowflakeTest
 {
@@ -194,7 +195,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         // add schema to db query
         $config['parameters']['tables'][0]['query'] = sprintf(
             'SELECT * FROM %s."escaping"',
-            $this->connection->quoteIdentifier($this->getEnv('snowflake', 'DB_SCHEMA'))
+            QueryBuilder::quoteIdentifier($this->getEnv('snowflake', 'DB_SCHEMA'))
         );
 
         $app = $this->createApplication($config);
@@ -217,6 +218,22 @@ class SnowflakeTest extends AbstractSnowflakeTest
 
         $app = $this->createApplication($config);
         $result = $app->run();
+
+        $history = $this->connection->fetchAll("
+            select 
+                QUERY_TEXT, QUERY_TAG, END_TIME 
+            from 
+                table(information_schema.query_history_by_user()) 
+            WHERE 
+                query_text='SHOW TABLES IN SCHEMA' 
+            order by END_TIME DESC
+            LIMIT 1;
+        ");
+
+        $this->assertSame(
+            sprintf('{"runId":"%s"}', getenv('KBC_RUNID')),
+            $history[0]['QUERY_TAG']
+        );
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileNotExists($outputCsvFolder);
@@ -1195,7 +1212,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
     {
         $sql = sprintf(
             'DESC USER %s;',
-            $this->connection->quoteIdentifier($user)
+            QueryBuilder::quoteIdentifier($user)
         );
 
         $config = $this->connection->fetchAll($sql);
@@ -1214,8 +1231,8 @@ class SnowflakeTest extends AbstractSnowflakeTest
         if ($warehouse) {
             $sql = sprintf(
                 'ALTER USER %s SET DEFAULT_WAREHOUSE = %s;',
-                $this->connection->quoteIdentifier($user),
-                $this->connection->quoteIdentifier($warehouse)
+                QueryBuilder::quoteIdentifier($user),
+                QueryBuilder::quoteIdentifier($warehouse)
             );
             $this->connection->query($sql);
 
@@ -1223,7 +1240,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         } else {
             $sql = sprintf(
                 'ALTER USER %s SET DEFAULT_WAREHOUSE = null;',
-                $this->connection->quoteIdentifier($user)
+                QueryBuilder::quoteIdentifier($user)
             );
             $this->connection->query($sql);
 

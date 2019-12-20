@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
-use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractorLogger\Logger;
 use Keboola\DbExtractor\Test\ExtractorTest;
+use Keboola\SnowflakeDbAdapter\Connection;
+use Keboola\SnowflakeDbAdapter\QueryBuilder;
 use Keboola\StorageApi\Client;
 use Keboola\StorageApi\Options\FileUploadOptions;
 use Keboola\StorageApi\Options\GetFileOptions;
@@ -42,10 +43,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $config = $this->getConfig();
 
         $config['parameters']['db']['password'] = $config['parameters']['db']['#password'];
+        unset($config['parameters']['db']['#password']);
         $this->connection = new Connection($config['parameters']['db']);
 
         $this->connection->query(
-            sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($config['parameters']['db']['schema']))
+            sprintf('USE SCHEMA %s', QueryBuilder::quoteIdentifier($config['parameters']['db']['schema']))
         );
         $this->connection->query(
             'alter session set client_timestamp_type_mapping=\'timestamp_ntz\''
@@ -55,6 +57,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             'url' => 'https://connection.keboola.com',
             'token' => getenv('STORAGE_API_TOKEN'),
         ]);
+        putenv('KBC_RUNID='. $this->storageApiClient->generateRunId());
 
         $this->setupTables();
 
@@ -69,6 +72,11 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
         $fileSystem->remove($this->dataDir . '/getTablesAction/config.yml');
         $fileSystem->remove($this->dataDir . '/getTablesAction/config.json');
         $fileSystem->remove($this->dataDir . '/getTablesAction/out');
+    }
+
+    public function tearDown(): void
+    {
+        $this->connection->disconnect();
     }
 
     public function getConfig(string $driver = 'snowflake'): array
@@ -127,7 +135,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $this->connection->query(sprintf(
             'DROP TABLE IF EXISTS %s',
-            $this->connection->quoteIdentifier('types')
+            QueryBuilder::quoteIdentifier('types')
         ));
 
         $this->connection->query(
@@ -138,7 +146,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
                   "decimal" NUMBER(10,2), 
                   "date" DATE
                 );',
-                $this->connection->quoteIdentifier('types')
+                QueryBuilder::quoteIdentifier('types')
             )
         );
         $storageFileInfo = $this->storageApiClient->getFile(
@@ -182,9 +190,9 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     private function generateCreateCommand(string $tableName, CsvFile $csv, array $fileInfo): string
     {
         $csvOptions = [];
-        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', $this->connection->quoteIdentifier($csv->getDelimiter()));
+        $csvOptions[] = sprintf('FIELD_DELIMITER = %s', QueryBuilder::quoteIdentifier($csv->getDelimiter()));
         $csvOptions[] = sprintf('FIELD_OPTIONALLY_ENCLOSED_BY = %s', $this->quote($csv->getEnclosure()));
-        $csvOptions[] = sprintf('ESCAPE_UNENCLOSED_FIELD = %s', $this->connection->quoteIdentifier('\\'));
+        $csvOptions[] = sprintf('ESCAPE_UNENCLOSED_FIELD = %s', QueryBuilder::quoteIdentifier('\\'));
 
         if (!$fileInfo['isSliced']) {
             $csvOptions[] = 'SKIP_HEADER = 1';
@@ -197,7 +205,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
              FILE_FORMAT = (TYPE=CSV %s)
              CREDENTIALS = (AWS_KEY_ID = %s AWS_SECRET_KEY = %s  AWS_TOKEN = %s)
             ",
-            $this->connection->quoteIdentifier($tableName),
+            QueryBuilder::quoteIdentifier($tableName),
             $fileInfo['s3Path']['bucket'],
             $fileInfo['s3Path']['key'],
             implode(' ', $csvOptions),
@@ -222,18 +230,18 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         if ($schemaName) {
             $this->connection->query(
-                sprintf('USE SCHEMA %s', $this->connection->quoteIdentifier($schemaName))
+                sprintf('USE SCHEMA %s', QueryBuilder::quoteIdentifier($schemaName))
             );
         }
 
         $this->connection->query(sprintf(
             'DROP TABLE IF EXISTS %s',
-            $this->connection->quoteIdentifier($tableName)
+            QueryBuilder::quoteIdentifier($tableName)
         ));
 
         $this->connection->query(sprintf(
             'CREATE TABLE %s (%s);',
-            $this->connection->quoteIdentifier($tableName),
+            QueryBuilder::quoteIdentifier($tableName),
             implode(
                 ', ',
                 array_map(function ($column) {
@@ -256,7 +264,7 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
 
         $sql = sprintf(
             'SELECT COUNT(*) AS ROWCOUNT FROM %s',
-            $this->connection->quoteIdentifier($tableName)
+            QueryBuilder::quoteIdentifier($tableName)
         );
         $result = $this->connection->fetchAll($sql);
         $this->assertEquals($this->countTable($file), (int) $result[0]['ROWCOUNT']);
@@ -306,15 +314,15 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
             "datetime" DATETIME NOT NULL DEFAULT to_timestamp_ntz(current_timestamp()),
             PRIMARY KEY ("id")
             )',
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         );
         $this->connection->query($createQuery);
 
         $insertQuery = sprintf(
             'INSERT INTO %s.%s ("name", "date") VALUES (\'george\', \'2019-11-20\'), (\'henry\', \'2019-11-21\')',
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         );
         $this->connection->query($insertQuery);
     }
@@ -323,8 +331,8 @@ abstract class AbstractSnowflakeTest extends ExtractorTest
     {
         $dropQuery = sprintf(
             'DROP TABLE IF EXISTS %s.%s',
-            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
-            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['schema']),
+            QueryBuilder::quoteIdentifier($config['parameters']['table']['tableName'])
         );
         $this->connection->query($dropQuery);
     }
