@@ -944,13 +944,13 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 ),
             1 =>
                 array (
-                    'key' => 'KBC.catalog',
-                    'value' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'key' => 'KBC.schema',
+                    'value' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                 ),
             2 =>
                 array (
-                    'key' => 'KBC.schema',
-                    'value' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                    'key' => 'KBC.catalog',
+                    'value' => $this->getEnv('snowflake', 'DB_DATABASE'),
                 ),
             3 =>
                 array (
@@ -961,11 +961,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 array (
                     'key' => 'KBC.rowCount',
                     'value' => '4',
-                ),
-            5 =>
-                array (
-                    'key' => 'KBC.byteCount',
-                    'value' => '1024',
                 ),
         );
         $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
@@ -997,11 +992,26 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '100',
                         ),
                     4 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'character',
+                        ),
+                    5 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'TEXT',
                         ),
-                    5 =>
+                    6 =>
+                        array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array (
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    8 =>
                         array (
                             'key' => 'KBC.ordinalPosition',
                             'value' => '1',
@@ -1030,14 +1040,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '6,0',
                         ),
                     4 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'integer',
+                        ),
+                    5 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'NUMBER',
                         ),
-                    5 =>
+                    6 =>
+                        array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array (
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    8 =>
                         array (
                             'key' => 'KBC.ordinalPosition',
-                            'value' => '2',
+                            'value' => 2,
                         ),
                 ),
             'decimal' =>
@@ -1063,14 +1088,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '10,2',
                         ),
                     4 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'decimal',
+                        ),
+                    5 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'NUMBER',
                         ),
-                    5 =>
+                    6 =>
                         array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array(
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    8 =>
+                        array(
                             'key' => 'KBC.ordinalPosition',
-                            'value' => '3',
+                            'value' => 3,
                         ),
                 ),
             'date' =>
@@ -1091,14 +1131,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => 'DATE',
                         ),
                     3 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'date',
+                        ),
+                    4 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'DATE',
                         ),
-                    4 =>
+                    5 =>
                         array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    6 =>
+                        array(
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array(
                             'key' => 'KBC.ordinalPosition',
-                            'value' => '4',
+                            'value' => 4,
                         ),
                 ),
         );
