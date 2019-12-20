@@ -8,6 +8,8 @@ use Keboola\Csv\CsvFile;
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\DbRetryProxy;
 use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractor\TableResultFormat\Table;
+use Keboola\DbExtractor\TableResultFormat\TableColumn;
 use Keboola\DbExtractorLogger\Logger;
 use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
@@ -398,7 +400,9 @@ class Snowflake extends Extractor
         $views = $this->runRetriableQuery($sql, 'Error fetching show views');
         $arr = array_merge($arr, $views);
 
+        /** @var Table[] $tableDefs */
         $tableDefs = [];
+        $sqlWhereElements = [];
         foreach ($arr as $table) {
             if ($this->shouldTableBeSkipped($table)) {
                 continue;
@@ -406,18 +410,22 @@ class Snowflake extends Extractor
             if (is_null($tables) || !(array_search($table['name'], array_column($tables, 'tableName')) === false)) {
                 $isView = array_key_exists('text', $table);
                 $fullTableId = $table['schema_name'] . '.' . $table['name'];
-                $tableDefs[$fullTableId] = [
-                    'name' => $table['name'],
-                    'catalog' => (isset($table['database_name'])) ? $table['database_name'] : null,
-                    'schema' => (isset($table['schema_name'])) ? $table['schema_name'] : null,
-                    'type' => $isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null),
-                ];
+                $tableFormat = new Table();
+                $tableFormat
+                    ->setSchema($table['schema_name'])
+                    ->setName($table['name'])
+                    ->setCatalog((isset($table['database_name'])) ? $table['database_name'] : null)
+                    ->setType($isView ? 'VIEW' : (isset($table['kind']) ? $table['kind'] : null));
+
                 if (isset($table['rows'])) {
-                    $tableDefs[$fullTableId]['rowCount'] = $table['rows'];
+                    $tableFormat->setRowCount((int) $table['rows']);
                 }
-                if (isset($table['bytes'])) {
-                    $tableDefs[$fullTableId]['byteCount'] = $table['bytes'];
-                }
+                $tableDefs[$fullTableId] = $tableFormat;
+                $sqlWhereElements[] = sprintf(
+                    '(table_schema = %s AND table_name = %s)',
+                    $this->quote($table['schema_name']),
+                    $this->quote($table['name'])
+                );
             }
         }
 
@@ -425,14 +433,6 @@ class Snowflake extends Extractor
             return [];
         }
 
-        $sqlWhereElements = [];
-        foreach ($tableDefs as $fullTableId => $tableDef) {
-            $sqlWhereElements[] = sprintf(
-                '(table_schema = %s AND table_name = %s)',
-                $this->quote($tableDef['schema']),
-                $this->quote($tableDef['name'])
-            );
-        }
         $sqlWhereClause = sprintf('WHERE %s', implode(' OR ', $sqlWhereElements));
 
         $sql = 'SELECT * FROM information_schema.columns '
@@ -450,21 +450,20 @@ class Snowflake extends Extractor
                     $length = $column['NUMERIC_PRECISION'];
                 }
             }
+            $columnFormat = new TableColumn();
+            $columnFormat
+                ->setName($column['COLUMN_NAME'])
+                ->setDefault($column['COLUMN_DEFAULT'])
+                ->setLength($length)
+                ->setNullable((trim($column['IS_NULLABLE']) === 'NO') ? false : true)
+                ->setType($column['DATA_TYPE'])
+                ->setOrdinalPosition((int) $column['ORDINAL_POSITION']);
 
-            $curColumn = [
-                'name' => $column['COLUMN_NAME'],
-                'default' => $column['COLUMN_DEFAULT'],
-                'length' => $length,
-                'nullable' => (trim($column['IS_NULLABLE']) === 'NO') ? false : true,
-                'type' => $column['DATA_TYPE'],
-                'ordinalPosition' => $column['ORDINAL_POSITION'],
-            ];
-
-            if (!array_key_exists('columns', $tableDefs[$curTable])) {
-                $tableDefs[$curTable]['columns'] = [];
-            }
-            $tableDefs[$curTable]['columns'][] = $curColumn;
+            $tableDefs[$curTable]->addColumn($columnFormat);
         }
+        array_walk($tableDefs, function (Table &$item): void {
+            $item = $item->getOutput();
+        });
         return array_values($tableDefs);
     }
 
