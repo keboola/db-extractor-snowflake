@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Csv\CsvFile;
 use Keboola\DbExtractor\Exception\UserException;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
 class SnowflakeEntrypointTest extends AbstractSnowflakeTest
@@ -195,6 +196,54 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $this->assertStringContainsString('[4x]', $process->getOutput());
         $this->assertStringContainsString('failed with message:', $process->getErrorOutput());
         $this->assertEquals(1, $process->getExitCode());
+    }
+
+    public function testRunIncrementalFetching(): void
+    {
+        $config = $this->getIncrementalConfig();
+        $this->createAutoIncrementAndTimestampTable($config);
+
+        @unlink($this->dataDir . '/config.json');
+
+        $inputStateFile = $this->dataDir . '/in/state.json';
+
+        $fs = new Filesystem();
+        if (!$fs->exists($inputStateFile)) {
+            $fs->mkdir($this->dataDir . '/in');
+            $fs->touch($inputStateFile);
+        }
+        $outputStateFile = $this->dataDir . '/out/state.json';
+        // unset the state file
+        @unlink($outputStateFile);
+        @unlink($inputStateFile);
+
+        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
+        $process->run();
+
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertFileExists($outputStateFile);
+        $this->assertEquals(['lastFetchedRow' => '2'], json_decode((string) file_get_contents($outputStateFile), true));
+
+        // add a couple rows
+        $this->connection->query(sprintf(
+            "INSERT INTO %s.%s (\"name\") VALUES ('wiliam'), ('charles')",
+            $this->connection->quoteIdentifier($config['parameters']['table']['schema']),
+            $this->connection->quoteIdentifier($config['parameters']['table']['tableName'])
+        ));
+
+        // copy state to input state file
+        file_put_contents($inputStateFile, file_get_contents($outputStateFile));
+
+        // run the config again
+        $process = Process::fromShellCommandline('php ' . self::ROOT_PATH . '/run.php --data=' . $this->dataDir);
+        $process->setTimeout(300);
+        $process->run();
+
+        $this->assertEquals(0, $process->getExitCode());
+        $this->assertEquals(['lastFetchedRow' => '4'], json_decode((string) file_get_contents($outputStateFile), true));
     }
 
     public function getRowFilesProvider(): array
