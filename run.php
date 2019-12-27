@@ -8,6 +8,7 @@ use Keboola\DbExtractorLogger\Logger;
 use Monolog\Handler\NullHandler;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Encoder\JsonDecode;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -30,7 +31,18 @@ try {
         throw new UserException('Could not find configuration file');
     }
 
-    $app = new SnowflakeApplication($config, $logger, [], $arguments['data']);
+    // get the state
+    $inputState = [];
+    $inputStateFile = $arguments['data'] . '/in/state.json';
+    if (file_exists($inputStateFile)) {
+        $jsonDecode = new JsonDecode(true);
+        $inputState = $jsonDecode->decode(
+            file_get_contents($inputStateFile),
+            JsonEncoder::FORMAT
+        );
+    }
+
+    $app = new SnowflakeApplication($config, $logger, $inputState, $arguments['data']);
 
     if ($app['action'] !== 'run') {
         $app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));
