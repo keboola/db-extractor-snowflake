@@ -6,6 +6,8 @@ use Keboola\DbExtractor\SnowflakeApplication;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorLogger\Logger;
 use Monolog\Handler\NullHandler;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
@@ -39,6 +41,13 @@ try {
 
     if (!$runAction) {
         echo json_encode($result);
+    } else {
+        if (!empty($result['state'])) {
+            // write state
+            $outputStateFile = $arguments['data'] . '/out/state.json';
+            $jsonEncode = new JsonEncode();
+            file_put_contents($outputStateFile, $jsonEncode->encode($result['state'], JsonEncoder::FORMAT));
+        }
     }
 
     $app['logger']->log('info', 'Extractor finished successfully.');
