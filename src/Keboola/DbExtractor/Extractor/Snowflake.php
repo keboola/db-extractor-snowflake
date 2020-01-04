@@ -58,6 +58,10 @@ class Snowflake extends Extractor
         $dbParams['password'] = $dbParams['#password'];
         $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
 
+        if (getenv('KBC_RUNID')) {
+            $dbParams['runId'] = getenv('KBC_RUNID');
+        }
+
         $connection = new Connection($dbParams);
 
         $this->user = $dbParams['user'];

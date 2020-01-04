@@ -145,6 +145,22 @@ class SnowflakeEntrypointTest extends AbstractSnowflakeTest
         $data = json_decode($output, true);
         $this->assertArrayHasKey('status', $data);
         $this->assertEquals('success', $data['status']);
+
+        //@todo
+//        $queries = $this->connection->fetchAll(
+//            '
+//                SELECT
+//                    QUERY_TEXT, QUERY_TAG
+//                FROM
+//                    TABLE(INFORMATION_SCHEMA.QUERY_HISTORY_BY_SESSION())
+//                WHERE QUERY_TEXT = \'USE WAREHOUSE "ROMAN2_SNOWFLAKE_EXTRACTOR";\'
+//                ORDER BY START_TIME DESC
+//                LIMIT 1
+//            '
+//        );
+//
+//        $runId = sprintf('{"runId":"%s"}', getenv('KBC_RUNID'));
+//        $this->assertEquals($runId, $queries[0]['QUERY_TAG']);
     }
 
     public function testNonexistingTable(): void
