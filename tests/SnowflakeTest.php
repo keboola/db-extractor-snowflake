@@ -250,27 +250,30 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '7',
-                    'byteCount' => '1024',
+                    'rowCount' => 7,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'col1',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'col1',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'col2',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'col2',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -280,117 +283,140 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '100',
-                    'byteCount' => '6656',
+                    'rowCount' => 100,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'usergender',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'usergender',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'usercity',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'usercity',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             2 =>
                                 array (
                                     'name' => 'usersentiment',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '3',
+                                    'ordinalPosition' => 3,
+                                    'sanitizedName' => 'usersentiment',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             3 =>
                                 array (
                                     'name' => 'zipcode',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '4',
+                                    'ordinalPosition' => 4,
+                                    'sanitizedName' => 'zipcode',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             4 =>
                                 array (
                                     'name' => 'sku',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '5',
+                                    'ordinalPosition' => 5,
+                                    'sanitizedName' => 'sku',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             5 =>
                                 array (
                                     'name' => 'createdat',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '6',
+                                    'ordinalPosition' => 6,
+                                    'sanitizedName' => 'createdat',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             6 =>
                                 array (
                                     'name' => 'category',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '7',
+                                    'ordinalPosition' => 7,
+                                    'sanitizedName' => 'category',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             7 =>
                                 array (
                                     'name' => 'price',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '8',
+                                    'ordinalPosition' => 8,
+                                    'sanitizedName' => 'price',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             8 =>
                                 array (
                                     'name' => 'county',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '9',
+                                    'ordinalPosition' => 9,
+                                    'sanitizedName' => 'county',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             9 =>
                                 array (
                                     'name' => 'countycode',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '10',
+                                    'ordinalPosition' => 10,
+                                    'sanitizedName' => 'countycode',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             10 =>
                                 array (
                                     'name' => 'userstate',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '11',
+                                    'ordinalPosition' => 11,
+                                    'sanitizedName' => 'userstate',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             11 =>
                                 array (
                                     'name' => 'categorygroup',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '12',
+                                    'ordinalPosition' => 12,
+                                    'sanitizedName' => 'categorygroup',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -400,36 +426,38 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '1',
-                    'byteCount' => '1024',
+                    'rowCount' => 1,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'var',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'VARIANT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'var',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'obj',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'OBJECT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'obj',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             2 =>
                                 array (
                                     'name' => 'arr',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'ARRAY',
-                                    'ordinalPosition' => '3',
+                                    'ordinalPosition' => 3,
+                                    'sanitizedName' => 'arr',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -439,45 +467,51 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '4',
-                    'byteCount' => '1024',
+                    'rowCount' => 4,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'character',
-                                    'default' => null,
                                     'length' => '100',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'character',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'integer',
-                                    'default' => null,
                                     'length' => '6,0',
                                     'nullable' => true,
                                     'type' => 'NUMBER',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'integer',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             2 =>
                                 array (
                                     'name' => 'decimal',
-                                    'default' => null,
                                     'length' => '10,2',
                                     'nullable' => true,
                                     'type' => 'NUMBER',
-                                    'ordinalPosition' => '3',
+                                    'ordinalPosition' => 3,
+                                    'sanitizedName' => 'decimal',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             3 =>
                                 array (
                                     'name' => 'date',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'DATE',
-                                    'ordinalPosition' => '4',
+                                    'ordinalPosition' => 4,
+                                    'sanitizedName' => 'date',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -492,20 +526,24 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             0 =>
                                 array (
                                     'name' => 'col1',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => true,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'col1',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'col2',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => true,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'col2',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -542,27 +580,30 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '7',
-                    'byteCount' => '1024',
+                    'rowCount' => 7,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'col1',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'col1',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'col2',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'col2',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -572,117 +613,140 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '100',
-                    'byteCount' => '6656',
+                    'rowCount' => 100,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'usergender',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'usergender',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'usercity',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'usercity',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             2 =>
                                 array (
                                     'name' => 'usersentiment',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '3',
+                                    'ordinalPosition' => 3,
+                                    'sanitizedName' => 'usersentiment',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             3 =>
                                 array (
                                     'name' => 'zipcode',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '4',
+                                    'ordinalPosition' => 4,
+                                    'sanitizedName' => 'zipcode',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             4 =>
                                 array (
                                     'name' => 'sku',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '5',
+                                    'ordinalPosition' => 5,
+                                    'sanitizedName' => 'sku',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             5 =>
                                 array (
                                     'name' => 'createdat',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '6',
+                                    'ordinalPosition' => 6,
+                                    'sanitizedName' => 'createdat',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             6 =>
                                 array (
                                     'name' => 'category',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '7',
+                                    'ordinalPosition' => 7,
+                                    'sanitizedName' => 'category',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             7 =>
                                 array (
                                     'name' => 'price',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '8',
+                                    'ordinalPosition' => 8,
+                                    'sanitizedName' => 'price',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             8 =>
                                 array (
                                     'name' => 'county',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '9',
+                                    'ordinalPosition' => 9,
+                                    'sanitizedName' => 'county',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             9 =>
                                 array (
                                     'name' => 'countycode',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '10',
+                                    'ordinalPosition' => 10,
+                                    'sanitizedName' => 'countycode',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             10 =>
                                 array (
                                     'name' => 'userstate',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '11',
+                                    'ordinalPosition' => 11,
+                                    'sanitizedName' => 'userstate',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             11 =>
                                 array (
                                     'name' => 'categorygroup',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '12',
+                                    'ordinalPosition' => 12,
+                                    'sanitizedName' => 'categorygroup',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -692,36 +756,38 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '1',
-                    'byteCount' => '1024',
+                    'rowCount' => 1,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'var',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'VARIANT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'var',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'obj',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'OBJECT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'obj',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             2 =>
                                 array (
                                     'name' => 'arr',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'ARRAY',
-                                    'ordinalPosition' => '3',
+                                    'ordinalPosition' => 3,
+                                    'sanitizedName' => 'arr',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -731,45 +797,51 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                     'type' => 'TABLE',
-                    'rowCount' => '4',
-                    'byteCount' => '1024',
+                    'rowCount' => 4,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'character',
-                                    'default' => null,
                                     'length' => '100',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'character',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'integer',
-                                    'default' => null,
                                     'length' => '6,0',
                                     'nullable' => true,
                                     'type' => 'NUMBER',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'integer',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             2 =>
                                 array (
                                     'name' => 'decimal',
-                                    'default' => null,
                                     'length' => '10,2',
                                     'nullable' => true,
                                     'type' => 'NUMBER',
-                                    'ordinalPosition' => '3',
+                                    'ordinalPosition' => 3,
+                                    'sanitizedName' => 'decimal',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             3 =>
                                 array (
                                     'name' => 'date',
-                                    'default' => null,
-                                    'length' => null,
                                     'nullable' => true,
                                     'type' => 'DATE',
-                                    'ordinalPosition' => '4',
+                                    'ordinalPosition' => 4,
+                                    'sanitizedName' => 'date',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -779,27 +851,30 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'catalog' => $this->getEnv('snowflake', 'DB_DATABASE'),
                     'schema' => 'PUBLIC',
                     'type' => 'TABLE',
-                    'rowCount' => '7',
-                    'byteCount' => '1024',
+                    'rowCount' => 7,
                     'columns' =>
                         array (
                             0 =>
                                 array (
                                     'name' => 'col1',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'col1',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
                                 array (
                                     'name' => 'col2',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => false,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'col2',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -814,20 +889,24 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             0 =>
                                 array (
                                     'name' => 'col1',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => true,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '1',
+                                    'ordinalPosition' => 1,
+                                    'sanitizedName' => 'col1',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                             1 =>
-                                array (
+                                array(
                                     'name' => 'col2',
-                                    'default' => null,
                                     'length' => '200',
                                     'nullable' => true,
                                     'type' => 'TEXT',
-                                    'ordinalPosition' => '2',
+                                    'ordinalPosition' => 2,
+                                    'sanitizedName' => 'col2',
+                                    'primaryKey' => false,
+                                    'uniqueKey' => false,
                                 ),
                         ),
                 ),
@@ -865,13 +944,13 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 ),
             1 =>
                 array (
-                    'key' => 'KBC.catalog',
-                    'value' => $this->getEnv('snowflake', 'DB_DATABASE'),
+                    'key' => 'KBC.schema',
+                    'value' => $this->getEnv('snowflake', 'DB_SCHEMA'),
                 ),
             2 =>
                 array (
-                    'key' => 'KBC.schema',
-                    'value' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                    'key' => 'KBC.catalog',
+                    'value' => $this->getEnv('snowflake', 'DB_DATABASE'),
                 ),
             3 =>
                 array (
@@ -882,11 +961,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                 array (
                     'key' => 'KBC.rowCount',
                     'value' => '4',
-                ),
-            5 =>
-                array (
-                    'key' => 'KBC.byteCount',
-                    'value' => '1024',
                 ),
         );
         $this->assertEquals($expectedTableMetadata, $outputManifest['metadata']);
@@ -918,11 +992,26 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '100',
                         ),
                     4 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'character',
+                        ),
+                    5 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'TEXT',
                         ),
-                    5 =>
+                    6 =>
+                        array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array (
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    8 =>
                         array (
                             'key' => 'KBC.ordinalPosition',
                             'value' => '1',
@@ -951,14 +1040,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '6,0',
                         ),
                     4 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'integer',
+                        ),
+                    5 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'NUMBER',
                         ),
-                    5 =>
+                    6 =>
+                        array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array (
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    8 =>
                         array (
                             'key' => 'KBC.ordinalPosition',
-                            'value' => '2',
+                            'value' => 2,
                         ),
                 ),
             'decimal' =>
@@ -984,14 +1088,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => '10,2',
                         ),
                     4 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'decimal',
+                        ),
+                    5 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'NUMBER',
                         ),
-                    5 =>
+                    6 =>
                         array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array(
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    8 =>
+                        array(
                             'key' => 'KBC.ordinalPosition',
-                            'value' => '3',
+                            'value' => 3,
                         ),
                 ),
             'date' =>
@@ -1012,14 +1131,29 @@ class SnowflakeTest extends AbstractSnowflakeTest
                             'value' => 'DATE',
                         ),
                     3 =>
+                        array(
+                            'key' => 'KBC.sanitizedName',
+                            'value' => 'date',
+                        ),
+                    4 =>
                         array (
                             'key' => 'KBC.type',
                             'value' => 'DATE',
                         ),
-                    4 =>
+                    5 =>
                         array (
+                            'key' => 'KBC.primaryKey',
+                            'value' => false,
+                        ),
+                    6 =>
+                        array(
+                            'key' => 'KBC.uniqueKey',
+                            'value' => false,
+                        ),
+                    7 =>
+                        array(
                             'key' => 'KBC.ordinalPosition',
-                            'value' => '4',
+                            'value' => 4,
                         ),
                 ),
         );
