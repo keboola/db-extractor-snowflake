@@ -11,11 +11,12 @@ use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\TableResultFormat\Table;
 use Keboola\DbExtractor\TableResultFormat\TableColumn;
 use Keboola\DbExtractorLogger\Logger;
-use Keboola\Db\Import\Snowflake\Connection;
 use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\Datatype\Definition\Exception\InvalidTypeException;
+use Keboola\SnowflakeDbAdapter\Connection;
+use Keboola\SnowflakeDbAdapter\QueryBuilder;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
 
@@ -59,6 +60,12 @@ class Snowflake extends Extractor
     {
         $dbParams['password'] = $dbParams['#password'];
         $this->snowSqlConfig = $this->createSnowSqlConfig($dbParams);
+        unset($dbParams['#password']);
+        unset($dbParams['ssh']);
+
+        if (getenv('KBC_RUNID')) {
+            $dbParams['runId'] = getenv('KBC_RUNID');
+        }
 
         $connection = new Connection($dbParams);
 
@@ -72,7 +79,7 @@ class Snowflake extends Extractor
 
         if (!empty($dbParams['schema'])) {
             $this->schema = $dbParams['schema'];
-            $connection->query(sprintf('USE SCHEMA %s', $connection->quoteIdentifier($this->schema)));
+            $connection->query(sprintf('USE SCHEMA %s', QueryBuilder::quoteIdentifier($this->schema)));
         }
 
         return $connection;
@@ -95,7 +102,7 @@ class Snowflake extends Extractor
         try {
             $this->db->query(sprintf(
                 'USE WAREHOUSE %s;',
-                $this->db->quoteIdentifier($warehouse)
+                QueryBuilder::quoteIdentifier($warehouse)
             ));
         } catch (\Throwable $e) {
             if (preg_match('/Object does not exist/ui', $e->getMessage())) {
@@ -135,9 +142,9 @@ class Snowflake extends Extractor
         if (isset($this->incrementalFetching['limit']) && $this->incrementalFetching['limit'] > 0) {
             $fullsql = sprintf(
                 'SELECT %s FROM %s.%s',
-                $this->db->quoteIdentifier($this->incrementalFetching['column']),
-                $this->db->quoteIdentifier($table['schema']),
-                $this->db->quoteIdentifier($table['tableName'])
+                QueryBuilder::quoteIdentifier($this->incrementalFetching['column']),
+                QueryBuilder::quoteIdentifier($table['schema']),
+                QueryBuilder::quoteIdentifier($table['tableName'])
             );
 
             $fullsql .= $this->createIncrementalAddon();
@@ -150,10 +157,10 @@ class Snowflake extends Extractor
         } else {
             $fullsql = sprintf(
                 'SELECT MAX(%s) as %s FROM %s.%s',
-                $this->db->quoteIdentifier($this->incrementalFetching['column']),
-                $this->db->quoteIdentifier($this->incrementalFetching['column']),
-                $this->db->quoteIdentifier($table['schema']),
-                $this->db->quoteIdentifier($table['tableName'])
+                QueryBuilder::quoteIdentifier($this->incrementalFetching['column']),
+                QueryBuilder::quoteIdentifier($this->incrementalFetching['column']),
+                QueryBuilder::quoteIdentifier($table['schema']),
+                QueryBuilder::quoteIdentifier($table['tableName'])
             );
         }
         $result = $this->runRetriableQuery($fullsql, 'Error fetching maximum value');
@@ -223,14 +230,14 @@ class Snowflake extends Extractor
         @mkdir($outputDataDir, 0755, true);
 
         $sql = [];
-        $sql[] = sprintf('USE DATABASE %s;', $this->db->quoteIdentifier($this->database));
+        $sql[] = sprintf('USE DATABASE %s;', QueryBuilder::quoteIdentifier($this->database));
 
         if ($this->schema) {
-            $sql[] = sprintf('USE SCHEMA %s;', $this->db->quoteIdentifier($this->schema));
+            $sql[] = sprintf('USE SCHEMA %s;', QueryBuilder::quoteIdentifier($this->schema));
         }
 
         if ($this->warehouse) {
-            $sql[] = sprintf('USE WAREHOUSE %s;', $this->db->quoteIdentifier($this->warehouse));
+            $sql[] = sprintf('USE WAREHOUSE %s;', QueryBuilder::quoteIdentifier($this->warehouse));
         }
 
         $sql[] = sprintf(
@@ -533,16 +540,16 @@ class Snowflake extends Extractor
             $query = sprintf(
                 'SELECT %s FROM %s.%s',
                 implode(', ', array_map(function ($column): string {
-                    return $this->db->quoteIdentifier($column);
+                    return QueryBuilder::quoteIdentifier($column);
                 }, $columns)),
-                $this->db->quoteIdentifier($table['schema']),
-                $this->db->quoteIdentifier($table['tableName'])
+                QueryBuilder::quoteIdentifier($table['schema']),
+                QueryBuilder::quoteIdentifier($table['tableName'])
             );
         } else {
             $query = sprintf(
                 'SELECT * FROM %s.%s',
-                $this->db->quoteIdentifier($table['schema']),
-                $this->db->quoteIdentifier($table['tableName'])
+                QueryBuilder::quoteIdentifier($table['schema']),
+                QueryBuilder::quoteIdentifier($table['tableName'])
             );
         }
         if ($incrementalAddon) {
@@ -568,13 +575,13 @@ class Snowflake extends Extractor
             }
             $incrementalAddon = sprintf(
                 ' WHERE %s >= %s',
-                $this->db->quoteIdentifier($this->incrementalFetching['column']),
+                QueryBuilder::quoteIdentifier($this->incrementalFetching['column']),
                 $lastFetchedRow
             );
         }
         $incrementalAddon .= sprintf(
             ' ORDER BY %s',
-            $this->db->quoteIdentifier($this->incrementalFetching['column'])
+            QueryBuilder::quoteIdentifier($this->incrementalFetching['column'])
         );
         return $incrementalAddon;
     }
@@ -587,14 +594,14 @@ class Snowflake extends Extractor
                 if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
                     return sprintf(
                         'CAST(%s AS TEXT) AS %s',
-                        $this->db->quoteIdentifier($column['name']),
-                        $this->db->quoteIdentifier($column['name'])
+                        QueryBuilder::quoteIdentifier($column['name']),
+                        QueryBuilder::quoteIdentifier($column['name'])
                     );
                 }
-                return $this->db->quoteIdentifier($column['name']);
+                return QueryBuilder::quoteIdentifier($column['name']);
             }, $columnInfo)),
-            $this->db->quoteIdentifier($table['schema']),
-            $this->db->quoteIdentifier($table['tableName'])
+            QueryBuilder::quoteIdentifier($table['schema']),
+            QueryBuilder::quoteIdentifier($table['tableName'])
         );
     }
 
@@ -674,7 +681,7 @@ class Snowflake extends Extractor
     {
         $sql = sprintf(
             'DESC USER %s;',
-            $this->db->quoteIdentifier($this->user)
+            QueryBuilder::quoteIdentifier($this->user)
         );
 
         $config = $this->runRetriableQuery($sql, 'Error get user config');
