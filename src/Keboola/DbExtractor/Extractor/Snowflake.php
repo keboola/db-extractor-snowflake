@@ -267,7 +267,10 @@ class Snowflake extends Extractor
         if (!$process->isSuccessful()) {
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
-            throw new \Exception(sprintf('File download error occurred processing [%s]', $table['name']));
+            throw new \Exception(sprintf(
+                'File download error occurred processing [%s]',
+                isset($table['name']) ? $table['name'] : $tmpTableName
+            ));
         }
 
         $csvFiles = $this->parseFiles($process->getOutput(), $outputDataDir);
