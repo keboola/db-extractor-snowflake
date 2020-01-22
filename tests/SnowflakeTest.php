@@ -106,7 +106,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
             $app->run();
             $this->fail('Test connection with invalid warehouse ID should fail');
         } catch (UserException $e) {
-            $this->assertRegExp('/Invalid warehouse/ui', $e->getMessage());
+            $this->assertRegExp('/Cannot access object or it does not exist/ui', $e->getMessage());
         }
 
         $this->setUserDefaultWarehouse($user, $warehouse);
