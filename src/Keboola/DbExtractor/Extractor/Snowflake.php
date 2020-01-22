@@ -16,6 +16,7 @@ use Keboola\Datatype\Definition\GenericStorage as GenericDatatype;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\Datatype\Definition\Exception\InvalidTypeException;
 use Keboola\SnowflakeDbAdapter\Connection;
+use Keboola\SnowflakeDbAdapter\Exception\CannotAccessObjectException;
 use Keboola\SnowflakeDbAdapter\QueryBuilder;
 use Keboola\Temp\Temp;
 use Symfony\Component\Process\Process;
@@ -67,8 +68,6 @@ class Snowflake extends Extractor
             $dbParams['runId'] = getenv('KBC_RUNID');
         }
 
-        $connection = new Connection($dbParams);
-
         $this->user = $dbParams['user'];
 
         $this->database = $dbParams['database'];
@@ -77,9 +76,14 @@ class Snowflake extends Extractor
             $this->warehouse = $dbParams['warehouse'];
         }
 
-        if (!empty($dbParams['schema'])) {
-            $this->schema = $dbParams['schema'];
-            $connection->query(sprintf('USE SCHEMA %s', QueryBuilder::quoteIdentifier($this->schema)));
+        try {
+            $connection = new Connection($dbParams);
+            if (!empty($dbParams['schema'])) {
+                $this->schema = $dbParams['schema'];
+                $connection->query(sprintf('USE SCHEMA %s', QueryBuilder::quoteIdentifier($this->schema)));
+            }
+        } catch (CannotAccessObjectException $e) {
+            throw new UserException($e->getMessage(), 0, $e);
         }
 
         return $connection;

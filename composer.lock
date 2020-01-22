@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "433e410a392a17b58902e3473f26dc5d",
+    "content-hash": "854175bb3c292e721312c543da3f2768",
     "packages": [
         {
             "name": "keboola/common-exceptions",
@@ -76,16 +76,16 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "7fe86bb17a2dac163d398b0bd93bf54d40da6580"
+                "reference": "9045ffb57777cc4a29c58a0ddf1c2f7864cf3de2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/7fe86bb17a2dac163d398b0bd93bf54d40da6580",
-                "reference": "7fe86bb17a2dac163d398b0bd93bf54d40da6580",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/9045ffb57777cc4a29c58a0ddf1c2f7864cf3de2",
+                "reference": "9045ffb57777cc4a29c58a0ddf1c2f7864cf3de2",
                 "shasum": ""
             },
             "require": {
@@ -111,7 +111,7 @@
             "license": [
                 "MIT"
             ],
-            "time": "2019-12-20T11:27:48+00:00"
+            "time": "2020-01-22T09:55:57+00:00"
         },
         {
             "name": "keboola/db-extractor-common",
