@@ -219,13 +219,12 @@ class Snowflake extends Extractor
             $copyCommand,
             sprintf('Copy Command: %s failed with message', $copyCommand)
         );
+        $rowCount = (int) ($res[0]['rows_unloaded'] ?? 0);
 
-        if (count($res) > 0 && (int) $res[0]['rows_unloaded'] === 0) {
+        if ($rowCount === 0) {
             // query resulted in no rows, nothing left to do
             return 0;
         }
-
-        $rowCount = (int) $res[0]['rows_unloaded'];
 
         $this->logger->info('Downloading data from Snowflake');
 
