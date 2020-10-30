@@ -1,8 +1,8 @@
 FROM php:7.3-cli-stretch
 
-ARG SNOWFLAKE_ODBC_VERSION=2.16.10
-ARG SNOWFLAKE_SNOWSQL_VERSION=1.1.68
-ARG SNOWFLAKE_GPG_KEY=93DB296A69BE019A
+ARG SNOWFLAKE_ODBC_VERSION=2.21.5
+ARG SNOWFLAKE_SNOWSQL_VERSION=1.2.10
+ARG SNOWFLAKE_GPG_KEY=EC218558EABB25A1
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -29,8 +29,8 @@ RUN set -x \
 COPY driver/snowflake-policy.pol /etc/debsig/policies/$SNOWFLAKE_GPG_KEY/generic.pol
 COPY driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 ADD https://sfc-repo.azure.snowflakecomputing.com/odbc/linux/$SNOWFLAKE_ODBC_VERSION/snowflake-odbc-$SNOWFLAKE_ODBC_VERSION.x86_64.deb /tmp/snowflake-odbc.deb
-ADD http://s3-us-west-2.amazonaws.com/sfc-snowsql-updates/bootstrap/1.1/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
-ADD http://sfc-snowsql-updates.s3.us-west-2.amazonaws.com/bootstrap/1.1/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig /tmp/snowsql-linux_x86_64.bash.sig
+RUN curl -o /usr/bin/snowsql-linux_x86_64.bash https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash
+RUN curl -o /tmp/snowsql-linux_x86_64.bash.sig https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig
 
 # snowflake - charset settings
 ENV LANG en_US.UTF-8
@@ -48,7 +48,7 @@ RUN mkdir -p ~/.gnupg \
     && dpkg -i /tmp/snowflake-odbc.deb \
     && SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash
 
-RUN snowsql -v 1.1.49
+RUN snowsql -v $SNOWFLAKE_SNOWSQL_VERSION
 
 # install composer
 RUN cd \
