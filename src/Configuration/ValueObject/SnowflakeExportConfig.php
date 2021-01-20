@@ -14,7 +14,7 @@ class SnowflakeExportConfig extends ExportConfig
         return new self(
             $data['id'] ?? null,
             $data['name'] ?? null,
-            $data['query'],
+            $data['query'] ?? null,
             empty($data['query']) ? InputTable::fromArray($data) : null,
             $data['incremental'] ?? false,
             empty($data['query']) ? SnowflakeIncrementalFetchingConfig::fromArray($data) : null,
