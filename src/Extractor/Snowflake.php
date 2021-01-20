@@ -646,4 +646,10 @@ class Snowflake extends BaseExtractor
             !$exportConfig->hasQuery() &&
             $exportConfig->isIncrementalFetching();
     }
+
+    protected function getOutputFilename(string $outputTableName): string
+    {
+        $sanitizedTablename = Utils\Strings::webalize($outputTableName, '._', false);
+        return $this->dataDir . '/out/tables/' . $sanitizedTablename . '.csv';
+    }
 }
