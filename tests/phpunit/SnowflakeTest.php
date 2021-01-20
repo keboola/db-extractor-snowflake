@@ -651,7 +651,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $app->run();
 
         $outputManifest = json_decode(
-            (string) file_get_contents($this->dataDir . '/out/tables/in.c-main.tablecolumns.csv.gz.manifest'),
+            (string) file_get_contents($this->dataDir . '/out/tables/in.c-main.tableColumns.csv.gz.manifest'),
             true
         );
 
