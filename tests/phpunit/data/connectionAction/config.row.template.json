@@ -1,0 +1,15 @@
+{
+    "action": "testConnection",
+    "parameters": {
+        "extractor_class": "snowflake",
+        "id": 2,
+        "name": "escaping",
+        "query": "SELECT * FROM \"escaping\" ;\n",
+        "outputTable": "in.c-main.escaping",
+        "incremental": false,
+        "primaryKey": [
+            "col1"
+        ],
+        "enabled": true
+    }
+}
