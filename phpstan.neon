@@ -1,3 +1,5 @@
 parameters:
-	ignoreErrors:
-		- '#Cannot call method scalarNode()#'
+    checkMissingIterableValueType: false
+    ignoreErrors:
+        - '#Parameter \#1 \$object of function get_class expects object, Throwable\|null given\.#'
+        - '#Unreachable statement - code above always terminates\.#'

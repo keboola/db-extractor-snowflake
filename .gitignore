@@ -1,6 +1,7 @@
 .DS_Store
 vendor/
 /data/
+data/
 .idea/
 composer.phar
 runtests.sh
