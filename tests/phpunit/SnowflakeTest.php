@@ -234,186 +234,153 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
         $this->assertCount(5, $result['tables']);
 
-        $expectedData = array (
-            0 =>
-                array (
-                    'name' => 'escaping',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'col1',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'col2',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            1 =>
-                array (
-                    'name' => 'sales',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'usergender',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'usercity',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            2 =>
-                                array (
-                                    'name' => 'usersentiment',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            3 =>
-                                array (
-                                    'name' => 'zipcode',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            4 =>
-                                array (
-                                    'name' => 'sku',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            5 =>
-                                array (
-                                    'name' => 'createdat',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            6 =>
-                                array (
-                                    'name' => 'category',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            7 =>
-                                array (
-                                    'name' => 'price',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            8 =>
-                                array (
-                                    'name' => 'county',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            9 =>
-                                array (
-                                    'name' => 'countycode',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            10 =>
-                                array (
-                                    'name' => 'userstate',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            11 =>
-                                array (
-                                    'name' => 'categorygroup',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            2 =>
-                array (
-                    'name' => 'semi-structured',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'var',
-                                    'type' => 'VARIANT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'obj',
-                                    'type' => 'OBJECT',
-                                    'primaryKey' => false,
-                                ),
-                            2 =>
-                                array (
-                                    'name' => 'arr',
-                                    'type' => 'ARRAY',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            3 =>
-                array (
-                    'name' => 'types',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'character',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'integer',
-                                    'type' => 'NUMBER',
-                                    'primaryKey' => false,
-                                ),
-                            2 =>
-                                array (
-                                    'name' => 'decimal',
-                                    'type' => 'NUMBER',
-                                    'primaryKey' => false,
-                                ),
-                            3 =>
-                                array (
-                                    'name' => 'date',
-                                    'type' => 'DATE',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            4 =>
-                array (
-                    'name' => 'escaping_view',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'col1',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'col2',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-        );
+        $expectedData = [
+            [
+                'name' => 'escaping',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'col1',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'escaping_view',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'col1',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'sales',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'usergender',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'usercity',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'usersentiment',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'zipcode',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'sku',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'createdat',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'category',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'price',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'county',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'countycode',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'userstate',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'categorygroup',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'semi-structured',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'var',
+                        'type' => 'VARIANT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'obj',
+                        'type' => 'OBJECT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'arr',
+                        'type' => 'ARRAY',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'types',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'character',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'integer',
+                        'type' => 'NUMBER',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'decimal',
+                        'type' => 'NUMBER',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'date',
+                        'type' => 'DATE',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+        ];
 
         $this->assertEquals($expectedData, $result['tables']);
     }
@@ -435,206 +402,169 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertEquals('success', $result['status']);
         $this->assertCount(6, $result['tables']);
 
-        $expectedData = array (
-            0 =>
-                array (
-                    'name' => 'escaping',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'col1',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'col2',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            1 =>
-                array (
-                    'name' => 'sales',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'usergender',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'usercity',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            2 =>
-                                array (
-                                    'name' => 'usersentiment',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            3 =>
-                                array (
-                                    'name' => 'zipcode',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            4 =>
-                                array (
-                                    'name' => 'sku',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            5 =>
-                                array (
-                                    'name' => 'createdat',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            6 =>
-                                array (
-                                    'name' => 'category',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            7 =>
-                                array (
-                                    'name' => 'price',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            8 =>
-                                array (
-                                    'name' => 'county',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            9 =>
-                                array (
-                                    'name' => 'countycode',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            10 =>
-                                array (
-                                    'name' => 'userstate',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            11 =>
-                                array (
-                                    'name' => 'categorygroup',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            2 =>
-                array (
-                    'name' => 'semi-structured',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'var',
-                                    'type' => 'VARIANT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'obj',
-                                    'type' => 'OBJECT',
-                                    'primaryKey' => false,
-                                ),
-                            2 =>
-                                array (
-                                    'name' => 'arr',
-                                    'type' => 'ARRAY',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            3 =>
-                array (
-                    'name' => 'types',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'character',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'integer',
-                                    'type' => 'NUMBER',
-                                    'primaryKey' => false,
-                                ),
-                            2 =>
-                                array (
-                                    'name' => 'decimal',
-                                    'type' => 'NUMBER',
-                                    'primaryKey' => false,
-                                ),
-                            3 =>
-                                array (
-                                    'name' => 'date',
-                                    'type' => 'DATE',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            4 =>
-                array (
-                    'name' => 'escaping',
-                    'schema' => 'PUBLIC',
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'col1',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array (
-                                    'name' => 'col2',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-            5 =>
-                array (
-                    'name' => 'escaping_view',
-                    'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
-                    'columns' =>
-                        array (
-                            0 =>
-                                array (
-                                    'name' => 'col1',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                            1 =>
-                                array(
-                                    'name' => 'col2',
-                                    'type' => 'TEXT',
-                                    'primaryKey' => false,
-                                ),
-                        ),
-                ),
-        );
+        $expectedData = [
+            [
+                'name' => 'escaping',
+                'schema' => 'PUBLIC',
+                'columns' => [
+                    [
+                        'name' => 'col1',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'escaping',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'col1',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'escaping_view',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'col1',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'sales',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'usergender',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'usercity',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'usersentiment',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'zipcode',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'sku',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'createdat',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'category',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'price',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'county',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'countycode',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'userstate',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'categorygroup',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'semi-structured',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'var',
+                        'type' => 'VARIANT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'obj',
+                        'type' => 'OBJECT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'arr',
+                        'type' => 'ARRAY',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'types',
+                'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'character',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'integer',
+                        'type' => 'NUMBER',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'decimal',
+                        'type' => 'NUMBER',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'date',
+                        'type' => 'DATE',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+        ];
 
         $this->assertEquals($expectedData, $result['tables']);
     }

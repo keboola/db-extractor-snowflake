@@ -120,6 +120,10 @@ class SnowflakeMetadataProvider implements MetadataProvider
             return !$this->shouldTableBeSkipped($v, $whiteList);
         });
 
+        usort($filteredResult, function ($item1, $item2) {
+            return strnatcmp($item1['name'], $item2['name']);
+        });
+
         return $filteredResult;
     }
 
