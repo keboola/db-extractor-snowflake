@@ -72,7 +72,16 @@ Note that `GRANT SELECT ON ALL *` queries will grant permissions to objects exis
  - snowflake-odbc-x86_64.deb
  - snowsql-linux_x86_64.bash
 2. Create snowflake resources (database, schema, role and user) [note that the test user/role must have permissions on the Public schema of the test database]
-3. Create `.env` file and fill in you Redshift and S3 credentials:
+3. Additional snowflake resource for extractor tests:
+```
+GRANT ALL ON DATABASE "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT ALL ON SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT ALL ON SCHEMA "PUBLIC" TO ROLE "snowflake_extractor";
+GRANT ALL ON ALL TABLES IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
+GRANT ALL ON ALL VIEWS IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
+```
+
+4. Create `.env` file and fill in you Redshift and S3 credentials:
 ```
 SNOWFLAKE_DB_HOST=
 SNOWFLAKE_DB_PORT=443
@@ -82,12 +91,13 @@ SNOWFLAKE_DB_DATABASE=
 SNOWFLAKE_DB_SCHEMA=
 SNOWFLAKE_DB_WAREHOUSE=
 STORAGE_API_TOKEN=
+KBC_RUNID=123456
 ```
-4. Install composer dependencies locally and load test fixtures to S3
+5. Install composer dependencies locally and load test fixtures to S3
 ```$xslt
 docker-compose run --rm dev composer install
 ```
-5. Run the tests:
+6. Run the tests:
 
 ```
 docker-compose run --rm app
