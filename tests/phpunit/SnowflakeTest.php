@@ -224,7 +224,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $config['action'] = 'getTables';
 
         // add a table to a different schema (should not be fetched)
-        $this->createEscapingTable('escaping', 'PUBLIC');
+        $this->createEscapingTable('publicEscaping', 'PUBLIC');
 
         $app = $this->createApplication($config);
         $result = $app->run();
@@ -392,7 +392,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         unset($config['parameters']['db']['schema']);
 
         // add a table to a different schema
-        $this->createEscapingTable('escaping', 'PUBLIC');
+        $this->createEscapingTable('publicEscaping', 'PUBLIC');
 
         $app = $this->createApplication($config);
         $result = $app->run();
@@ -403,22 +403,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $this->assertCount(6, $result['tables']);
 
         $expectedData = [
-            [
-                'name' => 'escaping',
-                'schema' => 'PUBLIC',
-                'columns' => [
-                    [
-                        'name' => 'col1',
-                        'type' => 'TEXT',
-                        'primaryKey' => false,
-                    ],
-                    [
-                        'name' => 'col2',
-                        'type' => 'TEXT',
-                        'primaryKey' => false,
-                    ],
-                ],
-            ],
             [
                 'name' => 'escaping',
                 'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
@@ -438,6 +422,22 @@ class SnowflakeTest extends AbstractSnowflakeTest
             [
                 'name' => 'escaping_view',
                 'schema' => $this->getEnv('snowflake', 'DB_SCHEMA'),
+                'columns' => [
+                    [
+                        'name' => 'col1',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'TEXT',
+                        'primaryKey' => false,
+                    ],
+                ],
+            ],
+            [
+                'name' => 'publicEscaping',
+                'schema' => 'PUBLIC',
                 'columns' => [
                     [
                         'name' => 'col1',
