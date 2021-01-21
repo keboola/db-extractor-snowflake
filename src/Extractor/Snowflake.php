@@ -257,14 +257,18 @@ class Snowflake extends BaseExtractor
         @mkdir($outputDataDir, 0755, true);
 
         $sql = [];
+        if ($this->warehouse) {
+            $sql[] = sprintf('USE WAREHOUSE %s;', QueryBuilder::quoteIdentifier($this->warehouse));
+        }
+
         $sql[] = sprintf('USE DATABASE %s;', QueryBuilder::quoteIdentifier($this->database));
 
         if ($this->schema) {
-            $sql[] = sprintf('USE SCHEMA %s;', QueryBuilder::quoteIdentifier($this->schema));
-        }
-
-        if ($this->warehouse) {
-            $sql[] = sprintf('USE WAREHOUSE %s;', QueryBuilder::quoteIdentifier($this->warehouse));
+            $sql[] = sprintf(
+                'USE SCHEMA %s.%s;',
+                QueryBuilder::quoteIdentifier($this->database),
+                QueryBuilder::quoteIdentifier($this->schema)
+            );
         }
 
         $sql[] = sprintf(
