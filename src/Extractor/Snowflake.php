@@ -8,7 +8,6 @@ use ErrorException;
 use Keboola\Csv\CsvOptions;
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
-use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeMetadataProvider;
 use Keboola\DbExtractor\DbRetryProxy;
 use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;

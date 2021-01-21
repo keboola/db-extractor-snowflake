@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Configuration\ValueObject;
+namespace Keboola\DbExtractor\Extractor;
 
-use Keboola\DbExtractor\Extractor\MetadataProvider;
 use Keboola\DbExtractor\Traits\QuoteTrait;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\ColumnBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\MetadataBuilder;
