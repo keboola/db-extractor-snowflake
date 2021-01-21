@@ -6,9 +6,9 @@ namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Component\Logger;
 use Keboola\Csv\CsvReader;
-use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeExportConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\Snowflake;
+use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\SnowflakeDbAdapter\QueryBuilder;
 
 class SnowflakeTest extends AbstractSnowflakeTest
@@ -868,7 +868,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
         $params['outputTable'] = 'test';
         $params['primaryKey'] = [];
         $params['retries'] = 3;
-        $exportConfig = SnowflakeExportConfig::fromArray($params);
+        $exportConfig = ExportConfig::fromArray($params);
         if (isset($params['incrementalFetchingColumn']) && $params['incrementalFetchingColumn'] !== '') {
             $incrementalConfig = $this->getIncrementalConfig();
             $this->createAutoIncrementAndTimestampTable($incrementalConfig);

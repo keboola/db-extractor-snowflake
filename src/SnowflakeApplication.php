@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor;
 
 use Keboola\DbExtractor\Configuration\NodeDefinition\SnowflakeDbNode;
-use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeExportConfig;
+use Keboola\DbExtractor\Configuration\SnowflakeTableNodeDecorator;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ActionConfigRowDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigRowDefinition;
-use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\DbExtractorConfig\Exception\UserException as ConfigUserException;
 use Psr\Log\LoggerInterface;
 
@@ -31,16 +30,27 @@ class SnowflakeApplication extends Application
         try {
             if ($this->isRowConfiguration($config)) {
                 if ($this['action'] === 'run') {
-                    $this->config = new Config($config, new ConfigRowDefinition($dbNode));
+                    $configDefinition = new ConfigRowDefinition(
+                        $dbNode,
+                        null,
+                        null,
+                        new SnowflakeTableNodeDecorator()
+                    );
                 } else {
-                    $this->config = new Config($config, new ActionConfigRowDefinition($dbNode));
+                    $configDefinition = new ActionConfigRowDefinition($dbNode);
                 }
             } else {
-                $this->config = new Config($config, new ConfigDefinition($dbNode));
+                $configDefinition = new ConfigDefinition(
+                    $dbNode,
+                    null,
+                    null,
+                    new SnowflakeTableNodeDecorator()
+                );
             }
         } catch (ConfigUserException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
+        $this->config = new Config($config, $configDefinition);
     }
 
     protected function isRowConfiguration(array $config): bool
@@ -50,10 +60,5 @@ class SnowflakeApplication extends Application
         }
 
         return false;
-    }
-
-    protected function createExportConfig(array $data): ExportConfig
-    {
-        return SnowflakeExportConfig::fromArray($data);
     }
 }
