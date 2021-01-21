@@ -157,16 +157,6 @@ class Snowflake extends BaseExtractor
             'rows' => $this->exportAndDownload($exportConfig),
         ];
 
-        if ($output['rows'] > 0) {
-            $this->createManifest($exportConfig);
-        } else {
-            @unlink($this->getOutputFilename($exportConfig->getOutputTable())); // no rows, no file
-            $this->logger->warning(sprintf(
-                'Query returned empty result. Nothing was imported to [%s]',
-                $exportConfig->getOutputTable()
-            ));
-        }
-
         // output state
         if ($maxValue) {
             $output['state']['lastFetchedRow'] = $maxValue;
@@ -241,6 +231,7 @@ class Snowflake extends BaseExtractor
             }
         } else {
             $query = $exportConfig->getQuery();
+            $columnInfo = $this->getColumnInfo($query);
         }
 
         $this->cleanupTableStage($exportConfig->getOutputTable());
@@ -322,6 +313,16 @@ class Snowflake extends BaseExtractor
         ));
 
         $this->cleanupTableStage($exportConfig->getOutputTable());
+
+        if ($rowCount > 0) {
+            $this->createSnowflakeManifest($exportConfig, $columnInfo);
+        } else {
+            @unlink($this->getOutputFilename($exportConfig->getOutputTable())); // no rows, no file
+            $this->logger->warning(sprintf(
+                'Query returned empty result. Nothing was imported to [%s]',
+                $exportConfig->getOutputTable()
+            ));
+        }
 
         return $rowCount;
     }
@@ -597,7 +598,7 @@ class Snowflake extends BaseExtractor
         return SnowflakeDatabaseConfig::fromArray($data);
     }
 
-    protected function createManifest(ExportConfig $exportConfig): void
+    protected function createSnowflakeManifest(ExportConfig $exportConfig, array $columns): void
     {
         $metadataSerializer = $this->getManifestMetadataSerializer();
         $outFilename = $this->getOutputFilename($exportConfig->getOutputTable()) . '.gz.manifest';
@@ -605,6 +606,7 @@ class Snowflake extends BaseExtractor
         $manifestData = [
             'destination' => $exportConfig->getOutputTable(),
             'incremental' => $exportConfig->isIncrementalLoading(),
+            'columns' => array_map(fn($v) => $v['name'], $columns),
         ];
 
         if ($exportConfig->hasPrimaryKey()) {
@@ -631,7 +633,6 @@ class Snowflake extends BaseExtractor
 
             $manifestData['metadata'] = $metadataSerializer->serializeTable($table);
             $manifestData['column_metadata'] = $columnMetadata;
-            $manifestData['columns'] = array_keys($columnMetadata);
             if (!empty($sanitizedPks)) {
                 $manifestData['primary_key'] = $sanitizedPks;
             }
