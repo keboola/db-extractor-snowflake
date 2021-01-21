@@ -866,6 +866,7 @@ class SnowflakeTest extends AbstractSnowflakeTest
     public function testGetSimplifiedPdoQuery(array $params, array $state, string $expected): void
     {
         $params['outputTable'] = 'test';
+        $params['query'] = '';
         $params['primaryKey'] = [];
         $params['retries'] = 3;
         $exportConfig = ExportConfig::fromArray($params);
@@ -980,32 +981,6 @@ class SnowflakeTest extends AbstractSnowflakeTest
                     'SELECT "id", "name", "number", "timestamp"' .
                     ' FROM "%s"."auto_increment_timestamp"' .
                     ' ORDER BY "timestamp"',
-                    $dbSchema
-                ),
-            ],
-            'test simplePDO query id column and previos state and no limit' => [
-                [
-                    'table' => [
-                        'tableName' => 'auto_increment_timestamp',
-                        'schema' => $dbSchema,
-                    ],
-                    'columns' => [
-                        'id',
-                        'name',
-                        'number',
-                        'timestamp',
-                    ],
-                    'incrementalFetchingLimit' => 0,
-                    'incrementalFetchingColumn' => 'id',
-                ],
-                [
-                    'lastFetchedRow' => 4,
-                ],
-                sprintf(
-                    'SELECT "id", "name", "number", "timestamp"' .
-                    ' FROM "%s"."auto_increment_timestamp"' .
-                    ' WHERE "id" >= 4' .
-                    ' ORDER BY "id"',
                     $dbSchema
                 ),
             ],
