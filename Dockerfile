@@ -1,4 +1,4 @@
-FROM php:7.3-cli-stretch
+FROM php:7.4-cli
 
 ARG SNOWFLAKE_ODBC_VERSION=2.21.5
 ARG SNOWFLAKE_SNOWSQL_VERSION=1.2.10
@@ -8,11 +8,14 @@ ENV DEBIAN_FRONTEND noninteractive
 
 # Install Dependencies
 RUN apt-get update \
-  && apt-get install unzip git unixodbc unixodbc-dev libpq-dev debsig-verify -y
+  && apt-get install unzip git unixodbc unixodbc-dev libpq-dev debsig-verify libicu-dev -y
 
 RUN docker-php-ext-install pdo_pgsql pdo_mysql
 RUN pecl install xdebug \
   && docker-php-ext-enable xdebug
+
+RUN docker-php-ext-configure intl \
+    && docker-php-ext-install intl
 
 # Install PHP odbc extension
 # https://github.com/docker-library/php/issues/103
@@ -62,5 +65,5 @@ RUN echo "memory_limit = -1" >> /usr/local/etc/php/conf.d/php.ini
 RUN echo "date.timezone = \"Europe/Prague\"" >> /usr/local/etc/php/conf.d/php.ini
 RUN composer install --no-interaction
 
-CMD php ./run.php --data=/data
+CMD php ./src/run.php
 

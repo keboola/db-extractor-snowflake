@@ -9,7 +9,7 @@ use Keboola\SnowflakeDbAdapter\QueryBuilder;
 class SnowflakeIncrementalTest extends AbstractSnowflakeTest
 {
 
-    public const ROOT_PATH = __DIR__ . '/..';
+    public const ROOT_PATH = __DIR__ . '/db-extractor-snowflake';
 
     public function testIncrementalFetchingByTimestamp(): void
     {
