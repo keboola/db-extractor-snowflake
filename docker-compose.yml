@@ -6,7 +6,6 @@ services:
     image: keboola/ex-db-snowflake
     environment:
       - KBC_RUNID
-      - STORAGE_API_TOKEN
       - SNOWFLAKE_DB_HOST
       - SNOWFLAKE_DB_PORT
       - SNOWFLAKE_DB_USER

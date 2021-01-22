@@ -32,17 +32,10 @@ trait SalesTableTrait
                 $tableName,
                 'PK_' . $tableName,
                 'PRIMARY KEY',
-                implode(', ', $primaryKey)
-            );
-        }
-
-        if ($tableName === 'sales2') {
-            $this->addConstraint(
-                $tableName,
-                'FK_sales_sales2',
-                'FOREIGN KEY',
-                'createdat',
-                'sales(createdat)'
+                implode(
+                    ', ',
+                    array_map(fn($v) => $this->quoteIdentifier($v), $primaryKey)
+                )
             );
         }
     }

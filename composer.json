@@ -38,11 +38,17 @@
     "autoload-dev": {
         "psr-4": {
             "Keboola\\DbExtractor\\Tests\\": "tests/phpunit/",
-            "Keboola\\DbExtractor\\TraitTests\\": "tests/traits/"
+            "Keboola\\DbExtractor\\TraitTests\\": "tests/traits/",
+            "Keboola\\DbExtractor\\FunctionalTests\\": "tests/functional/"
         }
     },
     "scripts": {
-        "tests": "phpunit",
+        "tests-phpunit": "phpunit --testsuite unit",
+        "tests-datadir": "phpunit --testsuite functional",
+        "tests": [
+            "@tests-phpunit",
+            "@tests-datadir"
+        ],
         "phpstan": "phpstan analyse --no-progress --level=max -c phpstan.neon ./src ./tests",
         "phpcs": "phpcs -n --ignore=vendor --extensions=php .",
         "phpcbf": "phpcbf -n --ignore=vendor --extensions=php .",

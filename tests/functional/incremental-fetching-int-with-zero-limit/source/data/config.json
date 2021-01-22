@@ -1,0 +1,23 @@
+{
+  "parameters": {
+    "id": 3,
+    "name": "auto-increment-timestamp",
+    "outputTable": "in.c-main.auto-increment-timestamp",
+    "incremental": true,
+    "incrementalFetchingColumn": "_Weir%d I-D",
+    "incrementalFetchingLimit": 0,
+    "primaryKey": ["_Weir%d I-D"],
+    "table": {
+      "schema": "%env(string:SNOWFLAKE_DB_SCHEMA)%",
+      "tableName": "auto Increment Timestamp"
+    },
+    "db": {
+      "host": "%env(string:SNOWFLAKE_DB_HOST)%",
+      "port": "%env(string:SNOWFLAKE_DB_PORT)%",
+      "user": "%env(string:SNOWFLAKE_DB_USER)%",
+      "#password": "%env(string:SNOWFLAKE_DB_PASSWORD)%",
+      "database": "%env(string:SNOWFLAKE_DB_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_DB_SCHEMA)%"
+    }
+  }
+}

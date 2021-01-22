@@ -1,0 +1,151 @@
+{
+    "destination": "in.c-main.semi-structured",
+    "incremental": false,
+    "columns": [
+        "var",
+        "obj",
+        "arr"
+    ],
+    "metadata": [
+        {
+            "key": "KBC.name",
+            "value": "semi-structured"
+        },
+        {
+            "key": "KBC.sanitizedName",
+            "value": "semi_structured"
+        },
+        {
+            "key": "KBC.schema",
+            "value": "replaceEnv"
+        },
+        {
+            "key": "KBC.catalog",
+            "value": "replaceEnv"
+        },
+        {
+            "key": "KBC.type",
+            "value": "TABLE"
+        },
+        {
+            "key": "KBC.rowCount",
+            "value": 1
+        }
+    ],
+    "column_metadata": {
+        "var": [
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARIANT"
+            },
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "var"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "var"
+            },
+            {
+                "key": "KBC.primaryKey",
+                "value": false
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 1
+            }
+        ],
+        "obj": [
+            {
+                "key": "KBC.datatype.type",
+                "value": "OBJECT"
+            },
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "obj"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "obj"
+            },
+            {
+                "key": "KBC.primaryKey",
+                "value": false
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 2
+            }
+        ],
+        "arr": [
+            {
+                "key": "KBC.datatype.type",
+                "value": "ARRAY"
+            },
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "arr"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "arr"
+            },
+            {
+                "key": "KBC.primaryKey",
+                "value": false
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 3
+            }
+        ]
+    }
+}
