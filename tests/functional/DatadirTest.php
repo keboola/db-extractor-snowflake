@@ -126,6 +126,19 @@ class DatadirTest extends DatadirTestCase
         }
     }
 
+    public static function tearDownAfterClass(): void
+    {
+        $databaseManager = new DatabaseManager(TestConnection::createConnection());
+
+        $databaseManager->createSalesTable();
+        $databaseManager->generateSalesRows();
+        $databaseManager->addSalesConstraint('sales', ['createdat']);
+
+        $databaseManager->createEscapingTable();
+        $databaseManager->generateEscapingRows();
+        parent::tearDownAfterClass();
+    }
+
     private function findGzipFiles(string $dir): Finder
     {
         $finder = new Finder();
