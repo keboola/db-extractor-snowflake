@@ -10,10 +10,6 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update \
   && apt-get install unzip git unixodbc unixodbc-dev libpq-dev debsig-verify libicu-dev -y
 
-RUN docker-php-ext-install pdo_pgsql pdo_mysql
-RUN pecl install xdebug \
-  && docker-php-ext-enable xdebug
-
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install intl
 

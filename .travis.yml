@@ -9,6 +9,7 @@ before_install:
   - docker-compose -v
 
 install:
+  - docker-compose build
   - docker-compose run --rm app composer ci
 
 script:
