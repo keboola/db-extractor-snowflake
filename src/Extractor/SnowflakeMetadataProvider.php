@@ -68,7 +68,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
             );
         }
 
-        if ($loadColumns) {
+        if ($sqlWhereElements && $loadColumns) {
             foreach ($this->queryColumns($sqlWhereElements) as $column) {
                 $tableId = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
                 if (!isset($tableBuilders[$tableId])) {
