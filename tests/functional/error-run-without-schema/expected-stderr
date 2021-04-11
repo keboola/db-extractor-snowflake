@@ -1,1 +1,1 @@
-DB query "SELECT * FROM "escaping"" failed: : Error "odbc_prepare(): SQL error: SQL compilation error: Object '"escaping"' does not exist or not authorized., SQL state S0002 in SQLPrepare" while executing query "SELECT * FROM (SELECT * FROM "escaping") LIMIT 0;"
+SQL compilation error: Object '"escaping"' does not exist or not authorized. S0002

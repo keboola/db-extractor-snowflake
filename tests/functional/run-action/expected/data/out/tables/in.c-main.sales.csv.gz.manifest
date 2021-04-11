@@ -1,20 +1,6 @@
 {
     "destination": "in.c-main.sales",
     "incremental": false,
-    "columns": [
-        "usergender",
-        "usercity",
-        "usersentiment",
-        "zipcode",
-        "sku",
-        "createdat",
-        "category",
-        "price",
-        "county",
-        "countycode",
-        "userstate",
-        "categorygroup"
-    ],
     "metadata": [
         {
             "key": "KBC.name",
@@ -546,5 +532,19 @@
                 "value": 12
             }
         ]
-    }
+    },
+    "columns": [
+        "usergender",
+        "usercity",
+        "usersentiment",
+        "zipcode",
+        "sku",
+        "createdat",
+        "category",
+        "price",
+        "county",
+        "countycode",
+        "userstate",
+        "categorygroup"
+    ]
 }

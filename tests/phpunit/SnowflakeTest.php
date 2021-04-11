@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Tests;
 
 use Keboola\Component\Logger;
+use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\Snowflake;
+use Keboola\DbExtractor\Extractor\SnowflakeOdbcConnection;
+use Keboola\DbExtractor\Extractor\SnowflakeQueryFactory;
 use Keboola\DbExtractor\FunctionalTests\TestConnection;
 use Keboola\DbExtractor\SnowflakeApplication;
 use Keboola\DbExtractor\Tests\Traits\ConfigTrait;
@@ -19,6 +22,7 @@ use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\QueryBuilder;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use Throwable;
 
 class SnowflakeTest extends TestCase
@@ -112,7 +116,7 @@ class SnowflakeTest extends TestCase
             $app->run();
             $this->fail('Test connection with invalid warehouse ID should fail');
         } catch (UserException $e) {
-            $this->assertMatchesRegularExpression('/Cannot access object or it does not exist/ui', $e->getMessage());
+            $this->assertMatchesRegularExpression('/Invalid warehouse/ui', $e->getMessage());
         }
 
         $this->setUserDefaultWarehouse($user, $warehouse);
@@ -172,15 +176,29 @@ class SnowflakeTest extends TestCase
         $params['primaryKey'] = [];
         $params['retries'] = 3;
         $exportConfig = ExportConfig::fromArray($params);
-        if ($exportConfig->isIncrementalFetching()) {
-            $incrementalConfig = $this->getIncrementalConfig();
-            $extractor = new Snowflake($incrementalConfig['parameters'], $state, new Logger());
-            $extractor->validateIncrementalFetching($exportConfig);
-        } else {
-            $config = $this->getConfig();
-            $extractor = new Snowflake($config['parameters'], $state, new Logger());
+
+        $queryFactory = new SnowflakeQueryFactory($state);
+        if (isset($state['lastFetchedRow']) && is_numeric($state['lastFetchedRow'])) {
+            $queryFactory->setIncrementalFetchingColType(Snowflake::INCREMENT_TYPE_NUMERIC);
         }
-        $query = $extractor->simpleQuery($exportConfig);
+
+        /** @var SnowflakeDatabaseConfig $databaseConfig */
+        $databaseConfig = SnowflakeDatabaseConfig::fromArray([
+            'host' => (string) getenv('SNOWFLAKE_DB_HOST'),
+            'port' => (string) getenv('SNOWFLAKE_DB_PORT'),
+            'user' => (string) getenv('SNOWFLAKE_DB_USER'),
+            '#password' => (string) getenv('SNOWFLAKE_DB_PASSWORD'),
+            'database' => (string) getenv('SNOWFLAKE_DB_DATABASE'),
+        ]);
+
+        $query = $queryFactory->create(
+            $exportConfig,
+            new SnowflakeOdbcConnection(
+                new NullLogger(),
+                $databaseConfig
+            )
+        );
+
         $this->assertEquals($expected, $query);
     }
 

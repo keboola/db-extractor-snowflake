@@ -1,14 +1,6 @@
 {
     "destination": "in.c-main.auto-increment-timestamp",
     "incremental": true,
-    "columns": [
-        "_Weir%d I-D",
-        "Weir%d Na-me",
-        "someInteger",
-        "someDecimal",
-        "type",
-        "datetime"
-    ],
     "primary_key": [
         "Weir_d_I_D"
     ],
@@ -287,5 +279,13 @@
                 "value": 6
             }
         ]
-    }
+    },
+    "columns": [
+        "Weir_d_I_D",
+        "Weir_d_Na_me",
+        "someInteger",
+        "someDecimal",
+        "type",
+        "datetime"
+    ]
 }

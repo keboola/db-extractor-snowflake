@@ -1,1 +1,1 @@
-DB query "SELECT CAST("decimal" AS DECIMAL(15,5)), "character", "integer", "date" FROM "types"" failed: : Error "odbc_prepare(): SQL error: SQL compilation error: Object '"types"' does not exist or not authorized., SQL state S0002 in SQLPrepare" while executing query "SELECT * FROM (SELECT CAST("decimal" AS DECIMAL(15,5)), "character", "integer", "date" FROM "types") LIMIT 0;"
+SQL compilation error: Object '"types"' does not exist or not authorized. S0002
