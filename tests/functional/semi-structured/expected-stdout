@@ -1,4 +1,7 @@
-Exporting to in.c-main.semi-structured
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+Use schema "%s" in database "%s"
+Exporting "semi-structured" to "in.c-main.semi-structured".
 Downloading data from Snowflake
 1 files (62 B) downloaded
+Exported "1" rows to "in.c-main.semi-structured".
 Extractor finished successfully.

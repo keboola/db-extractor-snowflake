@@ -4,30 +4,26 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Extractor;
 
-use Keboola\DbExtractor\Traits\QuoteTrait;
+use Keboola\DbExtractor\Adapter\Metadata\MetadataProvider;
+use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\ColumnBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\MetadataBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\TableBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\Table;
 use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\TableCollection;
+use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\InputTable;
-use Keboola\SnowflakeDbAdapter\Connection;
 
 class SnowflakeMetadataProvider implements MetadataProvider
 {
-    use QuoteTrait;
+    private OdbcConnection $db;
 
-    private Connection $db;
+    private DatabaseConfig $databaseConfig;
 
-    private ?string $database;
-
-    private ?string $schema;
-
-    public function __construct(Connection $db, ?string $database, ?string $schema)
+    public function __construct(OdbcConnection $db, DatabaseConfig $databaseConfig)
     {
         $this->db = $db;
-        $this->database = $database; // database is optional
-        $this->schema = $schema;
+        $this->databaseConfig = $databaseConfig; // database is optional
     }
 
     public function getTable(InputTable $table): Table
@@ -63,8 +59,8 @@ class SnowflakeMetadataProvider implements MetadataProvider
             $this->processTableData($tableBuilder, $item);
             $sqlWhereElements[] = sprintf(
                 '(table_schema = %s AND table_name = %s)',
-                $this->quote($item['schema_name']),
-                $this->quote($item['name'])
+                $this->db->quote($item['schema_name']),
+                $this->db->quote($item['name'])
             );
         }
 
@@ -80,6 +76,19 @@ class SnowflakeMetadataProvider implements MetadataProvider
         }
 
         return $builder->build();
+    }
+
+    public function getColumnInfo(string $query): array
+    {
+        // Create temporary view from the supplied query
+        $sql = sprintf(
+            'SELECT * FROM (%s) LIMIT 0;',
+            rtrim(trim($query), ';')
+        );
+
+        $this->db->query($sql)->fetchAll();
+
+        return $this->db->query('DESC RESULT LAST_QUERY_ID()')->fetchAll();
     }
 
     private function processTableData(TableBuilder $builder, array $data): void
@@ -104,16 +113,16 @@ class SnowflakeMetadataProvider implements MetadataProvider
             $sqlWhereClause
         );
 
-        return $this->db->fetchAll($sql);
+        return $this->db->query($sql)->fetchAll();
     }
 
     private function queryTables(?array $whiteList): array
     {
-        $sql = $this->schema ? 'SHOW TABLES IN SCHEMA' : 'SHOW TABLES IN DATABASE';
-        $tables = $this->db->fetchAll($sql);
+        $sql = $this->databaseConfig->hasSchema() ? 'SHOW TABLES IN SCHEMA' : 'SHOW TABLES IN DATABASE';
+        $tables = $this->db->query($sql)->fetchAll();
 
-        $sql = $this->schema ? 'SHOW VIEWS IN SCHEMA' : 'SHOW VIEWS IN DATABASE';
-        $views = $this->db->fetchAll($sql);
+        $sql = $this->databaseConfig->hasSchema() ? 'SHOW VIEWS IN SCHEMA' : 'SHOW VIEWS IN DATABASE';
+        $views = $this->db->query($sql)->fetchAll();
 
         $result = array_merge($tables, $views);
         $filteredResult = array_filter($result, function ($v) use ($whiteList) {
@@ -132,7 +141,9 @@ class SnowflakeMetadataProvider implements MetadataProvider
      */
     private function shouldTableBeSkipped(array $table, ?array $whiteList): bool
     {
-        $isFromDifferentSchema = $this->schema && $table['schema_name'] !== $this->schema;
+        $isFromDifferentSchema = $this->databaseConfig->hasSchema() &&
+            $table['schema_name'] !== $this->databaseConfig->getSchema();
+
         $isFromInformationSchema = $table['schema_name'] === 'INFORMATION_SCHEMA';
         $isNotFromWhiteList = false;
         if ($whiteList) {

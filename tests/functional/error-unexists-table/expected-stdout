@@ -1,5 +1,12 @@
-Exporting to in.c-main.escaping
-DB query "SELECT * FROM "non_existing_table"" failed: : Error "odbc_prepare(): SQL error: SQL compilation error: Object '"non_existing_table"' does not exist or not authorized., SQL state S0002 in SQLPrepare" while executing query "SELECT * FROM (SELECT * FROM "non_existing_table") LIMIT 0;". Retrying... [1x]
-DB query "SELECT * FROM "non_existing_table"" failed: : Error "odbc_prepare(): SQL error: SQL compilation error: Object '"non_existing_table"' does not exist or not authorized., SQL state S0002 in SQLPrepare" while executing query "SELECT * FROM (SELECT * FROM "non_existing_table") LIMIT 0;". Retrying... [2x]
-DB query "SELECT * FROM "non_existing_table"" failed: : Error "odbc_prepare(): SQL error: SQL compilation error: Object '"non_existing_table"' does not exist or not authorized., SQL state S0002 in SQLPrepare" while executing query "SELECT * FROM (SELECT * FROM "non_existing_table") LIMIT 0;". Retrying... [3x]
-DB query "SELECT * FROM "non_existing_table"" failed: : Error "odbc_prepare(): SQL error: SQL compilation error: Object '"non_existing_table"' does not exist or not authorized., SQL state S0002 in SQLPrepare" while executing query "SELECT * FROM (SELECT * FROM "non_existing_table") LIMIT 0;". Retrying... [4x]
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+Use schema "%s" in database "%s"
+Exporting "sales" to "in.c-main.escaping".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+SQL compilation error: Object '"non_existing_table"' does not exist or not authorized. S0002. Retrying... [1x]
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+SQL compilation error: Object '"non_existing_table"' does not exist or not authorized. S0002. Retrying... [2x]
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+SQL compilation error: Object '"non_existing_table"' does not exist or not authorized. S0002. Retrying... [3x]
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+SQL compilation error: Object '"non_existing_table"' does not exist or not authorized. S0002. Retrying... [4x]
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".

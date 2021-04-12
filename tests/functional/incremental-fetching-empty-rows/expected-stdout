@@ -1,2 +1,4 @@
-Exporting to in.c-main.auto-increment-timestamp
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
+Use schema "%s" in database "%s"
+Exporting "auto-increment-timestamp" to "in.c-main.auto-increment-timestamp".
 Extractor finished successfully.

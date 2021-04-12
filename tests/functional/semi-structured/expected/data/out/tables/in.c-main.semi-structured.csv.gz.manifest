@@ -1,11 +1,6 @@
 {
     "destination": "in.c-main.semi-structured",
     "incremental": false,
-    "columns": [
-        "var",
-        "obj",
-        "arr"
-    ],
     "metadata": [
         {
             "key": "KBC.name",
@@ -147,5 +142,10 @@
                 "value": 3
             }
         ]
-    }
+    },
+    "columns": [
+        "var",
+        "obj",
+        "arr"
+    ]
 }
