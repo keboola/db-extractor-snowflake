@@ -13,18 +13,14 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
 {
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
-    private SnowflakeOdbcConnection $connection;
-
     private SnowflakeMetadataProvider $metadataProvider;
 
     private ?string $incrementalFetchingColType = null;
 
     public function __construct(
-        SnowflakeOdbcConnection $connection,
         SnowflakeMetadataProvider $metadataProvider,
         array $state
     ) {
-        $this->connection = $connection;
         $this->metadataProvider = $metadataProvider;
         parent::__construct($state);
     }
@@ -35,19 +31,38 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
         return $this;
     }
 
-    public function create(ExportConfig $exportConfig, DbConnection $connection): string
+    protected function createSelect(ExportConfig $exportConfig, DbConnection $connection): Generator
     {
-        $query = parent::create($exportConfig, $this->connection);
-        $columnInfo = $this->metadataProvider->getColumnInfo($query);
-        $objectColumns = array_filter($columnInfo, function ($column): bool {
+        // Create query without casting to get columns metadata
+        $rawQuery = implode(' ', array_merge(
+            iterator_to_array(parent::createSelect($exportConfig, $connection)),
+            iterator_to_array(parent::createFrom($exportConfig, $connection)),
+        ));
+        $columnsMetadata = $this->metadataProvider->getColumnsInfo($rawQuery);
+        $structuredColumnsCount = count(array_filter($columnsMetadata, function (array $column) {
             return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
-        });
+        }));
 
-        if (empty($objectColumns)) {
-            return $query;
+        // No structured column -> use default implementation
+        if ($structuredColumnsCount === 0) {
+            yield from parent::createSelect($exportConfig, $connection);
+            return;
         }
 
-        return $this->createWithCasting($exportConfig, $this->connection, $columnInfo);
+        // Cast semi-structured types to text
+        $castedColumns = array_map(function ($column) use ($connection): string {
+            if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+                return sprintf(
+                    'CAST(%s AS TEXT) AS %s',
+                    $connection->quoteIdentifier($column['name']),
+                    $connection->quoteIdentifier($column['name'])
+                );
+            }
+            return $connection->quoteIdentifier($column['name']);
+        }, $columnsMetadata);
+
+        // Generate SELECT statement
+        yield sprintf('SELECT %s', implode(', ', $castedColumns));
     }
 
     public function createIncrementalAddon(ExportConfig $exportConfig, DbConnection $connection): string
@@ -55,18 +70,6 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
         $sql = array_merge(
             iterator_to_array($this->createWhere($exportConfig, $connection)),
             iterator_to_array($this->createOrderBy($exportConfig, $connection))
-        );
-        return implode(' ', $sql);
-    }
-
-    protected function createWithCasting(
-        ExportConfig $exportConfig,
-        DbConnection $connection,
-        array $columnInfo
-    ): string {
-        $sql = array_merge(
-            iterator_to_array($this->createSelectWithCast($connection, $columnInfo)),
-            iterator_to_array($this->createFrom($exportConfig, $connection))
         );
         return implode(' ', $sql);
     }
@@ -86,21 +89,5 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
                 $lastFetchedRow
             );
         }
-    }
-
-    protected function createSelectWithCast(DbConnection $connection, array $columnInfo): Generator
-    {
-        $columnCast = array_map(function ($column) use ($connection): string {
-            if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
-                return sprintf(
-                    'CAST(%s AS TEXT) AS %s',
-                    $connection->quoteIdentifier($column['name']),
-                    $connection->quoteIdentifier($column['name'])
-                );
-            }
-            return $connection->quoteIdentifier($column['name']);
-        }, $columnInfo);
-
-        yield sprintf('SELECT %s', implode(', ', $columnCast));
     }
 }

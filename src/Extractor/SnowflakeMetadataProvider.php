@@ -78,7 +78,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
         return $builder->build();
     }
 
-    public function getColumnInfo(string $query): array
+    public function getColumnsInfo(string $query): array
     {
         // Create temporary view from the supplied query
         $sql = sprintf(
