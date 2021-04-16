@@ -22,7 +22,7 @@ class Snowflake extends BaseExtractor
     public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
-    protected OdbcConnection $connection;
+    protected SnowflakeOdbcConnection $connection;
 
     private SnowflakeQueryFactory $queryFactory;
 
@@ -37,15 +37,18 @@ class Snowflake extends BaseExtractor
             $this->logger,
             $this->connection,
             $this->getQueryFactory(),
-            $this->getDatabaseConfig(),
-            $this->getMetadataProvider()
+            $this->getDatabaseConfig()
         );
     }
 
     protected function getQueryFactory(): SnowflakeQueryFactory
     {
         if (!isset($this->queryFactory)) {
-            $this->queryFactory = new SnowflakeQueryFactory($this->state);
+            $this->queryFactory = new SnowflakeQueryFactory(
+                $this->connection,
+                $this->getMetadataProvider(),
+                $this->state
+            );
         }
 
         return $this->queryFactory;

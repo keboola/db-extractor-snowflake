@@ -11,7 +11,23 @@ use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 
 class SnowflakeQueryFactory extends DefaultQueryFactory
 {
+    public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
+
+    private SnowflakeOdbcConnection $connection;
+
+    private SnowflakeMetadataProvider $metadataProvider;
+
     private ?string $incrementalFetchingColType = null;
+
+    public function __construct(
+        SnowflakeOdbcConnection $connection,
+        SnowflakeMetadataProvider $metadataProvider,
+        array $state
+    ) {
+        $this->connection = $connection;
+        $this->metadataProvider = $metadataProvider;
+        parent::__construct($state);
+    }
 
     public function setIncrementalFetchingColType(string $incrementalFetchingColType): self
     {
@@ -19,13 +35,19 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
         return $this;
     }
 
-    public function createWithCasting(ExportConfig $exportConfig, DbConnection $connection, array $columnInfo): string
+    public function create(ExportConfig $exportConfig, DbConnection $connection): string
     {
-        $sql = array_merge(
-            iterator_to_array($this->createSelectWithCast($connection, $columnInfo)),
-            iterator_to_array($this->createFrom($exportConfig, $connection))
-        );
-        return implode(' ', $sql);
+        $query = parent::create($exportConfig, $this->connection);
+        $columnInfo = $this->metadataProvider->getColumnInfo($query);
+        $objectColumns = array_filter($columnInfo, function ($column): bool {
+            return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
+        });
+
+        if (empty($objectColumns)) {
+            return $query;
+        }
+
+        return $this->createWithCasting($exportConfig, $this->connection, $columnInfo);
     }
 
     public function createIncrementalAddon(ExportConfig $exportConfig, DbConnection $connection): string
@@ -33,6 +55,18 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
         $sql = array_merge(
             iterator_to_array($this->createWhere($exportConfig, $connection)),
             iterator_to_array($this->createOrderBy($exportConfig, $connection))
+        );
+        return implode(' ', $sql);
+    }
+
+    protected function createWithCasting(
+        ExportConfig $exportConfig,
+        DbConnection $connection,
+        array $columnInfo
+    ): string {
+        $sql = array_merge(
+            iterator_to_array($this->createSelectWithCast($connection, $columnInfo)),
+            iterator_to_array($this->createFrom($exportConfig, $connection))
         );
         return implode(' ', $sql);
     }
@@ -46,7 +80,7 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
                 $lastFetchedRow = $connection->quote((string) $this->state['lastFetchedRow']);
             }
             yield sprintf(
-            // intentionally ">=" last row should be included, it is handled by storage deduplication process
+                // intentionally ">=" last row should be included, it is handled by storage deduplication process
                 'WHERE %s >= %s',
                 $connection->quoteIdentifier($exportConfig->getIncrementalFetchingColumn()),
                 $lastFetchedRow
@@ -57,7 +91,7 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
     protected function createSelectWithCast(DbConnection $connection, array $columnInfo): Generator
     {
         $columnCast = array_map(function ($column) use ($connection): string {
-            if (in_array($column['type'], SnowsqlExportAdapter::SEMI_STRUCTURED_TYPES)) {
+            if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
                 return sprintf(
                     'CAST(%s AS TEXT) AS %s',
                     $connection->quoteIdentifier($column['name']),

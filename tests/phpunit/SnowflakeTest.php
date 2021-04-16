@@ -10,6 +10,7 @@ use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\Snowflake;
 use Keboola\DbExtractor\Extractor\SnowflakeConnectionFactory;
+use Keboola\DbExtractor\Extractor\SnowflakeMetadataProvider;
 use Keboola\DbExtractor\Extractor\SnowflakeOdbcConnection;
 use Keboola\DbExtractor\Extractor\SnowflakeQueryFactory;
 use Keboola\DbExtractor\FunctionalTests\TestConnection;
@@ -26,7 +27,6 @@ use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\QueryBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
-use Throwable;
 
 class SnowflakeTest extends TestCase
 {
@@ -192,7 +192,30 @@ class SnowflakeTest extends TestCase
         $params['retries'] = 3;
         $exportConfig = ExportConfig::fromArray($params);
 
-        $queryFactory = new SnowflakeQueryFactory($state);
+        $metadataProvider = $this
+            ->getMockBuilder(SnowflakeMetadataProvider::class)
+            ->disableOriginalConstructor()
+            ->disableAutoReturnValueGeneration()
+            ->getMock();
+        $odbcConnection = $this
+            ->getMockBuilder(SnowflakeOdbcConnection::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $odbcConnection
+            ->method('quote')
+            ->willReturnCallback(function (string $str) {
+                return $this->quote($str);
+            });
+        $odbcConnection
+            ->method('quoteIdentifier')
+            ->willReturnCallback(function (string $str) {
+                return $this->quoteIdentifier($str);
+            });
+
+        // Don't test "SEMI_STRUCTURED_TYPES"
+        $metadataProvider->method('getColumnInfo')->willReturn([]);
+
+        $queryFactory = new SnowflakeQueryFactory($odbcConnection, $metadataProvider, $state);
         if (isset($state['lastFetchedRow']) && is_numeric($state['lastFetchedRow'])) {
             $queryFactory->setIncrementalFetchingColType(Snowflake::INCREMENT_TYPE_NUMERIC);
         }

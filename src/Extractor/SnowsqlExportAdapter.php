@@ -21,40 +21,33 @@ use Symfony\Component\Process\Process;
 
 class SnowsqlExportAdapter implements ExportAdapter
 {
-    private Temp $tempDir;
-
-    protected SnowflakeQueryFactory $simpleQueryFactory;
+    protected SnowflakeQueryFactory $queryFactory;
 
     private OdbcConnection $connection;
 
     protected LoggerInterface $logger;
 
-    private SplFileInfo $snowSqlConfig;
-
     private SnowflakeDatabaseConfig $databaseConfig;
 
-    private SnowflakeMetadataProvider $metadataProvider;
+    private Temp $tempDir;
 
-
-    public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
+    private SplFileInfo $snowSqlConfig;
 
     public function __construct(
         LoggerInterface $logger,
         OdbcConnection $connection,
         SnowflakeQueryFactory $QueryFactory,
-        DatabaseConfig $databaseConfig,
-        SnowflakeMetadataProvider $metadataProvider
+        DatabaseConfig $databaseConfig
     ) {
         if (!($databaseConfig instanceof SnowflakeDatabaseConfig)) {
             throw new InvalidArgumentException('DatabaseConfig must be instance of SnowflakeDatabaseConfig');
         }
-        $this->tempDir = new Temp('ex-snowflake-adapter');
         $this->logger = $logger;
         $this->connection = $connection;
-        $this->simpleQueryFactory = $QueryFactory;
+        $this->queryFactory = $QueryFactory;
         $this->databaseConfig = $databaseConfig;
+        $this->tempDir = new Temp('ex-snowflake-adapter');
         $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
-        $this->metadataProvider = $metadataProvider;
     }
 
     public function getName(): string
@@ -64,53 +57,24 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     public function export(ExportConfig $exportConfig, string $csvFilePath): ExportResult
     {
-        if (!$exportConfig->hasQuery()) {
-            $query = $this->createSimpleQuery($exportConfig);
-            $columnInfo = $this->metadataProvider->getColumnInfo($query);
-            $objectColumns = array_filter($columnInfo, function ($column): bool {
-                return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
-            });
-            if (!empty($objectColumns)) {
-                $query = $this->createSimpleQueryWithCasting($exportConfig, $columnInfo);
-            }
-        } else {
-            $query = $exportConfig->getQuery();
-        }
+        // Create query
+        $query = $exportConfig->hasQuery() ?
+            $exportConfig->getQuery() : $this->queryFactory->create($exportConfig, $this->connection);
 
+        // Copy into internal staging
         $this->cleanupTableStage($exportConfig->getOutputTable());
-
-        // copy into internal staging
         $copyCommand = $this->generateCopyCommand($exportConfig->getOutputTable(), $query);
-
         $res = $this->connection->query($copyCommand)->fetchAll();
         $rowCount = (int) ($res[0]['rows_unloaded'] ?? 0);
-
         if ($rowCount === 0) {
             // query resulted in no rows, nothing left to do
             return new ExportResult($csvFilePath, 0, null);
         }
 
-        $this->logger->info('Downloading data from Snowflake');
+        // Download CSV using snowsql
+        $process = $this->runDownloadCommand($exportConfig, $csvFilePath);
 
-        @mkdir($csvFilePath, 0755, true);
-
-        $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
-
-        $this->logger->debug(trim($command));
-
-        $process = Process::fromShellCommandline($command);
-        $process->setTimeout(null);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
-            $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
-            throw new Exception(sprintf(
-                'File download error occurred processing [%s]',
-                $exportConfig->hasTable() ? $exportConfig->getTable()->getName() : $exportConfig->getOutputTable()
-            ));
-        }
-
+        // Parse process output
         $csvFiles = $this->parseFiles($process->getOutput(), $csvFilePath);
         $bytesDownloaded = 0;
         foreach ($csvFiles as $csvFile) {
@@ -123,8 +87,10 @@ class SnowsqlExportAdapter implements ExportAdapter
             $this->dataSizeFormatted((int) $bytesDownloaded)
         ));
 
+        // Clean-up
         $this->cleanupTableStage($exportConfig->getOutputTable());
 
+        // TODO fix rowsCount = 0
         if ($rowCount > 0) {
             return new ExportResult($csvFilePath, $rowCount, null);
         }
@@ -138,14 +104,30 @@ class SnowsqlExportAdapter implements ExportAdapter
         return new ExportResult($csvFilePath, 0, null);
     }
 
-    protected function createSimpleQuery(ExportConfig $exportConfig): string
+    private function runDownloadCommand(ExportConfig $exportConfig, string $csvFilePath): Process
     {
-        return $this->simpleQueryFactory->create($exportConfig, $this->connection);
-    }
+        // Generate command
+        $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
+        $this->logger->info('Downloading data from Snowflake');
+        $this->logger->debug(trim($command));
 
-    protected function createSimpleQueryWithCasting(ExportConfig $exportConfig, array $columnInfo): string
-    {
-        return $this->simpleQueryFactory->createWithCasting($exportConfig, $this->connection, $columnInfo);
+        // Run
+        @mkdir($csvFilePath, 0755, true);
+        $process = Process::fromShellCommandline($command);
+        $process->setTimeout(null);
+        $process->run();
+
+        // Check result
+        if (!$process->isSuccessful()) {
+            $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
+            $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
+            throw new Exception(sprintf(
+                'File download error occurred processing [%s]',
+                $exportConfig->hasTable() ? $exportConfig->getTable()->getName() : $exportConfig->getOutputTable()
+            ));
+        }
+
+        return $process;
     }
 
     private function cleanupTableStage(string $tmpTableName): void
