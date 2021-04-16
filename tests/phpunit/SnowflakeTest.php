@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
+use Keboola\CommonExceptions\UserExceptionInterface;
 use Keboola\Component\Logger;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\Snowflake;
+use Keboola\DbExtractor\Extractor\SnowflakeConnectionFactory;
 use Keboola\DbExtractor\Extractor\SnowflakeOdbcConnection;
 use Keboola\DbExtractor\Extractor\SnowflakeQueryFactory;
 use Keboola\DbExtractor\FunctionalTests\TestConnection;
@@ -18,6 +20,7 @@ use Keboola\DbExtractor\TraitTests\Tables\AutoIncrementTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\EscapingTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\SalesTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\TypesTableTrait;
+use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\QueryBuilder;
@@ -57,26 +60,32 @@ class SnowflakeTest extends TestCase
 
         $this->setUserDefaultWarehouse($user);
 
-        // run without warehouse param
-        unset($config['parameters']['db']['warehouse']);
-        $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-
         try {
-            $app->run();
-            $this->fail('Run extractor without warehouse should fail');
-        } catch (Throwable $e) {
-            $this->assertMatchesRegularExpression('/No active warehouse/ui', $e->getMessage());
+            // run without warehouse param
+            unset($config['parameters']['db']['warehouse']);
+            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+
+            try {
+                $app->run();
+                $this->fail('Run extractor without warehouse should fail');
+            } catch (UserExceptionInterface $e) {
+                $this->assertSame(
+                    'Error connecting to DB: ' .
+                    'Please configure "warehouse" parameter. User default warehouse is not defined.',
+                    $e->getMessage()
+                );
+            }
+
+            // run with warehouse param
+            $config = $this->getConfig();
+            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+
+            $result = $app->run();
+            $this->assertEquals('success', $result['status']);
+            $this->assertCount(3, $result['imported']);
+        } finally {
+            $this->setUserDefaultWarehouse($user, $warehouse);
         }
-
-        // run with warehouse param
-        $config = $this->getConfig();
-        $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-
-        $result = $app->run();
-        $this->assertEquals('success', $result['status']);
-        $this->assertCount(3, $result['imported']);
-
-        $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
     public function testCredentialsDefaultWarehouse(): void
@@ -88,38 +97,44 @@ class SnowflakeTest extends TestCase
         $user = $config['parameters']['db']['user'];
         $warehouse = $config['parameters']['db']['warehouse'];
 
-        // empty default warehouse, specified in config
-        $this->setUserDefaultWarehouse($user, null);
-
-        $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-        $result = $app->run();
-
-        $this->assertArrayHasKey('status', $result);
-        $this->assertEquals('success', $result['status']);
-
-        // empty default warehouse and not specified in config
-        unset($config['parameters']['db']['warehouse']);
-        $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-
         try {
-            $app->run();
-            $this->fail('Test connection without warehouse and default warehouse should fail');
-        } catch (UserException $e) {
-            $this->assertMatchesRegularExpression('/Specify \"warehouse\" parameter/ui', $e->getMessage());
+            // empty default warehouse, specified in config
+            $this->setUserDefaultWarehouse($user, null);
+
+            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+            $result = $app->run();
+
+            $this->assertArrayHasKey('status', $result);
+            $this->assertEquals('success', $result['status']);
+
+            // empty default warehouse and not specified in config
+            unset($config['parameters']['db']['warehouse']);
+            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+
+            try {
+                $app->run();
+                $this->fail('Test connection without warehouse and default warehouse should fail');
+            } catch (UserException $e) {
+                $this->assertSame(
+                    'Connection failed: \'Error connecting to DB: ' .
+                    'Please configure "warehouse" parameter. User default warehouse is not defined.\'',
+                    $e->getMessage()
+                );
+            }
+
+            // bad warehouse
+            $config['parameters']['db']['warehouse'] = uniqid('test');
+            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+
+            try {
+                $app->run();
+                $this->fail('Test connection with invalid warehouse ID should fail');
+            } catch (UserException $e) {
+                $this->assertMatchesRegularExpression('/Invalid warehouse/ui', $e->getMessage());
+            }
+        } finally {
+            $this->setUserDefaultWarehouse($user, $warehouse);
         }
-
-        // bad warehouse
-        $config['parameters']['db']['warehouse'] = uniqid('test');
-        $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-
-        try {
-            $app->run();
-            $this->fail('Test connection with invalid warehouse ID should fail');
-        } catch (UserException $e) {
-            $this->assertMatchesRegularExpression('/Invalid warehouse/ui', $e->getMessage());
-        }
-
-        $this->setUserDefaultWarehouse($user, $warehouse);
     }
 
     public function testRunEmptyQuery(): void
@@ -191,13 +206,7 @@ class SnowflakeTest extends TestCase
             'database' => (string) getenv('SNOWFLAKE_DB_DATABASE'),
         ]);
 
-        $query = $queryFactory->create(
-            $exportConfig,
-            new SnowflakeOdbcConnection(
-                new NullLogger(),
-                $databaseConfig
-            )
-        );
+        $query = $queryFactory->create($exportConfig, $this->createOdbcConnection($databaseConfig));
 
         $this->assertEquals($expected, $query);
     }
@@ -371,5 +380,11 @@ class SnowflakeTest extends TestCase
 
             $this->assertEmpty($this->getUserDefaultWarehouse($user));
         }
+    }
+
+    private function createOdbcConnection(DatabaseConfig $databaseConfig): SnowflakeOdbcConnection
+    {
+        $factory = new SnowflakeConnectionFactory(new NullLogger());
+        return $factory->create($databaseConfig);
     }
 }

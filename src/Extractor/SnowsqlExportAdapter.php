@@ -10,6 +10,7 @@ use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Adapter\ValueObject\ExportResult;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
+use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\DbExtractorConfig\Exception\InvalidArgumentException;
@@ -20,6 +21,8 @@ use Symfony\Component\Process\Process;
 
 class SnowsqlExportAdapter implements ExportAdapter
 {
+    private Temp $tempDir;
+
     protected SnowflakeQueryFactory $simpleQueryFactory;
 
     private OdbcConnection $connection;
@@ -28,11 +31,10 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private SplFileInfo $snowSqlConfig;
 
-    private Temp $tempDir;
-
     private SnowflakeDatabaseConfig $databaseConfig;
 
     private SnowflakeMetadataProvider $metadataProvider;
+
 
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
@@ -41,19 +43,17 @@ class SnowsqlExportAdapter implements ExportAdapter
         OdbcConnection $connection,
         SnowflakeQueryFactory $QueryFactory,
         DatabaseConfig $databaseConfig,
-        SplFileInfo $snowSqlConfig,
-        Temp $tempDir,
         SnowflakeMetadataProvider $metadataProvider
     ) {
         if (!($databaseConfig instanceof SnowflakeDatabaseConfig)) {
             throw new InvalidArgumentException('DatabaseConfig must be instance of SnowflakeDatabaseConfig');
         }
+        $this->tempDir = new Temp('ex-snowflake-adapter');
         $this->logger = $logger;
         $this->connection = $connection;
         $this->simpleQueryFactory = $QueryFactory;
         $this->databaseConfig = $databaseConfig;
-        $this->snowSqlConfig = $snowSqlConfig;
-        $this->tempDir = $tempDir;
+        $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
         $this->metadataProvider = $metadataProvider;
     }
 
@@ -284,5 +284,32 @@ class SnowsqlExportAdapter implements ExportAdapter
             $this->snowSqlConfig,
             $snowSql
         );
+    }
+
+
+    private function createSnowSqlConfig(SnowflakeDatabaseConfig $databaseConfig): SplFileInfo
+    {
+        $cliConfig[] = '';
+        $cliConfig[] = '[options]';
+        $cliConfig[] = 'exit_on_error = true';
+        $cliConfig[] = '';
+        $cliConfig[] = '[connections.downloader]';
+        $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($databaseConfig->getHost()));
+        $cliConfig[] = sprintf('username = "%s"', $databaseConfig->getUsername());
+        $cliConfig[] = sprintf('password = "%s"', $databaseConfig->getPassword());
+        $cliConfig[] = sprintf('dbname = "%s"', $databaseConfig->getDatabase());
+
+        if ($databaseConfig->hasWarehouse()) {
+            $cliConfig[] = sprintf('warehousename = "%s"', $databaseConfig->getWarehouse());
+        }
+
+        if ($databaseConfig->hasSchema()) {
+            $cliConfig[] = sprintf('schemaname = "%s"', $databaseConfig->getSchema());
+        }
+
+        $file = $this->tempDir->createFile('snowsql.config');
+        file_put_contents($file->getPathname(), implode("\n", $cliConfig));
+
+        return $file;
     }
 }
