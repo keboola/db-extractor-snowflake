@@ -91,11 +91,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
 
         $columns = [];
         foreach ($columnsRaw as $data) {
-            // Eg. NUMBER(38,0) / DATE / VARCHAR(16777216)
-            preg_match('~^(.+)(?:\((.*)\))?$~', $data['type'], $m);
-            $type = $m[1];
-            $length = $m[2] ?? null;
-
+            [$type, $length] = SnowflakeUtils::parseTypeAndLength($data['type']);
             $builder = ColumnBuilder::create();
             $builder->setName($data['name']);
             $builder->setType($type);
