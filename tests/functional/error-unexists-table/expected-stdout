@@ -1,5 +1,4 @@
 Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
-Use schema "%s" in database "%s"
 Exporting "sales" to "in.c-main.escaping".
 Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s"".
 SQL compilation error: Object '"non_existing_table"' does not exist or not authorized. S0002. Retrying... [1x]

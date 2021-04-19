@@ -8,17 +8,10 @@ use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
-use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;
-use Keboola\DbExtractor\Utils\AccountUrlParser;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
-use Keboola\SnowflakeDbAdapter\Exception\CannotAccessObjectException;
-use Keboola\Temp\Temp;
-use Psr\Log\LoggerInterface;
-use \SplFileInfo;
-use Throwable;
 use Nette\Utils;
 
 class Snowflake extends BaseExtractor
@@ -29,22 +22,9 @@ class Snowflake extends BaseExtractor
     public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
     public const SEMI_STRUCTURED_TYPES = ['VARIANT' , 'OBJECT', 'ARRAY'];
 
-    protected OdbcConnection $connection;
-
-    private SplFileInfo $snowSqlConfig;
-
-    private ?string $warehouse = null;
-
-    private Temp $temp;
+    protected SnowflakeOdbcConnection $connection;
 
     private SnowflakeQueryFactory $queryFactory;
-
-    public function __construct(array $parameters, array $state, LoggerInterface $logger)
-    {
-        $this->temp = new Temp('ex-snowflake');
-
-        parent::__construct($parameters, $state, $logger);
-    }
 
     public function getMetadataProvider(): SnowflakeMetadataProvider
     {
@@ -57,17 +37,18 @@ class Snowflake extends BaseExtractor
             $this->logger,
             $this->connection,
             $this->getQueryFactory(),
-            $this->getDatabaseConfig(),
-            $this->snowSqlConfig,
-            $this->temp,
-            $this->getMetadataProvider()
+            $this->getDatabaseConfig()
         );
     }
 
     protected function getQueryFactory(): SnowflakeQueryFactory
     {
         if (!isset($this->queryFactory)) {
-            $this->queryFactory = new SnowflakeQueryFactory($this->state);
+            $this->queryFactory = new SnowflakeQueryFactory(
+                $this->connection,
+                $this->getMetadataProvider(),
+                $this->state
+            );
         }
 
         return $this->queryFactory;
@@ -75,70 +56,13 @@ class Snowflake extends BaseExtractor
 
     public function createConnection(DatabaseConfig $databaseConfig): void
     {
-        if (!($databaseConfig instanceof SnowflakeDatabaseConfig)) {
-            throw new ApplicationException('Instance of SnowflakeDatabaseConfig exceded');
-        }
-        $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
-
-        if ($databaseConfig->hasWarehouse()) {
-            $this->warehouse = $databaseConfig->getWarehouse();
-        }
-
-        try {
-            $this->connection = new SnowflakeOdbcConnection(
-                $this->logger,
-                $databaseConfig
-            );
-            if ($databaseConfig->hasSchema()) {
-                $this->connection->query(
-                    sprintf(
-                        'USE SCHEMA %s.%s',
-                        $this->connection->quoteIdentifier($databaseConfig->getDatabase()),
-                        $this->connection->quoteIdentifier($databaseConfig->getSchema())
-                    )
-                )->closeCursor();
-                $this->logger->info(sprintf(
-                    'Use schema "%s" in database "%s"',
-                    $databaseConfig->getSchema(),
-                    $databaseConfig->getDatabase()
-                ));
-            }
-            if (getenv('KBC_RUNID')) {
-                $queryTag = ['runId' => getenv('KBC_RUNID')];
-
-                $this->connection->query("ALTER SESSION SET QUERY_TAG='" . json_encode($queryTag) . "';");
-            }
-        } catch (CannotAccessObjectException $e) {
-            throw new UserException($e->getMessage(), 0, $e);
-        }
+        $factory = new SnowflakeConnectionFactory($this->logger);
+        $this->connection = $factory->create($databaseConfig);
     }
 
     public function testConnection(): void
     {
-        $this->connection->query('SELECT current_date;');
-
-        $defaultWarehouse = $this->getUserDefaultWarehouse();
-        if (!$defaultWarehouse && !$this->warehouse) {
-            throw new UserException('Specify "warehouse" parameter');
-        }
-
-        $warehouse = (string) $defaultWarehouse;
-        if ($this->warehouse) {
-            $warehouse = (string) $this->warehouse;
-        }
-
-        try {
-            $this->connection->query(sprintf(
-                'USE WAREHOUSE %s;',
-                $this->connection->quoteIdentifier($warehouse)
-            ));
-        } catch (Throwable $e) {
-            if (preg_match('/Object does not exist/ui', $e->getMessage())) {
-                throw new UserException(sprintf('Invalid warehouse "%s" specified', $warehouse));
-            } else {
-                throw $e;
-            }
-        }
+        $this->connection->testConnection();
     }
 
     public function getMaxOfIncrementalFetchingColumn(ExportConfig $exportConfig): ?string
@@ -229,50 +153,6 @@ class Snowflake extends BaseExtractor
     protected function createDatabaseConfig(array $data): DatabaseConfig
     {
         return SnowflakeDatabaseConfig::fromArray($data);
-    }
-
-    private function getUserDefaultWarehouse(): ?string
-    {
-        $sql = sprintf(
-            'DESC USER %s;',
-            $this->connection->quoteIdentifier($this->getDatabaseConfig()->getUsername())
-        );
-
-        $config = $this->connection->query($sql)->fetchAll();
-
-        foreach ($config as $item) {
-            if ($item['property'] === 'DEFAULT_WAREHOUSE') {
-                return $item['value'] === 'null' ? null : $item['value'];
-            }
-        }
-
-        return null;
-    }
-
-    private function createSnowSqlConfig(SnowflakeDatabaseConfig $databaseConfig): SplFileInfo
-    {
-        $cliConfig[] = '';
-        $cliConfig[] = '[options]';
-        $cliConfig[] = 'exit_on_error = true';
-        $cliConfig[] = '';
-        $cliConfig[] = '[connections.downloader]';
-        $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($databaseConfig->getHost()));
-        $cliConfig[] = sprintf('username = "%s"', $databaseConfig->getUsername());
-        $cliConfig[] = sprintf('password = "%s"', $databaseConfig->getPassword());
-        $cliConfig[] = sprintf('dbname = "%s"', $databaseConfig->getDatabase());
-
-        if ($databaseConfig->hasWarehouse()) {
-            $cliConfig[] = sprintf('warehousename = "%s"', $databaseConfig->getWarehouse());
-        }
-
-        if ($databaseConfig->hasSchema()) {
-            $cliConfig[] = sprintf('schemaname = "%s"', $databaseConfig->getSchema());
-        }
-
-        $file = $this->temp->createFile('snowsql.config');
-        file_put_contents($file->getPathname(), implode("\n", $cliConfig));
-
-        return $file;
     }
 
     protected function canFetchMaxIncrementalValueSeparately(ExportConfig $exportConfig): bool
