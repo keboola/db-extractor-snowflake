@@ -45,7 +45,6 @@ class Snowflake extends BaseExtractor
     {
         if (!isset($this->queryFactory)) {
             $this->queryFactory = new SnowflakeQueryFactory(
-                $this->connection,
                 $this->getMetadataProvider(),
                 $this->state
             );
@@ -208,7 +207,7 @@ class Snowflake extends BaseExtractor
                 $manifestData['primary_key'] = $sanitizedPks;
             }
         } else {
-            $columns = $this->getMetadataProvider()->getColumnInfo($exportConfig->getQuery());
+            $columns = $this->getMetadataProvider()->getColumnsInfo($exportConfig->getQuery());
 
             $manifestData['columns'] =  array_map(fn($v) => $v['name'], $columns);
         }

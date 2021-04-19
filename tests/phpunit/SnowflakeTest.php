@@ -181,7 +181,7 @@ class SnowflakeTest extends TestCase
     /**
      * @dataProvider simpleTableColumnsDataProvider
      */
-    public function testGetSimplifiedPdoQuery(array $params, array $state, string $expected): void
+    public function testGetSimplifiedPdoQuery(array $params, array $columnsInfo, array $state, string $expected): void
     {
         $this->createAITable();
         $this->generateAIRows();
@@ -213,30 +213,19 @@ class SnowflakeTest extends TestCase
             });
 
         // Don't test "SEMI_STRUCTURED_TYPES"
-        $metadataProvider->method('getColumnInfo')->willReturn([]);
+        $metadataProvider->method('getColumnsInfo')->willReturn($columnsInfo);
 
-        $queryFactory = new SnowflakeQueryFactory($odbcConnection, $metadataProvider, $state);
+        $queryFactory = new SnowflakeQueryFactory($metadataProvider, $state);
         if (isset($state['lastFetchedRow']) && is_numeric($state['lastFetchedRow'])) {
             $queryFactory->setIncrementalFetchingColType(Snowflake::INCREMENT_TYPE_NUMERIC);
         }
 
-        /** @var SnowflakeDatabaseConfig $databaseConfig */
-        $databaseConfig = SnowflakeDatabaseConfig::fromArray([
-            'host' => (string) getenv('SNOWFLAKE_DB_HOST'),
-            'port' => (string) getenv('SNOWFLAKE_DB_PORT'),
-            'user' => (string) getenv('SNOWFLAKE_DB_USER'),
-            '#password' => (string) getenv('SNOWFLAKE_DB_PASSWORD'),
-            'database' => (string) getenv('SNOWFLAKE_DB_DATABASE'),
-        ]);
-
-        $query = $queryFactory->create($exportConfig, $this->createOdbcConnection($databaseConfig));
-
+        $query = $queryFactory->create($exportConfig, $odbcConnection);
         $this->assertEquals($expected, $query);
     }
 
     public function simpleTableColumnsDataProvider(): array
     {
-        $dbSchema = getenv('SNOWFLAKE_DB_SCHEMA');
         return [
             'simple table select with no column metadata' => [
                 [
@@ -245,6 +234,16 @@ class SnowflakeTest extends TestCase
                         'schema' => 'testSchema',
                     ],
                     'columns' => [],
+                ],
+                [
+                    [
+                        'name' => 'col1',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'VARCHAR',
+                    ],
                 ],
                 [],
                 'SELECT * FROM "testSchema"."test"',
@@ -260,6 +259,16 @@ class SnowflakeTest extends TestCase
                         'col2',
                     ],
                 ],
+                [
+                    [
+                        'name' => 'col1',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'VARCHAR',
+                    ],
+                ],
                 [],
                 'SELECT "col1", "col2" FROM "testSchema"."test"',
             ],
@@ -267,7 +276,7 @@ class SnowflakeTest extends TestCase
                 [
                     'table' => [
                         'tableName' => 'auto Increment Timestamp',
-                        'schema' => $dbSchema,
+                        'schema' => 'mySchema',
                     ],
                     'columns' => [
                         '_Weir%d I-D',
@@ -278,19 +287,34 @@ class SnowflakeTest extends TestCase
                     'incrementalFetchingLimit' => 10,
                     'incrementalFetchingColumn' => 'datetime',
                 ],
+                [
+                    [
+                        'name' => '_Weir%d I-D',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'Weir%d Na-me',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'someInteger',
+                        'type' => 'INTEGER',
+                    ],
+                    [
+                        'name' => 'datetime',
+                        'type' => 'DATETIME',
+                    ],
+                ],
                 [],
-                sprintf(
-                    'SELECT "_Weir%%d I-D", "Weir%%d Na-me", "someInteger", "datetime"' .
-                    ' FROM "%s"."auto Increment Timestamp"' .
-                    ' ORDER BY "datetime" LIMIT 10',
-                    $dbSchema
-                ),
+                'SELECT "_Weir%d I-D", "Weir%d Na-me", "someInteger", "datetime"' .
+                ' FROM "mySchema"."auto Increment Timestamp"' .
+                ' ORDER BY "datetime" LIMIT 10',
             ],
             'test simplePDO query with limit and idp column and previos state' => [
                 [
                     'table' => [
                         'tableName' => 'auto Increment Timestamp',
-                        'schema' => $dbSchema,
+                        'schema' => 'mySchema',
                     ],
                     'columns' => [
                         '_Weir%d I-D',
@@ -302,21 +326,36 @@ class SnowflakeTest extends TestCase
                     'incrementalFetchingColumn' => '_Weir%d I-D',
                 ],
                 [
+                    [
+                        'name' => '_Weir%d I-D',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'Weir%d Na-me',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'someInteger',
+                        'type' => 'INTEGER',
+                    ],
+                    [
+                        'name' => 'datetime',
+                        'type' => 'DATETIME',
+                    ],
+                ],
+                [
                     'lastFetchedRow' => 4,
                 ],
-                sprintf(
-                    'SELECT "_Weir%%d I-D", "Weir%%d Na-me", "someInteger", "datetime"' .
-                    ' FROM "%s"."auto Increment Timestamp"' .
-                    ' WHERE "_Weir%%d I-D" >= 4' .
-                    ' ORDER BY "_Weir%%d I-D" LIMIT 10',
-                    $dbSchema
-                ),
+                'SELECT "_Weir%d I-D", "Weir%d Na-me", "someInteger", "datetime"' .
+                ' FROM "mySchema"."auto Increment Timestamp"' .
+                ' WHERE "_Weir%d I-D" >= 4' .
+                ' ORDER BY "_Weir%d I-D" LIMIT 10',
             ],
             'test simplePDO query datetime column but no state and no limit' => [
                 [
                     'table' => [
                         'tableName' => 'auto Increment Timestamp',
-                        'schema' => $dbSchema,
+                        'schema' => 'mySchema',
                     ],
                     'columns' => [
                         '_Weir%d I-D',
@@ -327,19 +366,35 @@ class SnowflakeTest extends TestCase
                     'incrementalFetchingLimit' => null,
                     'incrementalFetchingColumn' => 'datetime',
                 ],
+                [
+                    [
+                        'name' => '_Weir%d I-D',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'Weir%d Na-me',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'someInteger',
+                        'type' => 'INTEGER',
+                    ],
+                    [
+                        'name' => 'datetime',
+                        'type' => 'DATETIME',
+                    ],
+                ],
                 [],
-                sprintf(
-                    'SELECT "_Weir%%d I-D", "Weir%%d Na-me", "someInteger", "datetime"' .
-                    ' FROM "%s"."auto Increment Timestamp"' .
-                    ' ORDER BY "datetime"',
-                    $dbSchema
-                ),
+
+                'SELECT "_Weir%d I-D", "Weir%d Na-me", "someInteger", "datetime"' .
+                ' FROM "mySchema"."auto Increment Timestamp"' .
+                ' ORDER BY "datetime"',
             ],
             'test simplePDO query datetime column and previos state and limit' => [
                 [
                     'table' => [
                         'tableName' => 'auto Increment Timestamp',
-                        'schema' => $dbSchema,
+                        'schema' => 'mySchema',
                     ],
                     'columns' => [
                         '_Weir%d I-D',
@@ -351,16 +406,121 @@ class SnowflakeTest extends TestCase
                     'incrementalFetchingColumn' => 'datetime',
                 ],
                 [
+                    [
+                        'name' => '_Weir%d I-D',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'Weir%d Na-me',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'someInteger',
+                        'type' => 'INTEGER',
+                    ],
+                    [
+                        'name' => 'datetime',
+                        'type' => 'DATETIME',
+                    ],
+                ],
+                [
                     'lastFetchedRow' => '2018-10-26 10:52:32',
                 ],
-                sprintf(
-                    'SELECT "_Weir%%d I-D", "Weir%%d Na-me", "someInteger", "datetime"' .
-                    ' FROM "%s"."auto Increment Timestamp"' .
-                    ' WHERE "datetime" >= \'2018-10-26 10:52:32\'' .
-                    ' ORDER BY "datetime"' .
-                    ' LIMIT 1000',
-                    $dbSchema
-                ),
+                'SELECT "_Weir%d I-D", "Weir%d Na-me", "someInteger", "datetime"' .
+                ' FROM "mySchema"."auto Increment Timestamp"' .
+                ' WHERE "datetime" >= \'2018-10-26 10:52:32\'' .
+                ' ORDER BY "datetime"' .
+                ' LIMIT 1000',
+            ],
+            'test semi-structured types select all' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto Increment Timestamp',
+                        'schema' => 'mySchema',
+                    ],
+                    'columns' => [],
+                    'incrementalFetchingLimit' => 1000,
+                    'incrementalFetchingColumn' => 'id',
+                ],
+                [
+                    [
+                        'name' => 'id',
+                        'type' => 'INTEGER',
+                    ],
+                    [
+                        'name' => 'name',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'col1',
+                        'type' => 'VARIANT',
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'OBJECT',
+                    ],
+                    [
+                        'name' => 'col3',
+                        'type' => 'ARRAY',
+                    ],
+                ],
+                [
+                    'lastFetchedRow' => '123',
+                ],
+                'SELECT "id", "name", CAST("col1" AS TEXT) AS "col1", '.
+                'CAST("col2" AS TEXT) AS "col2", CAST("col3" AS TEXT) AS "col3"' .
+                ' FROM "mySchema"."auto Increment Timestamp"' .
+                ' WHERE "id" >= 123' .
+                ' ORDER BY "id"' .
+                ' LIMIT 1000',
+            ],
+            'test semi-structured types select listed columns' => [
+                [
+                    'table' => [
+                        'tableName' => 'auto Increment Timestamp',
+                        'schema' => 'mySchema',
+                    ],
+                    'columns' => [
+                        'id',
+                        'name',
+                        'col1',
+                        'col2',
+                        'col3',
+                    ],
+                    'incrementalFetchingLimit' => 1000,
+                    'incrementalFetchingColumn' => 'id',
+                ],
+                [
+                    [
+                        'name' => 'id',
+                        'type' => 'INTEGER',
+                    ],
+                    [
+                        'name' => 'name',
+                        'type' => 'VARCHAR',
+                    ],
+                    [
+                        'name' => 'col1',
+                        'type' => 'VARIANT',
+                    ],
+                    [
+                        'name' => 'col2',
+                        'type' => 'OBJECT',
+                    ],
+                    [
+                        'name' => 'col3',
+                        'type' => 'ARRAY',
+                    ],
+                ],
+                [
+                    'lastFetchedRow' => '123',
+                ],
+                'SELECT "id", "name", CAST("col1" AS TEXT) AS "col1", '.
+                'CAST("col2" AS TEXT) AS "col2", CAST("col3" AS TEXT) AS "col3"' .
+                ' FROM "mySchema"."auto Increment Timestamp"' .
+                ' WHERE "id" >= 123' .
+                ' ORDER BY "id"' .
+                ' LIMIT 1000',
             ],
         ];
     }
@@ -403,11 +563,5 @@ class SnowflakeTest extends TestCase
 
             $this->assertEmpty($this->getUserDefaultWarehouse($user));
         }
-    }
-
-    private function createOdbcConnection(DatabaseConfig $databaseConfig): SnowflakeOdbcConnection
-    {
-        $factory = new SnowflakeConnectionFactory(new NullLogger());
-        return $factory->create($databaseConfig);
     }
 }
