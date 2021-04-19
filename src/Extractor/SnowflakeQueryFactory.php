@@ -7,6 +7,7 @@ namespace Keboola\DbExtractor\Extractor;
 use Generator;
 use Keboola\DbExtractor\Adapter\Connection\DbConnection;
 use Keboola\DbExtractor\Adapter\Query\DefaultQueryFactory;
+use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\Column;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 
 class SnowflakeQueryFactory extends DefaultQueryFactory
@@ -39,8 +40,8 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
             iterator_to_array(parent::createFrom($exportConfig, $connection)),
         ));
         $columnsMetadata = $this->metadataProvider->getColumnsInfo($rawQuery);
-        $structuredColumnsCount = count(array_filter($columnsMetadata, function (array $column) {
-            return in_array($column['type'], self::SEMI_STRUCTURED_TYPES);
+        $structuredColumnsCount = count(array_filter($columnsMetadata->getAll(), function (Column $column) {
+            return in_array($column->getType(), self::SEMI_STRUCTURED_TYPES);
         }));
 
         // No structured column -> use default implementation
@@ -50,16 +51,16 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
         }
 
         // Cast semi-structured types to text
-        $castedColumns = array_map(function ($column) use ($connection): string {
-            if (in_array($column['type'], self::SEMI_STRUCTURED_TYPES)) {
+        $castedColumns = array_map(function (Column $column) use ($connection): string {
+            if (in_array($column->getType(), self::SEMI_STRUCTURED_TYPES)) {
                 return sprintf(
                     'CAST(%s AS TEXT) AS %s',
-                    $connection->quoteIdentifier($column['name']),
-                    $connection->quoteIdentifier($column['name'])
+                    $connection->quoteIdentifier($column->getName()),
+                    $connection->quoteIdentifier($column->getName())
                 );
             }
-            return $connection->quoteIdentifier($column['name']);
-        }, $columnsMetadata);
+            return $connection->quoteIdentifier($column->getName());
+        }, $columnsMetadata->getAll());
 
         // Generate SELECT statement
         yield sprintf('SELECT %s', implode(', ', $castedColumns));

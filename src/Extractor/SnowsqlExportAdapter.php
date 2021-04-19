@@ -23,6 +23,8 @@ class SnowsqlExportAdapter implements ExportAdapter
 {
     protected SnowflakeQueryFactory $queryFactory;
 
+    protected SnowflakeMetadataProvider $metadataProvider;
+
     private OdbcConnection $connection;
 
     protected LoggerInterface $logger;
@@ -37,6 +39,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         LoggerInterface $logger,
         OdbcConnection $connection,
         SnowflakeQueryFactory $QueryFactory,
+        SnowflakeMetadataProvider $metadataProvider,
         DatabaseConfig $databaseConfig
     ) {
         if (!($databaseConfig instanceof SnowflakeDatabaseConfig)) {
@@ -45,6 +48,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         $this->logger = $logger;
         $this->connection = $connection;
         $this->queryFactory = $QueryFactory;
+        $this->metadataProvider = $metadataProvider;
         $this->databaseConfig = $databaseConfig;
         $this->tempDir = new Temp('ex-snowflake-adapter');
         $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
@@ -66,10 +70,6 @@ class SnowsqlExportAdapter implements ExportAdapter
         $copyCommand = $this->generateCopyCommand($exportConfig->getOutputTable(), $query);
         $res = $this->connection->query($copyCommand)->fetchAll();
         $rowCount = (int) ($res[0]['rows_unloaded'] ?? 0);
-        if ($rowCount === 0) {
-            // query resulted in no rows, nothing left to do
-            return new ExportResult($csvFilePath, 0, null);
-        }
 
         // Download CSV using snowsql
         $process = $this->runDownloadCommand($exportConfig, $csvFilePath);
@@ -81,34 +81,28 @@ class SnowsqlExportAdapter implements ExportAdapter
             $bytesDownloaded += $csvFile->getSize();
         }
 
+        // Log info
         $this->logger->info(sprintf(
-            '%d files (%s) downloaded',
+            '%d files (%s) downloaded.',
             count($csvFiles),
             $this->dataSizeFormatted((int) $bytesDownloaded)
         ));
 
+        // Query metadata
+        $columns = $this->metadataProvider->getColumnsInfo($query);
+        $queryMetadata = new SnowflakeQueryMetadata($columns);
+
         // Clean-up
         $this->cleanupTableStage($exportConfig->getOutputTable());
 
-        // TODO fix rowsCount = 0
-        if ($rowCount > 0) {
-            return new ExportResult($csvFilePath, $rowCount, null);
-        }
-
-        @unlink($csvFilePath); // no rows, no file
-        $this->logger->warning(sprintf(
-            'Query returned empty result. Nothing was imported to [%s]',
-            $exportConfig->getOutputTable()
-        ));
-
-        return new ExportResult($csvFilePath, 0, null);
+        return new ExportResult($csvFilePath, $rowCount, $queryMetadata, false, null);
     }
 
     private function runDownloadCommand(ExportConfig $exportConfig, string $csvFilePath): Process
     {
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
-        $this->logger->info('Downloading data from Snowflake');
+        $this->logger->info('Downloading data from Snowflake.');
         $this->logger->debug(trim($command));
 
         // Run
@@ -138,6 +132,10 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private function dataSizeFormatted(int $bytes): string
     {
+        if (!$bytes) {
+            return '0 B';
+        }
+
         $base = log($bytes) / log(1024);
         $suffixes = [' B', ' KB', ' MB', ' GB', ' TB'];
         return round(pow(1024, $base - floor($base)), 2) . $suffixes[(int) floor($base)];
