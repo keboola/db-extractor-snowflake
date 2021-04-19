@@ -15,6 +15,9 @@ use Keboola\DbExtractor\Extractor\SnowflakeOdbcConnection;
 use Keboola\DbExtractor\Extractor\SnowflakeQueryFactory;
 use Keboola\DbExtractor\FunctionalTests\TestConnection;
 use Keboola\DbExtractor\SnowflakeApplication;
+use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\ColumnBuilder;
+use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\Column;
+use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\ColumnCollection;
 use Keboola\DbExtractor\Tests\Traits\ConfigTrait;
 use Keboola\DbExtractor\TraitTests\RemoveAllTablesTrait;
 use Keboola\DbExtractor\TraitTests\Tables\AutoIncrementTableTrait;
@@ -211,9 +214,14 @@ class SnowflakeTest extends TestCase
             ->willReturnCallback(function (string $str) {
                 return $this->quoteIdentifier($str);
             });
-
-        // Don't test "SEMI_STRUCTURED_TYPES"
-        $metadataProvider->method('getColumnsInfo')->willReturn($columnsInfo);
+        $columns = array_map(function (array $data): Column {
+            $builder = ColumnBuilder::create();
+            $builder->setName($data['name']);
+            $builder->setType($data['type']);
+            return $builder->build();
+        }, $columnsInfo);
+        $columnCollection = new ColumnCollection($columns);
+        $metadataProvider->method('getColumnsInfo')->willReturn($columnCollection);
 
         $queryFactory = new SnowflakeQueryFactory($metadataProvider, $state);
         if (isset($state['lastFetchedRow']) && is_numeric($state['lastFetchedRow'])) {

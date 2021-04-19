@@ -8,7 +8,6 @@ use Keboola\DatadirTests\DatadirTestCase;
 use Keboola\DbExtractor\TraitTests\CloseSshTunnelsTrait;
 use Keboola\DbExtractor\TraitTests\RemoveAllTablesTrait;
 use Keboola\SnowflakeDbAdapter\Connection;
-use PDO;
 use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;

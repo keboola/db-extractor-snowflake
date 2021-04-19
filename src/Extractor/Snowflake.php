@@ -6,7 +6,6 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
-use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
@@ -26,28 +25,30 @@ class Snowflake extends BaseExtractor
 
     private SnowflakeQueryFactory $queryFactory;
 
-    public function getMetadataProvider(): SnowflakeMetadataProvider
-    {
-        return new SnowflakeMetadataProvider($this->connection, $this->getDatabaseConfig());
-    }
-
     protected function createExportAdapter(): ExportAdapter
     {
+        /** @var SnowflakeMetadataProvider $metadataProvider */
+        $metadataProvider = $this->getMetadataProvider();
         return new SnowsqlExportAdapter(
             $this->logger,
             $this->connection,
             $this->getQueryFactory(),
+            $metadataProvider,
             $this->getDatabaseConfig()
         );
+    }
+
+    public function createMetadataProvider(): SnowflakeMetadataProvider
+    {
+        return new SnowflakeMetadataProvider($this->connection, $this->getDatabaseConfig());
     }
 
     protected function getQueryFactory(): SnowflakeQueryFactory
     {
         if (!isset($this->queryFactory)) {
-            $this->queryFactory = new SnowflakeQueryFactory(
-                $this->getMetadataProvider(),
-                $this->state
-            );
+            /** @var SnowflakeMetadataProvider $metadataProvider */
+            $metadataProvider = $this->getMetadataProvider();
+            $this->queryFactory = new SnowflakeQueryFactory($metadataProvider, $this->state);
         }
 
         return $this->queryFactory;
@@ -166,52 +167,5 @@ class Snowflake extends BaseExtractor
         $sanitizedTableName = Utils\Strings::webalize($outputTableName, '._');
         $outTablesDir = $this->dataDir . '/out/tables';
         return $outTablesDir . '/' . $sanitizedTableName . '.csv.gz';
-    }
-
-    protected function createManifest(ExportConfig $exportConfig): void
-    {
-        $metadataSerializer = $this->getManifestMetadataSerializer();
-        $outFilename = $this->getOutputFilename($exportConfig->getOutputTable()) . '.manifest';
-
-        $manifestData = [
-            'destination' => $exportConfig->getOutputTable(),
-            'incremental' => $exportConfig->isIncrementalLoading(),
-        ];
-
-        if ($exportConfig->hasPrimaryKey()) {
-            $manifestData['primary_key'] = $exportConfig->getPrimaryKey();
-        }
-
-        if (!$exportConfig->hasQuery()) {
-            $table = $this->getMetadataProvider()->getTable($exportConfig->getTable());
-            $allTableColumns = $table->getColumns();
-            $columnMetadata = [];
-            $sanitizedPks = [];
-            $exportedColumns = $exportConfig->hasColumns() ? $exportConfig->getColumns() : $allTableColumns->getNames();
-            foreach ($exportedColumns as $index => $columnName) {
-                $column = $allTableColumns->getByName($columnName);
-                $columnMetadata[$column->getSanitizedName()] = $metadataSerializer->serializeColumn($column);
-
-                // Sanitize PKs defined in the configuration
-                if ($exportConfig->hasPrimaryKey() &&
-                    in_array($column->getName(), $exportConfig->getPrimaryKey(), true)
-                ) {
-                    $sanitizedPks[] = $column->getSanitizedName();
-                }
-            }
-
-            $manifestData['metadata'] = $metadataSerializer->serializeTable($table);
-            $manifestData['column_metadata'] = $columnMetadata;
-            $manifestData['columns'] = array_keys($columnMetadata);
-            if (!empty($sanitizedPks)) {
-                $manifestData['primary_key'] = $sanitizedPks;
-            }
-        } else {
-            $columns = $this->getMetadataProvider()->getColumnsInfo($exportConfig->getQuery());
-
-            $manifestData['columns'] =  array_map(fn($v) => $v['name'], $columns);
-        }
-
-        file_put_contents($outFilename, json_encode($manifestData));
     }
 }

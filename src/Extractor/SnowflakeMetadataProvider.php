@@ -9,6 +9,7 @@ use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\ColumnBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\MetadataBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\TableBuilder;
+use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\ColumnCollection;
 use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\Table;
 use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\TableCollection;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
@@ -78,17 +79,31 @@ class SnowflakeMetadataProvider implements MetadataProvider
         return $builder->build();
     }
 
-    public function getColumnsInfo(string $query): array
+    public function getColumnsInfo(string $query): ColumnCollection
     {
         // Create temporary view from the supplied query
         $sql = sprintf(
             'SELECT * FROM (%s) LIMIT 0;',
             rtrim(trim($query), ';')
         );
-
         $this->db->query($sql)->fetchAll();
+        $columnsRaw = $this->db->query('DESC RESULT LAST_QUERY_ID()')->fetchAll();
 
-        return $this->db->query('DESC RESULT LAST_QUERY_ID()')->fetchAll();
+        $columns = [];
+        foreach ($columnsRaw as $data) {
+            // Eg. NUMBER(38,0) / DATE / VARCHAR(16777216)
+            preg_match('~^(.+)(?:\((.*)\))?$~', $data['type'], $m);
+            $type = $m[1];
+            $length = $m[2] ?? null;
+
+            $builder = ColumnBuilder::create();
+            $builder->setName($data['name']);
+            $builder->setType($type);
+            $builder->setLength($length);
+            $columns[] = $builder->build();
+        }
+
+        return new ColumnCollection($columns);
     }
 
     private function processTableData(TableBuilder $builder, array $data): void

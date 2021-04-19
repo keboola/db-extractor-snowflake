@@ -16,7 +16,7 @@
         "ext-odbc": "*",
         "keboola/csv": "^2.2",
         "keboola/db-adapter-snowflake": "1.0.4",
-        "keboola/db-extractor-common": "^14.2",
+        "keboola/db-extractor-common": "^14.4",
         "keboola/db-extractor-config": "^1.4",
         "keboola/db-extractor-table-format": "^3.1",
         "keboola/php-component": "^8.1",
