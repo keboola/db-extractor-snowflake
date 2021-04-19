@@ -32,8 +32,3 @@ deploy:
   script: "./deploy.sh"
   on:
     tags: true
-
-notifications:
-  email: false
-  slack:
-    secure: KEqTz/efi+UYEyskb5n81AmmACLP8ulYw+xbm0HyL0/Gtp2h673kqyKHfeFSq6NfM11E45FnQ/X5Qsuk/K76fOlzeABThG18InwQZXd6sx7tf2F5X32WqeCpxmadD+GGY05VktPYRVSre7w/1/zc7CtYa62GD0N0ciCnQhWUKiyJ9B1bOLVZPCQHVo8fzEegV0Jn51VKiFuuBO17+OGtcItNUo2TCXBRTeCIzI+iF8F3qF4lGMuu2CT615+jiBL8URQdE9ogOdjthifLvCRquVN4XXbzda+CvIlHN8SY4Ko9SR8vr4nMZKCf9ARaYKMwb+Yr5rna4vQRLXv9xoq8nadVx8QGDbmEqOq0O2hJIP+PDAB2LttsHe6kHa9s+Q8xWsJOeXJslrveJYEINcAS6SeHay/w8F14apaF4fXrxTEf5JscjDZ2dz1xyS8iyrYAvhLJpU8wpGf7Mg9Bo0qAWLS1E9l7LGIvzD/Ckhalz/smtwwKauqhU1iQhROPiuPPXF7bHWkwoFdKAjZyTHLKWENVKoMI58MyLTTMb00sHjSfrvdodUQKJnnpdy48qlCa6+7qbYFEEwknmPLluhgoA8MCCLhmR9FUQ8BQnXWg9WzcsFazfSqTC/eYuHtdpcSsrwIQ3SdPgIs+AdIBez8fg6w+CroKnitS2/UkwrysU6s=
