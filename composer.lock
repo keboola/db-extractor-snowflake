@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f9028de70f3d75f68d35673169d82d07",
+    "content-hash": "2a8d0950863a5118238b46e2982abd82",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -268,16 +268,16 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "14.4.0",
+            "version": "14.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "66e7d54326002057bf6ae78feacc2838a8cac38b"
+                "reference": "ea82dfc87150f3292b2628158b1315ebe5ae7a23"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/66e7d54326002057bf6ae78feacc2838a8cac38b",
-                "reference": "66e7d54326002057bf6ae78feacc2838a8cac38b",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/ea82dfc87150f3292b2628158b1315ebe5ae7a23",
+                "reference": "ea82dfc87150f3292b2628158b1315ebe5ae7a23",
                 "shasum": ""
             },
             "require": {
@@ -288,7 +288,7 @@
                 "keboola/db-extractor-adapter": "^1.5.1",
                 "keboola/db-extractor-config": "^1.4",
                 "keboola/db-extractor-ssh-tunnel": "^1.1",
-                "keboola/db-extractor-table-format": "^3.0",
+                "keboola/db-extractor-table-format": "^3.2",
                 "keboola/php-component": "^8.1",
                 "keboola/php-datatypes": "^4.7",
                 "keboola/php-utils": "^2.3||^3.0||^4.0",
@@ -327,9 +327,9 @@
             "description": "Common library from Keboola Database Extractors",
             "support": {
                 "issues": "https://github.com/keboola/db-extractor-common/issues",
-                "source": "https://github.com/keboola/db-extractor-common/tree/14.4.0"
+                "source": "https://github.com/keboola/db-extractor-common/tree/14.5.0"
             },
-            "time": "2021-04-15T08:08:08+00:00"
+            "time": "2021-04-23T06:55:30+00:00"
         },
         {
             "name": "keboola/db-extractor-config",
@@ -417,16 +417,16 @@
         },
         {
             "name": "keboola/db-extractor-table-format",
-            "version": "3.1.7",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-table-format.git",
-                "reference": "9cb21260819bd0c6facffb9a1eb1f6f68d2eb63c"
+                "reference": "5f0861845a53cbfb9fe21c7203e180000dea8720"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-table-format/zipball/9cb21260819bd0c6facffb9a1eb1f6f68d2eb63c",
-                "reference": "9cb21260819bd0c6facffb9a1eb1f6f68d2eb63c",
+                "url": "https://api.github.com/repos/keboola/db-extractor-table-format/zipball/5f0861845a53cbfb9fe21c7203e180000dea8720",
+                "reference": "5f0861845a53cbfb9fe21c7203e180000dea8720",
                 "shasum": ""
             },
             "require": {
@@ -460,9 +460,9 @@
             ],
             "description": "PHP class for formating table result",
             "support": {
-                "source": "https://github.com/keboola/db-extractor-table-format/tree/3.1.7"
+                "source": "https://github.com/keboola/db-extractor-table-format/tree/3.2.0"
             },
-            "time": "2021-03-18T15:11:21+00:00"
+            "time": "2021-04-22T05:32:51+00:00"
         },
         {
             "name": "keboola/php-component",
@@ -3149,16 +3149,16 @@
         },
         {
             "name": "symfony/deprecation-contracts",
-            "version": "v2.2.0",
+            "version": "v2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/deprecation-contracts.git",
-                "reference": "5fa56b4074d1ae755beb55617ddafe6f5d78f665"
+                "reference": "5f38c8804a9e97d23e0c8d63341088cd8a22d627"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/5fa56b4074d1ae755beb55617ddafe6f5d78f665",
-                "reference": "5fa56b4074d1ae755beb55617ddafe6f5d78f665",
+                "url": "https://api.github.com/repos/symfony/deprecation-contracts/zipball/5f38c8804a9e97d23e0c8d63341088cd8a22d627",
+                "reference": "5f38c8804a9e97d23e0c8d63341088cd8a22d627",
                 "shasum": ""
             },
             "require": {
@@ -3167,7 +3167,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.2-dev"
+                    "dev-main": "2.4-dev"
                 },
                 "thanks": {
                     "name": "symfony/contracts",
@@ -3196,7 +3196,7 @@
             "description": "A generic function and convention to trigger deprecation notices",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/deprecation-contracts/tree/master"
+                "source": "https://github.com/symfony/deprecation-contracts/tree/v2.4.0"
             },
             "funding": [
                 {
@@ -3212,7 +3212,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-09-07T11:33:47+00:00"
+            "time": "2021-03-23T23:28:01+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -3850,16 +3850,16 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "0.12.83",
+            "version": "0.12.84",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpstan.git",
-                "reference": "4a967cec6efb46b500dd6d768657336a3ffe699f"
+                "reference": "9c43f15da8798c8f30a4b099e6a94530a558cfd5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/4a967cec6efb46b500dd6d768657336a3ffe699f",
-                "reference": "4a967cec6efb46b500dd6d768657336a3ffe699f",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9c43f15da8798c8f30a4b099e6a94530a558cfd5",
+                "reference": "9c43f15da8798c8f30a4b099e6a94530a558cfd5",
                 "shasum": ""
             },
             "require": {
@@ -3890,7 +3890,7 @@
             "description": "PHPStan - PHP Static Analysis Tool",
             "support": {
                 "issues": "https://github.com/phpstan/phpstan/issues",
-                "source": "https://github.com/phpstan/phpstan/tree/0.12.83"
+                "source": "https://github.com/phpstan/phpstan/tree/0.12.84"
             },
             "funding": [
                 {
@@ -3906,7 +3906,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2021-04-03T15:35:45+00:00"
+            "time": "2021-04-19T17:10:54+00:00"
         },
         {
             "name": "slevomat/coding-standard",
