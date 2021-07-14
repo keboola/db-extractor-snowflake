@@ -19,6 +19,9 @@ env:
   SNOWFLAKE_DB_USER: "COMPONENT_TESTER"
   SNOWFLAKE_DB_WAREHOUSE: "DEV"
   SNOWFLAKE_DB_PASSWORD: ${{ secrets.SNOWFLAKE_DB_PASSWORD }}
+
+  DOCKERHUB_USER: "keboolabot"
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -30,6 +33,7 @@ jobs:
           docker -v
       - name: Build image and run tests
         run: |
+          docker login --username "$DOCKERHUB_USER" --password "$DOCKERHUB_TOKEN"
           docker build -t $APP_IMAGE .
           docker-compose build
           docker-compose run --rm app composer ci
