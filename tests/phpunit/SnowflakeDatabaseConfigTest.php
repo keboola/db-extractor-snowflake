@@ -21,6 +21,7 @@ class SnowflakeDatabaseConfigTest extends TestCase
     {
         $config = $this->getConfig();
         $config['parameters']['db']['#password'] = $password;
+        /** @var SnowflakeDatabaseConfig $databaseConfig */
         $databaseConfig = SnowflakeDatabaseConfig::fromArray($config['parameters']['db']);
 
         Assert::assertEquals($expectedPassword, $databaseConfig->getPassword(true));
