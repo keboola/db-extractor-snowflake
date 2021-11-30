@@ -42,7 +42,7 @@ class SnowflakeConnectionFactory
             $this->logger,
             $this->buildDsnString($databaseConfig),
             $databaseConfig->getUsername(),
-            $databaseConfig->getPassword(),
+            $databaseConfig->getPassword(true),
             $this->getInitCallback($databaseConfig),
         );
     }

@@ -55,4 +55,12 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         }
         return $this->warehouse;
     }
+
+    public function getPassword(bool $escapeSemicolon = false): string
+    {
+        if ($escapeSemicolon && is_int(strpos(parent::getPassword(), ';'))) {
+            return '{' . str_replace('}', '}}', parent::getPassword()) . '}';
+        }
+        return parent::getPassword();
+    }
 }
