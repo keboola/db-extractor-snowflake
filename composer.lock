@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d903453ed7f9cb392f7b28df0ad5f44b",
+    "content-hash": "aee4ee72090d5400d01ee7fbb64f9113",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -268,16 +268,16 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "dev-ondra-send-action-to-extractor",
+            "version": "15.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "d80e1c153bf8543d5372f21c1352d534632f199d"
+                "reference": "648a9b5356509d4bf461b1ac5f91edd32fc90ccf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/d80e1c153bf8543d5372f21c1352d534632f199d",
-                "reference": "d80e1c153bf8543d5372f21c1352d534632f199d",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/648a9b5356509d4bf461b1ac5f91edd32fc90ccf",
+                "reference": "648a9b5356509d4bf461b1ac5f91edd32fc90ccf",
                 "shasum": ""
             },
             "require": {
@@ -327,9 +327,9 @@
             "description": "Common library from Keboola Database Extractors",
             "support": {
                 "issues": "https://github.com/keboola/db-extractor-common/issues",
-                "source": "https://github.com/keboola/db-extractor-common/tree/ondra-send-action-to-extractor"
+                "source": "https://github.com/keboola/db-extractor-common/tree/15.0.0"
             },
-            "time": "2021-12-09T19:57:57+00:00"
+            "time": "2021-12-13T08:24:09+00:00"
         },
         {
             "name": "keboola/db-extractor-config",
@@ -4184,9 +4184,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "keboola/db-extractor-common": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
