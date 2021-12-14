@@ -18,9 +18,12 @@ class SnowflakeConnectionFactory
 
     private LoggerInterface $logger;
 
-    public function __construct(LoggerInterface $logger)
+    private int $maxRetries;
+
+    public function __construct(LoggerInterface $logger, int $maxRetries)
     {
         $this->logger = $logger;
+        $this->maxRetries = $maxRetries;
     }
 
     public function create(DatabaseConfig $databaseConfig): SnowflakeOdbcConnection
@@ -44,6 +47,7 @@ class SnowflakeConnectionFactory
             $databaseConfig->getUsername(),
             $databaseConfig->getPassword(true),
             $this->getInitCallback($databaseConfig),
+            $this->maxRetries,
         );
     }
 

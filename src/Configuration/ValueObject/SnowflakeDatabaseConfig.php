@@ -40,7 +40,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
     ) {
         $this->warehouse = $warehouse;
 
-        parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig);
+        parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig, []);
     }
 
     public function hasWarehouse(): bool

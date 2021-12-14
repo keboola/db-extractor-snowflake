@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
+use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
@@ -56,7 +57,10 @@ class Snowflake extends BaseExtractor
 
     public function createConnection(DatabaseConfig $databaseConfig): void
     {
-        $factory = new SnowflakeConnectionFactory($this->logger);
+        // Disable connect retries for sync actions
+        $maxRetries = $this->isSyncAction() ? 1 : OdbcConnection::DEFAULT_MAX_RETRIES;
+
+        $factory = new SnowflakeConnectionFactory($this->logger, $maxRetries);
         $this->connection = $factory->create($databaseConfig);
     }
 
