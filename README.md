@@ -106,3 +106,7 @@ Run single test example:
 ```
 docker-compose run --rm dev ./vendor/bin/phpunit --debug --filter testGetTables
 ```
+
+## License
+
+MIT licensed, see [LICENSE](./LICENSE) file.
