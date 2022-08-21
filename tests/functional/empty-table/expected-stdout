@@ -1,1 +1,1 @@
-Extractor finished successfully.
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=%s;Port=443;Tracing=0;Database="%s";Schema="%s"".

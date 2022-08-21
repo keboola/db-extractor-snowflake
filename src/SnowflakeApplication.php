@@ -16,20 +16,17 @@ use Psr\Log\LoggerInterface;
 
 class SnowflakeApplication extends Application
 {
-    public function __construct(array $config, LoggerInterface $logger, array $state, string $dataDir)
+    protected function loadConfig(): void
     {
-        $config['parameters']['data_dir'] = $dataDir;
+        $config = $this->getRawConfig();
+        $action = $config['action'] ?? 'run';
+
         $config['parameters']['extractor_class'] = 'Snowflake';
-
-        parent::__construct($config, $logger, $state);
-    }
-
-    protected function buildConfig(array $config): void
-    {
+        $config['parameters']['data_dir'] = $this->getDataDir();
         $dbNode = new SnowflakeDbNode();
         try {
             if ($this->isRowConfiguration($config)) {
-                if ($this['action'] === 'run') {
+                if ($action === 'run') {
                     $configDefinition = new ConfigRowDefinition(
                         $dbNode,
                         null,
