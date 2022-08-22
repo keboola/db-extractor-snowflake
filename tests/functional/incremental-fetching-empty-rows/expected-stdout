@@ -2,4 +2,3 @@ Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowfl
 Exporting "auto-increment-timestamp" to "in.c-main.auto-increment-timestamp".
 Downloading data from Snowflake.
 0 files (0 B) downloaded.
-Extractor finished successfully.

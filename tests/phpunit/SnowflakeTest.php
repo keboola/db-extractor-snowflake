@@ -5,11 +5,9 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Tests;
 
 use Keboola\CommonExceptions\UserExceptionInterface;
+use Keboola\Component\JsonHelper;
 use Keboola\Component\Logger;
-use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
-use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\Snowflake;
-use Keboola\DbExtractor\Extractor\SnowflakeConnectionFactory;
 use Keboola\DbExtractor\Extractor\SnowflakeMetadataProvider;
 use Keboola\DbExtractor\Extractor\SnowflakeOdbcConnection;
 use Keboola\DbExtractor\Extractor\SnowflakeQueryFactory;
@@ -24,12 +22,12 @@ use Keboola\DbExtractor\TraitTests\Tables\AutoIncrementTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\EscapingTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\SalesTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\TypesTableTrait;
-use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\QueryBuilder;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
+use Psr\Log\Test\TestLogger;
 
 class SnowflakeTest extends TestCase
 {
@@ -46,6 +44,7 @@ class SnowflakeTest extends TestCase
 
     protected function setUp(): void
     {
+        putenv('KBC_DATADIR=' . $this->dataDir);
         $this->connection = TestConnection::createConnection();
         $this->removeAllTables();
         parent::setUp();
@@ -66,10 +65,11 @@ class SnowflakeTest extends TestCase
         try {
             // run without warehouse param
             unset($config['parameters']['db']['warehouse']);
-            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+            JsonHelper::writeFile($this->dataDir . '/config.json', $config);
+            $app = new SnowflakeApplication(new TestLogger());
 
             try {
-                $app->run();
+                $app->execute();
                 $this->fail('Run extractor without warehouse should fail');
             } catch (UserExceptionInterface $e) {
                 $this->assertSame(
@@ -81,11 +81,19 @@ class SnowflakeTest extends TestCase
 
             // run with warehouse param
             $config = $this->getConfig();
-            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+            JsonHelper::writeFile($this->dataDir . '/config.json', $config);
 
-            $result = $app->run();
-            $this->assertEquals('success', $result['status']);
-            $this->assertCount(3, $result['imported']);
+            $logger = new TestLogger();
+            $app = new SnowflakeApplication($logger);
+
+            $app->execute();
+
+            Assert::assertTrue(
+                $logger->hasInfo('Downloading data from Snowflake.')
+            );
+            Assert::assertTrue(
+                $logger->hasWarning('Query result set is empty. Exported "0" rows to "in.c-main.tableColumns".')
+            );
         } finally {
             $this->setUserDefaultWarehouse($user, $warehouse);
         }
@@ -93,6 +101,8 @@ class SnowflakeTest extends TestCase
 
     public function testCredentialsDefaultWarehouse(): void
     {
+        $this->createSalesTable();
+        $this->createEscapingTable();
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
         unset($config['parameters']['tables']);
@@ -104,35 +114,37 @@ class SnowflakeTest extends TestCase
             // empty default warehouse, specified in config
             $this->setUserDefaultWarehouse($user, null);
 
-            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-            $result = $app->run();
+            JsonHelper::writeFile($this->dataDir . '/config.json', $config);
 
-            $this->assertArrayHasKey('status', $result);
-            $this->assertEquals('success', $result['status']);
+            $app = new SnowflakeApplication(new TestLogger());
+            $app->execute();
 
             // empty default warehouse and not specified in config
             unset($config['parameters']['db']['warehouse']);
-            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+
+            JsonHelper::writeFile($this->dataDir . '/config.json', $config);
+            $app = new SnowflakeApplication(new TestLogger());
 
             try {
-                $app->run();
+                $app->execute();
                 $this->fail('Test connection without warehouse and default warehouse should fail');
-            } catch (UserException $e) {
+            } catch (UserExceptionInterface $e) {
                 $this->assertSame(
-                    'Connection failed: \'Error connecting to DB: ' .
-                    'Please configure "warehouse" parameter. User default warehouse is not defined.\'',
+                    'Error connecting to DB: ' .
+                    'Please configure "warehouse" parameter. User default warehouse is not defined.',
                     $e->getMessage()
                 );
             }
 
             // bad warehouse
             $config['parameters']['db']['warehouse'] = uniqid('test');
-            $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
+            JsonHelper::writeFile($this->dataDir . '/config.json', $config);
+            $app = new SnowflakeApplication(new TestLogger());
 
             try {
-                $app->run();
+                $app->execute();
                 $this->fail('Test connection with invalid warehouse ID should fail');
-            } catch (UserException $e) {
+            } catch (UserExceptionInterface $e) {
                 $this->assertMatchesRegularExpression('/Invalid warehouse/ui', $e->getMessage());
             }
         } finally {
@@ -157,8 +169,10 @@ class SnowflakeTest extends TestCase
         $config = $this->getConfig();
         $config['parameters']['tables'][1]['query'] = "SELECT * FROM \"escaping\" WHERE \"col1\" = '123'";
 
-        $app = new SnowflakeApplication($config, new Logger(), [], $this->dataDir);
-        $result = $app->run();
+        JsonHelper::writeFile($this->dataDir . '/config.json', $config);
+
+        $app = new SnowflakeApplication(new Logger());
+        $app->execute();
 
         $history = $this->connection->fetchAll("
             select 
@@ -176,7 +190,6 @@ class SnowflakeTest extends TestCase
             $history[0]['QUERY_TAG']
         );
 
-        $this->assertEquals('success', $result['status']);
         $this->assertFileDoesNotExist($outputCsvFolder);
         $this->assertFileDoesNotExist($outputManifestFile);
     }
