@@ -112,6 +112,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
             ->setCatalog($data['database_name'] ?? null)
             ->setType($isView ? 'VIEW' : $data['kind'])
             ->setRowCount(isset($data['rows']) ? (int) $data['rows'] : 0)
+            ->setDatatypeBackend(\Keboola\Datatype\Definition\Snowflake::META)
         ;
     }
 
