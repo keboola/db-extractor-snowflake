@@ -145,7 +145,7 @@ class SnowflakeConnectionFactory
             $this->quoteIdentifier($databaseConfig->getUsername())
         ));
 
-        while ($item = odbc_fetch_array($stmt)) {
+        while ($stmt && $item = odbc_fetch_array($stmt)) {
             if ($item['property'] === 'DEFAULT_WAREHOUSE') {
                 return $item['value'] === 'null' ? null : $item['value'];
             }
