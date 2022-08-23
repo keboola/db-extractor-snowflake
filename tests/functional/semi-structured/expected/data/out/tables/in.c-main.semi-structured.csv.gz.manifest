@@ -25,6 +25,10 @@
         {
             "key": "KBC.rowCount",
             "value": 1
+        },
+        {
+            "key": "KBC.datatype.backend",
+            "value": "snowflake"
         }
     ],
     "column_metadata": {

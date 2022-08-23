@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Extractor;
 
+use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\DbExtractor\Adapter\Metadata\MetadataProvider;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\ColumnBuilder;
@@ -112,6 +113,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
             ->setCatalog($data['database_name'] ?? null)
             ->setType($isView ? 'VIEW' : $data['kind'])
             ->setRowCount(isset($data['rows']) ? (int) $data['rows'] : 0)
+            ->setDatatypeBackend(SnowflakeDatatype::METADATA_BACKEND)
         ;
     }
 
