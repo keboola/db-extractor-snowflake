@@ -28,7 +28,7 @@
         },
         {
             "key": "KBC.datatype.backend",
-            "value": "snowflake",
+            "value": "snowflake"
         }
     ],
     "column_metadata": {
