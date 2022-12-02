@@ -1,4 +1,4 @@
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection";application="Keboola_Connection"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection"".
 Exporting "sales" to "in.c-main.escaping".
 Downloading data from Snowflake.
 1 files (216 B) downloaded.
