@@ -20,6 +20,8 @@ class SnowflakeConnectionFactory
 
     private int $maxRetries;
 
+    private const SNOWFLAKE_APPLICATION = 'Keboola_Connection';
+
     public function __construct(LoggerInterface $logger, int $maxRetries)
     {
         $this->logger = $logger;
@@ -74,6 +76,8 @@ class SnowflakeConnectionFactory
         if ($databaseConfig->hasWarehouse()) {
             $dsn .= ';Warehouse=' . $this->quoteIdentifier($databaseConfig->getWarehouse());
         }
+
+        $dsn .= ';application=' . $this->quoteIdentifier(self::SNOWFLAKE_APPLICATION);
 
         return $dsn;
     }
