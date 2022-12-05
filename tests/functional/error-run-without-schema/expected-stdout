@@ -1,11 +1,11 @@
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";application="Keboola_Connection"".
 Exporting "sales" to "in.c-main.escaping".
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";application="Keboola_Connection"".
 SQL compilation error: Object '"escaping"' does not exist or not authorized. S0002. Retrying... [1x]
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";application="Keboola_Connection"".
 SQL compilation error: Object '"escaping"' does not exist or not authorized. S0002. Retrying... [2x]
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";application="Keboola_Connection"".
 SQL compilation error: Object '"escaping"' does not exist or not authorized. S0002. Retrying... [3x]
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";application="Keboola_Connection"".
 SQL compilation error: Object '"escaping"' does not exist or not authorized. S0002. Retrying... [4x]
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";application="Keboola_Connection"".
