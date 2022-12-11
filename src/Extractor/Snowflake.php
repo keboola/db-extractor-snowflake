@@ -7,6 +7,7 @@ namespace Keboola\DbExtractor\Extractor;
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
+use Keboola\DbExtractor\Adapter\ValueObject\ExportResult;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
