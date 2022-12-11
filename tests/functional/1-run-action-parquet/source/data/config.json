@@ -1,0 +1,36 @@
+{
+  "parameters": {
+    "tables": [
+      {
+        "id": 1,
+        "name": "sales",
+        "query": "SELECT * FROM \"escaping\"",
+        "outputTable": "in.c-main.escaping",
+        "incremental": false,
+        "primaryKey": null,
+        "enabled": true
+      },
+      {
+        "id": 2,
+        "enabled": true,
+        "name": "sales",
+        "outputTable": "in.c-main.sales",
+        "incremental": false,
+        "primaryKey": null,
+        "table": {
+          "schema": "%env(string:SNOWFLAKE_DB_SCHEMA)%",
+          "tableName": "sales"
+        }
+      }
+    ],
+    "db": {
+      "host": "%env(string:SNOWFLAKE_DB_HOST)%",
+      "port": "%env(string:SNOWFLAKE_DB_PORT)%",
+      "user": "%env(string:SNOWFLAKE_DB_USER)%",
+      "#password": "%env(string:SNOWFLAKE_DB_PASSWORD)%",
+      "database": "%env(string:SNOWFLAKE_DB_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_DB_SCHEMA)%",
+      "exportFileFormat": "parquet"
+    }
+  }
+}
