@@ -7,6 +7,7 @@ namespace Keboola\DbExtractor\Extractor;
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
+use Keboola\DbExtractor\Adapter\ValueObject\ExportResult;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
@@ -170,6 +171,35 @@ class Snowflake extends BaseExtractor
     {
         $sanitizedTableName = Utils\Strings::webalize($outputTableName, '._');
         $outTablesDir = $this->dataDir . '/out/tables';
-        return $outTablesDir . '/' . $sanitizedTableName . '.csv.gz';
+        if ($this->getDatabaseConfig()->getFileFormat() === 'csv') {
+            return $outTablesDir . '/' . $sanitizedTableName . '.csv.gz';
+        } else {
+            return $outTablesDir . '/' . $sanitizedTableName . '.parquet';
+        }
+    }
+
+    protected function processExportResult(ExportConfig $exportConfig, ?string $maxValue, ExportResult $result): array
+    {
+        if ($this->getDatabaseConfig()->getFileFormat() === 'parquet') {
+            if ($result->getRowsCount() > 0) {
+                $this->logger->info(sprintf(
+                    'Exported "%d" rows to "%s".',
+                    $result->getRowsCount(),
+                    $exportConfig->getOutputTable()
+                ));
+            } else {
+                $this->logger->warning(sprintf(
+                    'Query result set is empty. Exported "0" rows to "%s".',
+                    $exportConfig->getOutputTable()
+                ));
+            }
+
+            return [
+                'outputTable' => $exportConfig->getOutputTable(),
+                'rows' => $result->getRowsCount(),
+            ];
+        }
+
+        return parent::processExportResult($exportConfig, $maxValue, $result);
     }
 }
