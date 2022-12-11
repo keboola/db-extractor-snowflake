@@ -12,6 +12,7 @@ $logger = new Logger();
 try {
     $app = new SnowflakeApplication($logger);
     $app->execute();
+    var_dump();
     exit(0);
 } catch (UserExceptionInterface $e) {
     $logger->error($e->getMessage());
