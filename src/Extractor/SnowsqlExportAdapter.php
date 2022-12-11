@@ -61,13 +61,21 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     public function export(ExportConfig $exportConfig, string $csvFilePath): ExportResult
     {
+        if ($this->databaseConfig->getFileFormat() === 'parquet') {
+            $csvFilePath = str_replace('.csv.gz', '.parquet', $csvFilePath);
+        }
+
         // Create query
         $query = $exportConfig->hasQuery() ?
             $exportConfig->getQuery() : $this->queryFactory->create($exportConfig, $this->connection);
 
         // Copy into internal staging
         $this->cleanupTableStage($exportConfig->getOutputTable());
-        $copyCommand = $this->generateCopyCommand($exportConfig->getOutputTable(), $query);
+        $copyCommand = $this->generateCopyCommand(
+            $exportConfig->getOutputTable(),
+            $query,
+            $this->databaseConfig->getFileFormat()
+        );
         $res = $this->connection->query($copyCommand)->fetchAll();
         $rowCount = (int) ($res[0]['rows_unloaded'] ?? 0);
 
@@ -155,7 +163,7 @@ class SnowsqlExportAdapter implements ExportAdapter
                 $lines,
                 function ($item): bool {
                     $item = trim($item);
-                    return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([.a-z0-9_\-]+\.gz)/ui', $item);
+                    return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([.a-z0-9_\-]+\.gz|parquet)/ui', $item);
                 }
             )
         );
@@ -171,7 +179,7 @@ class SnowsqlExportAdapter implements ExportAdapter
                 ));
             }
 
-            $file = new     SplFileInfo($path . '/' . $line[0]);
+            $file = new SplFileInfo($path . '/' . $line[0]);
             if ($file->isFile()) {
                 $files[] = $file;
             } else {
@@ -182,8 +190,10 @@ class SnowsqlExportAdapter implements ExportAdapter
         return $files;
     }
 
-    private function generateCopyCommand(string $stageTmpPath, string $query): string
+    private function generateCopyCommand(string $stageTmpPath, string $query, string $fileFormat): string
     {
+        $fileFormat = strtoupper($fileFormat);
+
         $csvOptions = [];
 
         $csvOptions[] = sprintf(
@@ -212,7 +222,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             '
             COPY INTO @~/%s/part
             FROM (%s)
-            FILE_FORMAT = (TYPE=CSV %s)
+            FILE_FORMAT = (TYPE=%s%s)
             HEADER = false
             MAX_FILE_SIZE=50000000
             OVERWRITE = TRUE
@@ -220,7 +230,8 @@ class SnowsqlExportAdapter implements ExportAdapter
             ',
             $stageTmpPath,
             rtrim(trim($query), ';'),
-            implode(' ', $csvOptions)
+            $fileFormat,
+            $fileFormat === 'CSV' ? ' ' . implode(' ', $csvOptions) : ''
         );
     }
 
@@ -253,7 +264,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             $outputDataDir
         );
 
-        $snowSql = $this->tempDir->createTmpFile('snowsql.sql');
+        $snowSql = $this->tempDir->createTmpFile(sprintf('snowsql.sql'));
         file_put_contents($snowSql->getPathname(), implode("\n", $sql));
 
         $this->logger->debug(trim(implode("\n", $sql)));
