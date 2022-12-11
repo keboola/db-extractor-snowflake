@@ -45,9 +45,6 @@ jobs:
           eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP)
           docker push $REPOSITORY:test
           docker pull quay.io/keboola/syrup-cli:latest
-      - name: Run KBC test jobs
-        run: |
-          docker run --rm -e KBC_STORAGE_TOKEN quay.io/keboola/syrup-cli:latest run-job $KBC_DEVELOPERPORTAL_APP 288409174 test
       - name: Deploy
         if: startsWith(github.ref, 'refs/tags/')
         run: ./deploy.sh
