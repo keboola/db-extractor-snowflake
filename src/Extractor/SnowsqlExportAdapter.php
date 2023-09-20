@@ -272,6 +272,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         $cliConfig[] = '';
         $cliConfig[] = '[options]';
         $cliConfig[] = 'exit_on_error = true';
+        $cliConfig[] = 'log_level = DEBUG';
         $cliConfig[] = '';
         $cliConfig[] = '[connections.downloader]';
         $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($databaseConfig->getHost()));
