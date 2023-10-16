@@ -1,0 +1,9 @@
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection"".
+Exporting "sales" to "in.c-main.escaping".
+Downloading data from Snowflake.
+1 files (1.16 KB) downloaded.
+Exported "7" rows to "in.c-main.escaping".
+Exporting "sales" to "in.c-main.sales".
+Downloading data from Snowflake.
+1 files (12.14 KB) downloaded.
+Exported "100" rows to "in.c-main.sales".

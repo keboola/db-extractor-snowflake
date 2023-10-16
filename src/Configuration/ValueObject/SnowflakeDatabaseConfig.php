@@ -11,6 +11,7 @@ use Keboola\DbExtractorConfig\Exception\PropertyNotSetException;
 class SnowflakeDatabaseConfig extends DatabaseConfig
 {
     private ?string $warehouse;
+    private string $fileFormat;
 
     public static function fromArray(array $data): DatabaseConfig
     {
@@ -24,7 +25,8 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['database'] ?? null,
             $data['schema'] ?? null,
             $data['warehouse'] ?? null,
-            $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null
+            $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
+            $data['exportFileFormat']
         );
     }
 
@@ -36,9 +38,11 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         ?string $database,
         ?string $schema,
         ?string $warehouse,
-        ?SSLConnectionConfig $sslConnectionConfig
+        ?SSLConnectionConfig $sslConnectionConfig,
+        string $fileFormat
     ) {
         $this->warehouse = $warehouse;
+        $this->fileFormat = $fileFormat;
 
         parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig, []);
     }
@@ -62,5 +66,10 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             return '{' . str_replace('}', '}}', parent::getPassword()) . '}';
         }
         return parent::getPassword();
+    }
+
+    public function getFileFormat(): string
+    {
+        return $this->fileFormat;
     }
 }

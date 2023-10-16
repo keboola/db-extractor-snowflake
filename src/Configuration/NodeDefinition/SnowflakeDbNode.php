@@ -17,6 +17,7 @@ class SnowflakeDbNode extends DbNode
 
         $this->addSchemaNode($builder);
         $this->addWarehouseNode($builder);
+        $this->addExportFileFormat($builder);
     }
 
     private function addSchemaNode(NodeBuilder $builder): void
@@ -27,5 +28,10 @@ class SnowflakeDbNode extends DbNode
     private function addWarehouseNode(NodeBuilder $builder): void
     {
         $builder->scalarNode('warehouse');
+    }
+
+    private function addExportFileFormat(NodeBuilder $builder)
+    {
+        $builder->enumNode('exportFileFormat')->values(['csv', 'parquet'])->defaultValue('csv');
     }
 }
