@@ -165,7 +165,7 @@ class DatadirTest extends DatadirTestCase
         $runProcess = new Process($runCommand);
         $runProcess->setEnv([
             'KBC_DATADIR' => $datadirPath,
-            'KBC_COMPONENT_RUN_MODE' => getenv('KBC_COMPONENT_RUN_MODE'),
+            'KBC_COMPONENT_RUN_MODE' => (string) getenv('KBC_COMPONENT_RUN_MODE'),
         ]);
         $runProcess->setTimeout(0.0);
         $runProcess->run();
