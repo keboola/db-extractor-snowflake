@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\FunctionalTests;
 
 use Keboola\DatadirTests\DatadirTestCase;
+use Keboola\DatadirTests\Exception\DatadirTestsException;
 use Keboola\DbExtractor\TraitTests\CloseSshTunnelsTrait;
 use Keboola\DbExtractor\TraitTests\RemoveAllTablesTrait;
 use Keboola\SnowflakeDbAdapter\Connection;
@@ -41,6 +42,7 @@ class DatadirTest extends DatadirTestCase
     protected function setUp(): void
     {
         parent::setUp();
+        putenv('KBC_COMPONENT_RUN_MODE=run');
 
         // Test dir, eg. "/code/tests/functional/full-load-ok"
         $this->testProjectDir = $this->getTestFileDir() . '/' . $this->dataName();
@@ -142,5 +144,31 @@ class DatadirTest extends DatadirTestCase
     {
         $finder = new Finder();
         return $finder->files()->in($dir)->depth(1)->name(['~.*\.csv.gz$~']);
+    }
+
+    protected function runScript(string $datadirPath): Process
+    {
+        $fs = new Filesystem();
+
+        $script = $this->getScript();
+        if (!$fs->exists($script)) {
+            throw new DatadirTestsException(sprintf(
+                'Cannot open script file "%s"',
+                $script
+            ));
+        }
+
+        $runCommand = [
+            'php',
+            $script,
+        ];
+        $runProcess = new Process($runCommand);
+        $runProcess->setEnv([
+            'KBC_DATADIR' => $datadirPath,
+            'KBC_COMPONENT_RUN_MODE' => getenv('KBC_COMPONENT_RUN_MODE'),
+        ]);
+        $runProcess->setTimeout(0.0);
+        $runProcess->run();
+        return $runProcess;
     }
 }
