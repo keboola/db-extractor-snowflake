@@ -1,0 +1,13 @@
+[%s] DEBUG: Component initialization completed [] []
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="COMPONENT_TESTING";Schema="COMPONENT_TEST";application="Keboola_Connection"".
+Exporting "sales" to "in.c-main.escaping".
+[%s] DEBUG: Running query "REMOVE @~/in.c-main.escaping;". [] []
+[%s] DEBUG: Running query "             COPY INTO @~/in.c-main.escaping/part             FROM (SELECT * FROM "escaping")             FILE_FORMAT = (TYPE=CSV FIELD_DELIMITER = ',' FIELD_OPTIONALLY_ENCLOSED_BY = '"' ESCAPE_UNENCLOSED_FIELD = '\\' COMPRESSION = 'GZIP' NULL_IF=())             HEADER = false             MAX_FILE_SIZE=50000000             OVERWRITE = TRUE             ;             ". [] []
+[%s] DEBUG: USE DATABASE "COMPONENT_TESTING"; USE SCHEMA "COMPONENT_TESTING"."COMPONENT_TEST"; GET @~/in.c-main.escaping file:///tmp/run-%s.%s/out/tables/in.c-main.escaping.csv.gz; [] []
+Downloading data from Snowflake.
+[%s] DEBUG: snowsql --noup --config /tmp/ex-snowflake-adapter/run-%s.%s/snowsql.config -c downloader -f /tmp/ex-snowflake-adapter/run-%s.%s/%s-snowsql.sql [] []
+1 files (216 B) downloaded.
+[%s] DEBUG: Running query "SELECT * FROM (SELECT * FROM "escaping") LIMIT 0;". [] []
+[%s] DEBUG: Running query "DESC RESULT LAST_QUERY_ID()". [] []
+[%s] DEBUG: Running query "REMOVE @~/in.c-main.escaping;". [] []
+Exported "7" rows to "in.c-main.escaping".
