@@ -20,7 +20,7 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
 
     public function __construct(
         SnowflakeMetadataProvider $metadataProvider,
-        array $state
+        array $state,
     ) {
         $this->metadataProvider = $metadataProvider;
         parent::__construct($state);
@@ -56,7 +56,7 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
                 return sprintf(
                     'CAST(%s AS TEXT) AS %s',
                     $connection->quoteIdentifier($column->getName()),
-                    $connection->quoteIdentifier($column->getName())
+                    $connection->quoteIdentifier($column->getName()),
                 );
             }
             return $connection->quoteIdentifier($column->getName());
@@ -70,7 +70,7 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
     {
         $sql = array_merge(
             iterator_to_array($this->createWhere($exportConfig, $connection)),
-            iterator_to_array($this->createOrderBy($exportConfig, $connection))
+            iterator_to_array($this->createOrderBy($exportConfig, $connection)),
         );
         return implode(' ', $sql);
     }
@@ -87,7 +87,7 @@ class SnowflakeQueryFactory extends DefaultQueryFactory
                 // intentionally ">=" last row should be included, it is handled by storage deduplication process
                 'WHERE %s >= %s',
                 $connection->quoteIdentifier($exportConfig->getIncrementalFetchingColumn()),
-                $lastFetchedRow
+                $lastFetchedRow,
             );
         }
     }

@@ -31,7 +31,7 @@ class SnowflakeApplication extends Application
                         $dbNode,
                         null,
                         null,
-                        new SnowflakeTableNodeDecorator()
+                        new SnowflakeTableNodeDecorator(),
                     );
                 } else {
                     $configDefinition = new ActionConfigRowDefinition($dbNode);
@@ -41,7 +41,7 @@ class SnowflakeApplication extends Application
                     $dbNode,
                     null,
                     null,
-                    new SnowflakeTableNodeDecorator()
+                    new SnowflakeTableNodeDecorator(),
                 );
             }
         } catch (ConfigUserException $e) {

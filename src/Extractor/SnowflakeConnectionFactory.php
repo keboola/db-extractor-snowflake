@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Extractor;
 
-use Throwable;
-use Psr\Log\LoggerInterface;
 use InvalidArgumentException;
-use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
+use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\SnowflakeDbAdapter\Exception\CannotAccessObjectException;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 class SnowflakeConnectionFactory
 {
@@ -78,7 +78,6 @@ class SnowflakeConnectionFactory
         }
 
         $dsn .= ';application=' . $this->quoteIdentifier(self::SNOWFLAKE_APPLICATION);
-
         return $dsn;
     }
 
@@ -93,14 +92,14 @@ class SnowflakeConnectionFactory
 
         if (!$warehouse) {
             throw new UserException(
-                'Please configure "warehouse" parameter. User default warehouse is not defined.'
+                'Please configure "warehouse" parameter. User default warehouse is not defined.',
             );
         }
 
         try {
             odbc_exec($connection, sprintf(
                 'USE WAREHOUSE %s;',
-                $this->quoteIdentifier($warehouse)
+                $this->quoteIdentifier($warehouse),
             ));
         } catch (Throwable $e) {
             if (preg_match('/Object does not exist/ui', $e->getMessage())) {
@@ -120,7 +119,7 @@ class SnowflakeConnectionFactory
             odbc_exec($connection, sprintf(
                 'USE SCHEMA %s.%s',
                 $this->quoteIdentifier($databaseConfig->getDatabase()),
-                $this->quoteIdentifier($databaseConfig->getSchema())
+                $this->quoteIdentifier($databaseConfig->getSchema()),
             ));
         }
     }
@@ -134,7 +133,7 @@ class SnowflakeConnectionFactory
         if ($runId) {
             odbc_exec($connection, sprintf(
                 "ALTER SESSION SET QUERY_TAG='%s';",
-                json_encode(['runId' => $runId])
+                json_encode(['runId' => $runId]),
             ));
         }
     }
@@ -146,7 +145,7 @@ class SnowflakeConnectionFactory
     {
         $stmt = odbc_exec($connection, sprintf(
             'DESC USER %s;',
-            $this->quoteIdentifier($databaseConfig->getUsername())
+            $this->quoteIdentifier($databaseConfig->getUsername()),
         ));
 
         while ($item = odbc_fetch_array($stmt)) {

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\Datatype\Definition\Exception\InvalidLengthException;
+use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
-use Keboola\Datatype\Definition\Snowflake as SnowflakeDatatype;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Nette\Utils;
@@ -35,7 +35,7 @@ class Snowflake extends BaseExtractor
             $this->connection,
             $this->getQueryFactory(),
             $metadataProvider,
-            $this->getDatabaseConfig()
+            $this->getDatabaseConfig(),
         );
     }
 
@@ -76,7 +76,7 @@ class Snowflake extends BaseExtractor
                 'SELECT %s FROM %s.%s',
                 $this->connection->quoteIdentifier($exportConfig->getIncrementalFetchingColumn()),
                 $this->connection->quoteIdentifier($exportConfig->getTable()->getSchema()),
-                $this->connection->quoteIdentifier($exportConfig->getTable()->getName())
+                $this->connection->quoteIdentifier($exportConfig->getTable()->getName()),
             );
 
             $fullsql .= $this->getQueryFactory()->createIncrementalAddon($exportConfig, $this->connection);
@@ -84,7 +84,7 @@ class Snowflake extends BaseExtractor
             $fullsql .= sprintf(
                 ' LIMIT %s OFFSET %s',
                 1,
-                $exportConfig->getIncrementalFetchingLimit() - 1
+                $exportConfig->getIncrementalFetchingLimit() - 1,
             );
         } else {
             $fullsql = sprintf(
@@ -92,7 +92,7 @@ class Snowflake extends BaseExtractor
                 $this->connection->quoteIdentifier($exportConfig->getIncrementalFetchingColumn()),
                 $this->connection->quoteIdentifier($exportConfig->getIncrementalFetchingColumn()),
                 $this->connection->quoteIdentifier($exportConfig->getTable()->getSchema()),
-                $this->connection->quoteIdentifier($exportConfig->getTable()->getName())
+                $this->connection->quoteIdentifier($exportConfig->getTable()->getName()),
             );
         }
         $result = $this->connection->query($fullsql)->fetchAll();
@@ -111,16 +111,16 @@ class Snowflake extends BaseExtractor
                             WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
                 $this->connection->quote($exportConfig->getTable()->getSchema()),
                 $this->connection->quote($exportConfig->getTable()->getName()),
-                $this->connection->quote($exportConfig->getIncrementalFetchingColumn())
-            )
+                $this->connection->quote($exportConfig->getIncrementalFetchingColumn()),
+            ),
         )->fetchAll();
 
         if (count($columns) === 0) {
             throw new UserException(
                 sprintf(
                     'Column [%s] specified for incremental fetching was not found in the table',
-                    $exportConfig->getIncrementalFetchingColumn()
-                )
+                    $exportConfig->getIncrementalFetchingColumn(),
+                ),
             );
         }
 
@@ -131,12 +131,12 @@ class Snowflake extends BaseExtractor
                     ->getQueryFactory()
                     ->setIncrementalFetchingColType(self::INCREMENT_TYPE_NUMERIC)
                 ;
-            } else if ($datatype->getBasetype() === 'TIMESTAMP') {
+            } elseif ($datatype->getBasetype() === 'TIMESTAMP') {
                 $this
                     ->getQueryFactory()
                     ->setIncrementalFetchingColType(self::INCREMENT_TYPE_TIMESTAMP)
                 ;
-            } else if ($datatype->getBasetype() === 'DATE') {
+            } elseif ($datatype->getBasetype() === 'DATE') {
                 $this
                     ->getQueryFactory()
                     ->setIncrementalFetchingColType(self::INCREMENT_TYPE_DATE)
@@ -148,8 +148,8 @@ class Snowflake extends BaseExtractor
             throw new UserException(
                 sprintf(
                     'Column [%s] specified for incremental fetching is not a numeric, date or timestamp type column',
-                    $exportConfig->getIncrementalFetchingColumn()
-                )
+                    $exportConfig->getIncrementalFetchingColumn(),
+                ),
             );
         }
     }

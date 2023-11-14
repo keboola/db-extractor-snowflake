@@ -13,17 +13,17 @@ class AccountParseTest extends TestCase
     {
         $this->assertEquals(
             'something',
-            AccountUrlParser::parse('something.snowflakecomputing.com')
+            AccountUrlParser::parse('something.snowflakecomputing.com'),
         );
 
         $this->assertEquals(
             'demo.something',
-            AccountUrlParser::parse('demo.something.snowflakecomputing.com')
+            AccountUrlParser::parse('demo.something.snowflakecomputing.com'),
         );
 
         $this->assertEquals(
             'next.demo.something',
-            AccountUrlParser::parse('next.demo.something.snowflakecomputing.com')
+            AccountUrlParser::parse('next.demo.something.snowflakecomputing.com'),
         );
     }
 }

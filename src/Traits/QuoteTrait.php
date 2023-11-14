@@ -6,7 +6,6 @@ namespace Keboola\DbExtractor\Traits;
 
 trait QuoteTrait
 {
-
     public function quote(string $value): string
     {
         return "'" . addslashes($value) . "'";

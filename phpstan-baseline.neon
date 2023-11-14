@@ -1,0 +1,41 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Method Keboola\\\\DbExtractor\\\\Extractor\\\\Snowflake\\:\\:getMaxOfIncrementalFetchingColumn\\(\\) should return string\\|null but returns mixed\\.$#"
+			count: 1
+			path: src/Extractor/Snowflake.php
+
+		-
+			message: "#^Parameter \\#1 \\$type of class Keboola\\\\Datatype\\\\Definition\\\\Snowflake constructor expects string, mixed given\\.$#"
+			count: 1
+			path: src/Extractor/Snowflake.php
+
+		-
+			message: "#^Parameter \\#1 \\$statement of function odbc_fetch_array expects resource, resource\\|false given\\.$#"
+			count: 1
+			path: src/Extractor/SnowflakeConnectionFactory.php
+
+		-
+			message: "#^Parameter \\#1 \\$name of method Keboola\\\\DbExtractor\\\\TableResultFormat\\\\Metadata\\\\Builder\\\\ColumnBuilder\\:\\:setName\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Extractor/SnowflakeMetadataProvider.php
+
+		-
+			message: "#^Parameter \\#1 \\$rawType of static method Keboola\\\\DbExtractor\\\\Extractor\\\\SnowflakeUtils\\:\\:parseTypeAndLength\\(\\) expects string, mixed given\\.$#"
+			count: 1
+			path: src/Extractor/SnowflakeMetadataProvider.php
+
+		-
+			message: "#^Parameter \\#1 \\$string1 of function strnatcmp expects string, mixed given\\.$#"
+			count: 1
+			path: src/Extractor/SnowflakeMetadataProvider.php
+
+		-
+			message: "#^Parameter \\#2 \\$string2 of function strnatcmp expects string, mixed given\\.$#"
+			count: 1
+			path: src/Extractor/SnowflakeMetadataProvider.php
+
+		-
+			message: "#^Cannot cast mixed to int\\.$#"
+			count: 1
+			path: src/Extractor/SnowsqlExportAdapter.php

@@ -11,25 +11,25 @@
         }
     ],
     "require": {
-        "php": "^7.4",
+        "php": "^8.2",
         "ext-json": "*",
         "ext-odbc": "*",
-        "keboola/csv": "^3.2",
-        "keboola/db-adapter-snowflake": "1.0.4",
-        "keboola/db-extractor-adapter": "^1.10",
-        "keboola/db-extractor-common": "^16.1",
-        "keboola/db-extractor-config": "^1.10",
-        "keboola/db-extractor-table-format": "^3.1",
-        "keboola/php-component": "^9.1",
-        "keboola/php-datatypes": "^6.0",
+        "keboola/csv": "^4.0",
+        "keboola/db-adapter-snowflake": "^1.4",
+        "keboola/db-extractor-adapter": "^1.13",
+        "keboola/db-extractor-common": "^16.2",
+        "keboola/db-extractor-config": "^1.14",
+        "keboola/db-extractor-table-format": "^3.8",
+        "keboola/php-component": "^9.4",
+        "keboola/php-datatypes": "^7.2",
         "keboola/php-temp": "^2.0",
         "keboola/retry": "^0.5.0",
         "symfony/process": "^5.2"
     },
     "require-dev": {
-        "keboola/coding-standard": "^9.0",
-        "keboola/datadir-tests": "^5.2",
-        "phpstan/phpstan": "^0.12.68",
+        "keboola/coding-standard": "^15.0",
+        "keboola/datadir-tests": "^5.6",
+        "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^9.5"
     },
     "autoload": {
@@ -66,6 +66,9 @@
     },
     "config": {
         "process-timeout": 0,
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

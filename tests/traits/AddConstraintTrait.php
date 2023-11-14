@@ -18,14 +18,14 @@ trait AddConstraintTrait
         string $name,
         string $type,
         string $value,
-        ?string $reference = null
+        ?string $reference = null,
     ): void {
         $sql = sprintf(
             'ALTER TABLE %s ADD CONSTRAINT %s %s (%s)',
             $this->quoteIdentifier($tableName),
             $name,
             $type,
-            $value
+            $value,
         );
 
         if ($reference) {

@@ -62,7 +62,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
             $sqlWhereElements[] = sprintf(
                 '(table_schema = %s AND table_name = %s)',
                 $this->db->quote($item['schema_name']),
-                $this->db->quote($item['name'])
+                $this->db->quote($item['name']),
             );
         }
 
@@ -85,7 +85,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
         // Create temporary view from the supplied query
         $sql = sprintf(
             'SELECT * FROM (%s) LIMIT 0;',
-            rtrim(trim($query), ';')
+            rtrim(trim($query), ';'),
         );
         $this->db->query($sql)->fetchAll();
         $columnsRaw = $this->db->query('DESC RESULT LAST_QUERY_ID()')->fetchAll();
@@ -123,7 +123,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
 
         $sql = sprintf(
             'SELECT * FROM information_schema.columns %s ORDER BY TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION',
-            $sqlWhereClause
+            $sqlWhereClause,
         );
 
         return $this->db->query($sql)->fetchAll();

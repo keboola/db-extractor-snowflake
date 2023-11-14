@@ -58,13 +58,14 @@ trait ConfigTrait
   }
 }
 JSON;
-        $config = json_decode(
+        /** @var array<array> $config */
+        $config = (array) json_decode(
             sprintf(
                 $configTemplate,
                 json_encode(TestConnection::getDbConfigArray()),
-                (string) getenv('SNOWFLAKE_DB_SCHEMA')
+                (string) getenv('SNOWFLAKE_DB_SCHEMA'),
             ),
-            true
+            true,
         );
         $config['parameters']['db']['#password'] = $config['parameters']['db']['password'];
         unset($config['parameters']['db']['password']);
@@ -90,13 +91,14 @@ JSON;
   }
 }
 JSON;
-        $config = json_decode(
+        /** @var array<array> $config */
+        $config = (array) json_decode(
             sprintf(
                 $configTemplate,
                 json_encode(TestConnection::getDbConfigArray()),
-                (string) getenv('SNOWFLAKE_DB_SCHEMA')
+                (string) getenv('SNOWFLAKE_DB_SCHEMA'),
             ),
-            true
+            true,
         );
         $config['parameters']['db']['#password'] = $config['parameters']['db']['password'];
         unset($config['parameters']['db']['password']);

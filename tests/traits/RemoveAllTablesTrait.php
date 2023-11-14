@@ -20,8 +20,8 @@ trait RemoveAllTablesTrait
                 sprintf(
                     'DROP TABLE IF EXISTS %s.%s',
                     $this->quoteIdentifier($view['schema_name']),
-                    $this->quoteIdentifier($view['name'])
-                )
+                    $this->quoteIdentifier($view['name']),
+                ),
             );
         }
         $views = $this->connection->fetchAll('SHOW VIEWS IN SCHEMA');
@@ -30,8 +30,8 @@ trait RemoveAllTablesTrait
                 sprintf(
                     'DROP VIEW IF EXISTS %s.%s',
                     $this->quoteIdentifier($view['schema_name']),
-                    $this->quoteIdentifier($view['name'])
-                )
+                    $this->quoteIdentifier($view['name']),
+                ),
             );
         }
     }

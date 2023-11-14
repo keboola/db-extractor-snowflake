@@ -40,7 +40,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         OdbcConnection $connection,
         SnowflakeQueryFactory $QueryFactory,
         SnowflakeMetadataProvider $metadataProvider,
-        DatabaseConfig $databaseConfig
+        DatabaseConfig $databaseConfig,
     ) {
         if (!($databaseConfig instanceof SnowflakeDatabaseConfig)) {
             throw new InvalidArgumentException('DatabaseConfig must be instance of SnowflakeDatabaseConfig');
@@ -85,7 +85,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         $this->logger->info(sprintf(
             '%d files (%s) downloaded.',
             count($csvFiles),
-            $this->dataSizeFormatted((int) $bytesDownloaded)
+            $this->dataSizeFormatted((int) $bytesDownloaded),
         ));
 
         // Query metadata
@@ -117,7 +117,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
             throw new Exception(sprintf(
                 'File download error occurred processing [%s]',
-                $exportConfig->hasTable() ? $exportConfig->getTable()->getName() : $exportConfig->getOutputTable()
+                $exportConfig->hasTable() ? $exportConfig->getTable()->getName() : $exportConfig->getOutputTable(),
             ));
         }
 
@@ -156,8 +156,8 @@ class SnowsqlExportAdapter implements ExportAdapter
                 function ($item): bool {
                     $item = trim($item);
                     return preg_match('/^\|.+\|$/ui', $item) && preg_match('/([.a-z0-9_\-]+\.gz)/ui', $item);
-                }
-            )
+                },
+            ),
         );
 
         foreach ($lines as $line) {
@@ -167,7 +167,7 @@ class SnowsqlExportAdapter implements ExportAdapter
                     $line[0],
                     $line[2],
                     $line[1],
-                    $line[3]
+                    $line[3],
                 ));
             }
 
@@ -188,22 +188,22 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         $csvOptions[] = sprintf(
             'FIELD_DELIMITER = %s',
-            $this->connection->quote(CsvOptions::DEFAULT_DELIMITER)
+            $this->connection->quote(CsvOptions::DEFAULT_DELIMITER),
         );
 
         $csvOptions[] = sprintf(
             'FIELD_OPTIONALLY_ENCLOSED_BY = %s',
-            $this->connection->quote(CsvOptions::DEFAULT_ENCLOSURE)
+            $this->connection->quote(CsvOptions::DEFAULT_ENCLOSURE),
         );
 
         $csvOptions[] = sprintf(
             'ESCAPE_UNENCLOSED_FIELD = %s',
-            $this->connection->quote('\\\\')
+            $this->connection->quote('\\\\'),
         );
 
         $csvOptions[] = sprintf(
             'COMPRESSION = %s',
-            $this->connection->quote('GZIP')
+            $this->connection->quote('GZIP'),
         );
 
         $csvOptions[] = sprintf('NULL_IF=()');
@@ -220,7 +220,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             ',
             $stageTmpPath,
             rtrim(trim($query), ';'),
-            implode(' ', $csvOptions)
+            implode(' ', $csvOptions),
         );
     }
 
@@ -230,27 +230,27 @@ class SnowsqlExportAdapter implements ExportAdapter
         if ($this->databaseConfig->hasWarehouse()) {
             $sql[] = sprintf(
                 'USE WAREHOUSE %s;',
-                $this->connection->quoteIdentifier($this->databaseConfig->getWarehouse())
+                $this->connection->quoteIdentifier($this->databaseConfig->getWarehouse()),
             );
         }
 
         $sql[] = sprintf(
             'USE DATABASE %s;',
-            $this->connection->quoteIdentifier($this->databaseConfig->getDatabase())
+            $this->connection->quoteIdentifier($this->databaseConfig->getDatabase()),
         );
 
         if ($this->databaseConfig->hasSchema()) {
             $sql[] = sprintf(
                 'USE SCHEMA %s.%s;',
                 $this->connection->quoteIdentifier($this->databaseConfig->getDatabase()),
-                $this->connection->quoteIdentifier($this->databaseConfig->getSchema())
+                $this->connection->quoteIdentifier($this->databaseConfig->getSchema()),
             );
         }
 
         $sql[] = sprintf(
             'GET @~/%s file://%s;',
             $exportConfig->getOutputTable(),
-            $outputDataDir
+            $outputDataDir,
         );
 
         $snowSql = $this->tempDir->createTmpFile('snowsql.sql');
@@ -262,7 +262,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         return sprintf(
             'snowsql --noup --config %s -c downloader -f %s',
             $this->snowSqlConfig,
-            $snowSql
+            $snowSql,
         );
     }
 
