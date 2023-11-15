@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Configuration\ValueObject;
 
-use \Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
+use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\SSLConnectionConfig;
 use Keboola\DbExtractorConfig\Exception\PropertyNotSetException;
 
@@ -24,7 +24,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['database'] ?? null,
             $data['schema'] ?? null,
             $data['warehouse'] ?? null,
-            $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null
+            $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
         );
     }
 
@@ -36,7 +36,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         ?string $database,
         ?string $schema,
         ?string $warehouse,
-        ?SSLConnectionConfig $sslConnectionConfig
+        ?SSLConnectionConfig $sslConnectionConfig,
     ) {
         $this->warehouse = $warehouse;
 

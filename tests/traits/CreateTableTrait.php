@@ -30,7 +30,7 @@ trait CreateTableTrait
         $this->connection->query(sprintf(
             'CREATE TABLE IF NOT EXISTS %s (%s)',
             implode('.', $tablePath),
-            implode(', ', $columnsSql)
+            implode(', ', $columnsSql),
         ));
     }
 }

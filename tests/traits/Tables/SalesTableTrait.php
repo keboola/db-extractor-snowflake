@@ -34,8 +34,8 @@ trait SalesTableTrait
                 'PRIMARY KEY',
                 implode(
                     ', ',
-                    array_map(fn($v) => $this->quoteIdentifier($v), $primaryKey)
-                )
+                    array_map(fn($v) => $this->quoteIdentifier($v), $primaryKey),
+                ),
             );
         }
     }

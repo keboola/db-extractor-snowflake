@@ -75,7 +75,7 @@ class SnowflakeTest extends TestCase
                 $this->assertSame(
                     'Error connecting to DB: ' .
                     'Please configure "warehouse" parameter. User default warehouse is not defined.',
-                    $e->getMessage()
+                    $e->getMessage(),
                 );
             }
 
@@ -89,10 +89,10 @@ class SnowflakeTest extends TestCase
             $app->execute();
 
             Assert::assertTrue(
-                $logger->hasInfo('Downloading data from Snowflake.')
+                $logger->hasInfo('Downloading data from Snowflake.'),
             );
             Assert::assertTrue(
-                $logger->hasWarning('Query result set is empty. Exported "0" rows to "in.c-main.tableColumns".')
+                $logger->hasWarning('Query result set is empty. Exported "0" rows to "in.c-main.tableColumns".'),
             );
         } finally {
             $this->setUserDefaultWarehouse($user, $warehouse);
@@ -132,7 +132,7 @@ class SnowflakeTest extends TestCase
                 $this->assertSame(
                     'Error connecting to DB: ' .
                     'Please configure "warehouse" parameter. User default warehouse is not defined.',
-                    $e->getMessage()
+                    $e->getMessage(),
                 );
             }
 
@@ -187,7 +187,7 @@ class SnowflakeTest extends TestCase
 
         $this->assertSame(
             sprintf('{"runId":"%s"}', getenv('KBC_RUNID')),
-            $history[0]['QUERY_TAG']
+            $history[0]['QUERY_TAG'],
         );
 
         $this->assertFileDoesNotExist($outputCsvFolder);
@@ -550,7 +550,7 @@ class SnowflakeTest extends TestCase
     {
         $sql = sprintf(
             'DESC USER %s;',
-            QueryBuilder::quoteIdentifier($user)
+            QueryBuilder::quoteIdentifier($user),
         );
 
         $config = $this->connection->fetchAll($sql);
@@ -570,7 +570,7 @@ class SnowflakeTest extends TestCase
             $sql = sprintf(
                 'ALTER USER %s SET DEFAULT_WAREHOUSE = %s;',
                 QueryBuilder::quoteIdentifier($user),
-                QueryBuilder::quoteIdentifier($warehouse)
+                QueryBuilder::quoteIdentifier($warehouse),
             );
             $this->connection->query($sql);
 
@@ -578,7 +578,7 @@ class SnowflakeTest extends TestCase
         } else {
             $sql = sprintf(
                 'ALTER USER %s SET DEFAULT_WAREHOUSE = null;',
-                QueryBuilder::quoteIdentifier($user)
+                QueryBuilder::quoteIdentifier($user),
             );
             $this->connection->query($sql);
 

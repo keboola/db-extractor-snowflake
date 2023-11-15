@@ -13,7 +13,7 @@ use RuntimeException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Process\Process;
-use \Throwable;
+use Throwable;
 
 class DatadirTest extends DatadirTestCase
 {
@@ -98,8 +98,8 @@ class DatadirTest extends DatadirTestCase
                             sprintf('"%s"', getenv('SNOWFLAKE_DB_DATABASE')),
                         ],
                         '"replaceEnv"',
-                        $json
-                    )
+                        $json,
+                    ),
                 );
             } catch (Throwable $e) {
                 // If a problem occurs, preserve the original contents
@@ -146,7 +146,7 @@ class DatadirTest extends DatadirTestCase
         return $finder->files()->in($dir)->depth(1)->name(['~.*\.csv.gz$~']);
     }
 
-    protected function runScript(string $datadirPath): Process
+    protected function runScript(string $datadirPath, ?string $runId = null): Process
     {
         $fs = new Filesystem();
 
@@ -154,7 +154,7 @@ class DatadirTest extends DatadirTestCase
         if (!$fs->exists($script)) {
             throw new DatadirTestsException(sprintf(
                 'Cannot open script file "%s"',
-                $script
+                $script,
             ));
         }
 
