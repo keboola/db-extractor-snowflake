@@ -6,6 +6,9 @@ ARG SNOWFLAKE_ODBC_GPG_KEY=630D9F3CAB551AF3
 ARG SNOWFLAKE_SNOWSQL_GPG_KEY=EC218558EABB25A1
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DEBIAN_FRONTEND noninteractive
+ENV TMPDIR=/opt/snowsqltempdir
+
+RUN mkdir -p /opt/snowsqltempdir
 
 # Install Dependencies
 RUN apt-get update \
