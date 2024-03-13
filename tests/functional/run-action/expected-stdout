@@ -1,6 +1,7 @@
 Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection"".
 Exporting "sales" to "in.c-main.escaping".
 Downloading data from Snowflake.
+snowsql --noup --config /opt/snowsqltempdir/ex-snowflake-adapter/run-%s.%s/snowsql.config -c downloader -f /opt/snowsqltempdir/ex-snowflake-adapter/run-%s.%s/%s-snowsql.sql
 1 files (216 B) downloaded.
 Exported "7" rows to "in.c-main.escaping".
 Exporting "sales" to "in.c-main.sales".
