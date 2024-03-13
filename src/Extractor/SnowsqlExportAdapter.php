@@ -103,7 +103,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
         $this->logger->info('Downloading data from Snowflake.');
-        $this->logger->debug(trim($command));
+        $this->logger->info(trim($command));
 
         // Run
         @mkdir($csvFilePath, 0755, true);
