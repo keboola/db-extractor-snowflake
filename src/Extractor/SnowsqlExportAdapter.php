@@ -256,7 +256,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         $snowSql = $this->tempDir->createTmpFile('snowsql.sql');
         file_put_contents($snowSql->getPathname(), implode("\n", $sql));
 
-        $this->logger->debug(trim(implode("\n", $sql)));
+        $this->logger->info(trim(implode("\n", $sql)));
 
         // execute external
         return sprintf(
