@@ -31,12 +31,13 @@
             "value": "snowflake"
         }
     ],
+    "columns": [
+        "var",
+        "obj",
+        "arr"
+    ],
     "column_metadata": {
         "var": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "VARIANT"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -50,16 +51,20 @@
                 "value": ""
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "VARIANT"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "var"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "var"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -72,10 +77,6 @@
         ],
         "obj": [
             {
-                "key": "KBC.datatype.type",
-                "value": "OBJECT"
-            },
-            {
                 "key": "KBC.datatype.nullable",
                 "value": true
             },
@@ -88,16 +89,20 @@
                 "value": ""
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "OBJECT"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "obj"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "obj"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -110,16 +115,20 @@
         ],
         "arr": [
             {
-                "key": "KBC.datatype.type",
-                "value": "ARRAY"
-            },
-            {
                 "key": "KBC.datatype.nullable",
                 "value": true
             },
             {
                 "key": "KBC.datatype.basetype",
                 "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "ARRAY"
             },
             {
                 "key": "KBC.datatype.default",
@@ -134,10 +143,6 @@
                 "value": "arr"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -146,10 +151,5 @@
                 "value": 3
             }
         ]
-    },
-    "columns": [
-        "var",
-        "obj",
-        "arr"
-    ]
+    }
 }
