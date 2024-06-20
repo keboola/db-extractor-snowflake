@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54f17aef9537fda77d05932102e76a5a",
+    "content-hash": "aea61516fd4dd84617fbfa40e747c8d9",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -271,16 +271,16 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "dev-adamvyborny-PST-1416-update-php-component",
+            "version": "17.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "df1384729a7e87326f3938f08c5d2ddc14b0d896"
+                "reference": "196c8b3b8f158c2e021f407d0b09e51613d1c1f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/df1384729a7e87326f3938f08c5d2ddc14b0d896",
-                "reference": "df1384729a7e87326f3938f08c5d2ddc14b0d896",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/196c8b3b8f158c2e021f407d0b09e51613d1c1f8",
+                "reference": "196c8b3b8f158c2e021f407d0b09e51613d1c1f8",
                 "shasum": ""
             },
             "require": {
@@ -341,9 +341,9 @@
             ],
             "description": "Common library from Keboola Database Extractors",
             "support": {
-                "source": "https://github.com/keboola/db-extractor-common/tree/adamvyborny-PST-1416-update-php-component"
+                "source": "https://github.com/keboola/db-extractor-common/tree/17.0.1"
             },
-            "time": "2024-06-20T06:53:25+00:00"
+            "time": "2024-06-20T12:38:27+00:00"
         },
         {
             "name": "keboola/db-extractor-config",
@@ -4502,9 +4502,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "keboola/db-extractor-common": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
