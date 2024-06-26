@@ -14,6 +14,10 @@
             "data_type": {
                 "base": {
                     "length": "16777216",
+                    "type": "STRING"
+                },
+                "snowflake": {
+                    "length": "16777216",
                     "type": "VARCHAR"
                 }
             }
@@ -29,6 +33,10 @@
             "name": "col2",
             "data_type": {
                 "base": {
+                    "length": "16777216",
+                    "type": "STRING"
+                },
+                "snowflake": {
                     "length": "16777216",
                     "type": "VARCHAR"
                 }

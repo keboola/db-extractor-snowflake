@@ -55,10 +55,6 @@
                 "value": "VARIANT"
             },
             {
-                "key": "KBC.datatype.default",
-                "value": ""
-            },
-            {
                 "key": "KBC.sourceName",
                 "value": "var"
             },
@@ -93,10 +89,6 @@
                 "value": "OBJECT"
             },
             {
-                "key": "KBC.datatype.default",
-                "value": ""
-            },
-            {
                 "key": "KBC.sourceName",
                 "value": "obj"
             },
@@ -129,10 +121,6 @@
             {
                 "key": "KBC.datatype.type",
                 "value": "ARRAY"
-            },
-            {
-                "key": "KBC.datatype.default",
-                "value": ""
             },
             {
                 "key": "KBC.sourceName",

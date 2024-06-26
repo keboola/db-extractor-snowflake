@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "aea61516fd4dd84617fbfa40e747c8d9",
+    "content-hash": "8df8681f67aad097e037880c3a532bda",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -271,16 +271,16 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "17.0.1",
+            "version": "17.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "196c8b3b8f158c2e021f407d0b09e51613d1c1f8"
+                "reference": "d13f7baa1dd5e9f8e47ca1a1f2b4579edf3c3bfc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/196c8b3b8f158c2e021f407d0b09e51613d1c1f8",
-                "reference": "196c8b3b8f158c2e021f407d0b09e51613d1c1f8",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/d13f7baa1dd5e9f8e47ca1a1f2b4579edf3c3bfc",
+                "reference": "d13f7baa1dd5e9f8e47ca1a1f2b4579edf3c3bfc",
                 "shasum": ""
             },
             "require": {
@@ -341,9 +341,9 @@
             ],
             "description": "Common library from Keboola Database Extractors",
             "support": {
-                "source": "https://github.com/keboola/db-extractor-common/tree/17.0.1"
+                "source": "https://github.com/keboola/db-extractor-common/tree/17.0.2"
             },
-            "time": "2024-06-20T12:38:27+00:00"
+            "time": "2024-06-26T10:29:50+00:00"
         },
         {
             "name": "keboola/db-extractor-config",
@@ -481,16 +481,16 @@
         },
         {
             "name": "keboola/php-component",
-            "version": "10.0.2",
+            "version": "10.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-component.git",
-                "reference": "cf303a8192ee037688bca2776efd9c35cdc4a722"
+                "reference": "4d14047e5584f8eabb1e576c57eba8167e9fc0a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-component/zipball/cf303a8192ee037688bca2776efd9c35cdc4a722",
-                "reference": "cf303a8192ee037688bca2776efd9c35cdc4a722",
+                "url": "https://api.github.com/repos/keboola/php-component/zipball/4d14047e5584f8eabb1e576c57eba8167e9fc0a5",
+                "reference": "4d14047e5584f8eabb1e576c57eba8167e9fc0a5",
                 "shasum": ""
             },
             "require": {
@@ -535,9 +535,9 @@
             ],
             "support": {
                 "issues": "https://github.com/keboola/php-component/issues",
-                "source": "https://github.com/keboola/php-component/tree/10.0.2"
+                "source": "https://github.com/keboola/php-component/tree/10.1.1"
             },
-            "time": "2024-06-19T13:42:20+00:00"
+            "time": "2024-06-26T09:09:27+00:00"
         },
         {
             "name": "keboola/php-datatypes",

@@ -13,11 +13,15 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "VARCHAR"
+                "value": "STRING"
             },
             {
                 "key": "KBC.datatype.length",
                 "value": "16777216"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
             },
             {
                 "key": "KBC.sourceName",
@@ -39,11 +43,15 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "VARCHAR"
+                "value": "STRING"
             },
             {
                 "key": "KBC.datatype.length",
                 "value": "16777216"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
             },
             {
                 "key": "KBC.sourceName",
