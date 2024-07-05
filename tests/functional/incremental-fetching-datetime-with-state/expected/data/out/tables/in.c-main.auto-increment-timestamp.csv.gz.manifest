@@ -1,9 +1,6 @@
 {
     "destination": "in.c-main.auto-increment-timestamp",
     "incremental": true,
-    "primary_key": [
-        "Weir_d_I_D"
-    ],
     "metadata": [
         {
             "key": "KBC.name",
@@ -34,12 +31,19 @@
             "value": "snowflake"
         }
     ],
+    "columns": [
+        "Weir_d_I_D",
+        "Weir_d_Na_me",
+        "someInteger",
+        "someDecimal",
+        "type",
+        "datetime"
+    ],
+    "primary_key": [
+        "Weir_d_I_D"
+    ],
     "column_metadata": {
         "Weir_d_I_D": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "NUMBER"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -57,16 +61,16 @@
                 "value": ""
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "NUMBER"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "_Weir%d I-D"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "Weir_d_I_D"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -78,10 +82,6 @@
             }
         ],
         "Weir_d_Na_me": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "TEXT"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -99,16 +99,16 @@
                 "value": "'mario'"
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "TEXT"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "Weir%d Na-me"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "Weir_d_Na_me"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -120,10 +120,6 @@
             }
         ],
         "someInteger": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "NUMBER"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -141,16 +137,16 @@
                 "value": ""
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "NUMBER"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "someInteger"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "someInteger"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -162,10 +158,6 @@
             }
         ],
         "someDecimal": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "NUMBER"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -183,16 +175,16 @@
                 "value": "0"
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "NUMBER"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "someDecimal"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "someDecimal"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -204,10 +196,6 @@
             }
         ],
         "type": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "TEXT"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -225,16 +213,16 @@
                 "value": ""
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "TEXT"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "type"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "type"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -246,10 +234,6 @@
             }
         ],
         "datetime": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "TIMESTAMP_NTZ"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -263,16 +247,16 @@
                 "value": "CAST(CURRENT_TIMESTAMP() AS TIMESTAMP_NTZ(9))"
             },
             {
+                "key": "KBC.datatype.type",
+                "value": "TIMESTAMP_NTZ"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "datetime"
             },
             {
                 "key": "KBC.sanitizedName",
                 "value": "datetime"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -283,13 +267,5 @@
                 "value": 6
             }
         ]
-    },
-    "columns": [
-         "Weir_d_I_D",
-         "Weir_d_Na_me",
-         "someInteger",
-         "someDecimal",
-         "type",
-         "datetime"
-    ]
+    }
 }
