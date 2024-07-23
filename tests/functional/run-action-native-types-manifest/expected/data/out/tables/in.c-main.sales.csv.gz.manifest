@@ -24,7 +24,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -47,7 +46,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -70,7 +68,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -93,7 +90,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -116,7 +112,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -139,7 +134,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "64",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -162,7 +156,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -185,7 +178,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -208,7 +200,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -231,7 +222,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -254,7 +244,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {
@@ -277,7 +266,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "16777216",
                     "type": "STRING"
                 },
                 "snowflake": {

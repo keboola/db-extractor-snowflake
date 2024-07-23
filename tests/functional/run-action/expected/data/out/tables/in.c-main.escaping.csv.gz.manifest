@@ -16,12 +16,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -46,12 +46,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
