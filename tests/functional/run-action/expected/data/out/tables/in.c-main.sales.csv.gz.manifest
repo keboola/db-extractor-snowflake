@@ -56,16 +56,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -94,16 +94,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -132,16 +132,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -170,16 +170,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -208,16 +208,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -246,16 +246,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "64"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "64"
             },
             {
                 "key": "KBC.sourceName",
@@ -284,16 +284,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -322,16 +322,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -360,16 +360,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -398,16 +398,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -436,16 +436,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -474,16 +474,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",

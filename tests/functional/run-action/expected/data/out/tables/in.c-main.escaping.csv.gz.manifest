@@ -5,6 +5,9 @@
         "col1",
         "col2"
     ],
+    "primary_key": [
+        "col1"
+    ],
     "column_metadata": {
         "col1": [
             {
@@ -16,12 +19,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",
@@ -46,12 +49,12 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "16777216"
-            },
-            {
                 "key": "KBC.datatype.type",
                 "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
             },
             {
                 "key": "KBC.sourceName",

@@ -53,16 +53,16 @@
                 "value": "NUMERIC"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "38,0"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "NUMBER"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "38,0"
             },
             {
                 "key": "KBC.sourceName",
@@ -91,16 +91,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "55"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": "'mario'"
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "55"
             },
             {
                 "key": "KBC.sourceName",
@@ -129,16 +129,16 @@
                 "value": "NUMERIC"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "38,0"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "NUMBER"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "38,0"
             },
             {
                 "key": "KBC.sourceName",
@@ -167,16 +167,16 @@
                 "value": "NUMERIC"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "10,8"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": "0"
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "NUMBER"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "10,8"
             },
             {
                 "key": "KBC.sourceName",
@@ -205,16 +205,16 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "55"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
             {
                 "key": "KBC.datatype.type",
                 "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "55"
             },
             {
                 "key": "KBC.sourceName",
