@@ -73,7 +73,11 @@ class SnowflakeMetadataProvider implements MetadataProvider
                     continue;
                 }
                 $columnBuilder = $tableBuilders[$tableId]->addColumn();
-                $this->processColumnData($columnBuilder, $column);
+                $this->processColumnData(
+                    $columnBuilder,
+                    $column,
+                    $this->queryPrimaryKeys($column['TABLE_SCHEMA'], $column['TABLE_NAME']),
+                );
             }
         }
 
@@ -168,7 +172,21 @@ class SnowflakeMetadataProvider implements MetadataProvider
         return $isFromDifferentSchema || $isFromInformationSchema || $isNotFromWhiteList;
     }
 
-    private function processColumnData(ColumnBuilder $columnBuilder, array $column): void
+    private function queryPrimaryKeys(string $schema, string $tableName): array
+    {
+        $sql = sprintf(
+            'SHOW PRIMARY KEYS IN TABLE %s.%s',
+            $this->db->quoteIdentifier($schema),
+            $this->db->quoteIdentifier($tableName),
+        );
+        $primaryKeyColumns = $this->db->query($sql)->fetchAll();
+
+        return array_map(function ($row) {
+            return $row['column_name'];
+        }, $primaryKeyColumns);
+    }
+
+    private function processColumnData(ColumnBuilder $columnBuilder, array $column, array $primaryKeys): void
     {
         $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
         if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
@@ -182,9 +200,12 @@ class SnowflakeMetadataProvider implements MetadataProvider
             ->setName($column['COLUMN_NAME'])
             ->setDefault($column['COLUMN_DEFAULT'])
             ->setLength($length)
-            ->setNullable((trim($column['IS_NULLABLE']) === 'NO') ? false : true)
+            ->setNullable(!(trim($column['IS_NULLABLE']) === 'NO'))
             ->setType($column['DATA_TYPE'])
-            ->setOrdinalPosition((int) $column['ORDINAL_POSITION'])
-        ;
+            ->setOrdinalPosition((int) $column['ORDINAL_POSITION']);
+
+        if (in_array($column['COLUMN_NAME'], $primaryKeys, true)) {
+            $columnBuilder->setPrimaryKey(true);
+        }
     }
 }
