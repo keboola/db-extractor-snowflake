@@ -1,0 +1,39 @@
+{
+    "destination": "in.c-main.null-column-table",
+    "incremental": false,
+    "columns": [
+        "test"
+    ],
+    "column_metadata": {
+        "test": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "VARCHAR"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "16777216"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "test"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "test"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            }
+        ]
+    }
+}
