@@ -21,7 +21,11 @@ class SnowflakeOdbcConnection extends OdbcConnection
     {
         if (strpos(odbc_errormsg(), 'msg=')) {
             preg_match('/msg=\'(.*)\'\./', odbc_errormsg(), $message);
-            throw new OdbcException($message[1] . ' ' . odbc_error());
+            if (isset($message[1])) {
+                throw new OdbcException($message[1] . ' ' . odbc_error());
+            } else {
+                throw new OdbcException(odbc_errormsg() . ' ' . odbc_error());
+            }
         }
     }
 }
