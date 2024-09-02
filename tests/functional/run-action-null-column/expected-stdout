@@ -1,0 +1,5 @@
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection"".
+Exporting "null column" to "in.c-main.null-column-table".
+Downloading data from Snowflake.
+1 files (21 B) downloaded.
+Exported "1" rows to "in.c-main.null-column-table".

@@ -97,6 +97,13 @@ class SnowflakeMetadataProvider implements MetadataProvider
         $columns = [];
         foreach ($columnsRaw as $data) {
             [$type, $length] = SnowflakeUtils::parseTypeAndLength($data['type']);
+
+            // to solve Snowflake VARCHAR(0) issue for null columns
+            // https://community.snowflake.com/s/case/500VI00000DZKyuYAH/inconsistency-in-describe-result-for-null-columns
+            if ($type === 'VARCHAR' && $length === '0') {
+                $length = '16777216';
+            }
+
             $builder = ColumnBuilder::create();
             $builder->setName($data['name']);
             $builder->setType($type);
