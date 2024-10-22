@@ -20,7 +20,7 @@ class SnowflakeOdbcConnection extends OdbcConnection
     protected function handleConnectionError(string $error, int $code = 0, ?Throwable $previousException = null): void
     {
         if (strpos(odbc_errormsg(), 'msg=')) {
-            preg_match('/msg=\'(.*)\'\./', odbc_errormsg(), $message);
+            preg_match('/msg=\'(.*)\' osCode/', odbc_errormsg(), $message);
             if (isset($message[1])) {
                 throw new OdbcException($message[1] . ' ' . odbc_error());
             } else {

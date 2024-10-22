@@ -113,6 +113,14 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // Check result
         if (!$process->isSuccessful()) {
+            // SnowSQL throws an error when there are no results,
+            // but the expected behavior is to return process with empty output
+            if (str_contains(
+                $process->getErrorOutput(),
+                'While getting file(s) there was an error: the file does not exist',
+            )) {
+                return $process;
+            }
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
             throw new Exception(sprintf(
