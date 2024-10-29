@@ -151,6 +151,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private function parseFiles(string $output, string $path): array
     {
+        $this->logger->debug('Snowsql output: ' . $output);
         $files = [];
         $lines = explode("\n", $output);
 
@@ -168,7 +169,6 @@ class SnowsqlExportAdapter implements ExportAdapter
             ),
         );
 
-        $this->logger->debug('Snowsql output: ' . var_export($lines));
         foreach ($lines as $line) {
             if (!preg_match('/^downloaded$/ui', $line[2])) {
                 throw new Exception(sprintf(
