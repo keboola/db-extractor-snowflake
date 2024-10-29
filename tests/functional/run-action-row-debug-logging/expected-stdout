@@ -7,6 +7,7 @@ Exporting "sales" to "in.c-main.escaping".
 Downloading data from Snowflake.
 [%s] DEBUG: snowsql --noup --config /opt/snowsqltempdir/ex-snowflake-adapter/run-%s.%s/snowsql.config -c downloader -f /opt/snowsqltempdir/ex-snowflake-adapter/run-%s.%s/%s-snowsql.sql [] []
 1 files (216 B) downloaded.
+[%s] DEBUG: Snowsql output: * SnowSQL * v1.3.2 Type SQL statements or %s
 [%s] DEBUG: Running query "SELECT * FROM (SELECT * FROM "escaping") LIMIT 0;". [] []
 [%s] DEBUG: Running query "DESC RESULT LAST_QUERY_ID()". [] []
 [%s] DEBUG: Running query "REMOVE @~/in.c-main.escaping;". [] []
