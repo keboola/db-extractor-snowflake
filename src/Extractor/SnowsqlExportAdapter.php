@@ -170,7 +170,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         foreach ($lines as $line) {
             if (!preg_match('/^downloaded$/ui', $line[2])) {
-                $this->logger->debug('Snowsql output: ' . $line);
+                $this->logger->debug('Snowsql output: ' . var_export($line));
                 throw new Exception(sprintf(
                     'Cannot download file: %s Status: %s Size: %s Message: %s',
                     $line[0],
