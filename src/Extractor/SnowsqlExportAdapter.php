@@ -260,7 +260,8 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // execute external
         return sprintf(
-            'snowsql --noup --config %s -c downloader -f %s',
+            'snowsql -o log_level=DEBUG -o log_file=%s --noup --config %s -c downloader -f %s',
+            '/data/snowsql_debug.log',
             $this->snowSqlConfig,
             $snowSql,
         );
