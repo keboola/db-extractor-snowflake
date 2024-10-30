@@ -74,7 +74,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         // Download CSV using snowsql
         $process = $this->runDownloadCommand($exportConfig, $csvFilePath);
 
-        // Parse process output
+        /*// Parse process output
         $csvFiles = $this->parseFiles($process->getOutput(), $csvFilePath);
         $bytesDownloaded = 0;
         foreach ($csvFiles as $csvFile) {
@@ -86,7 +86,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             '%d files (%s) downloaded.',
             count($csvFiles),
             $this->dataSizeFormatted((int) $bytesDownloaded),
-        ));
+        ));*/
 
         // Query metadata
         $columns = $this->metadataProvider->getColumnsInfo($query);
@@ -138,7 +138,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         $this->connection->query($sql);
     }
 
-    private function dataSizeFormatted(int $bytes): string
+    /*private function dataSizeFormatted(int $bytes): string
     {
         if (!$bytes) {
             return '0 B';
@@ -147,9 +147,9 @@ class SnowsqlExportAdapter implements ExportAdapter
         $base = log($bytes) / log(1024);
         $suffixes = [' B', ' KB', ' MB', ' GB', ' TB'];
         return round(pow(1024, $base - floor($base)), 2) . $suffixes[(int) floor($base)];
-    }
+    }*/
 
-    private function parseFiles(string $output, string $path): array
+    /*private function parseFiles(string $output, string $path): array
     {
         $files = [];
         $lines = explode("\n", $output);
@@ -188,7 +188,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         return $files;
-    }
+    }*/
 
     private function generateCopyCommand(string $stageTmpPath, string $query): string
     {
@@ -268,7 +268,8 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // execute external
         return sprintf(
-            'snowsql --noup --config %s -c downloader -f %s',
+            'snowsql -o log_level=DEBUG -o log_file=%s --noup --config %s -c downloader -f %s',
+            '/data/snowsql_debug.log',
             $this->snowSqlConfig,
             $snowSql,
         );
