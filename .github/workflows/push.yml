@@ -23,8 +23,10 @@ env:
 
   DOCKERHUB_USER: "keboolabot"
   DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  KBC_TEST_PROJECT_CONFIGS: "288409174"
 jobs:
-  Build:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the repo
@@ -46,9 +48,27 @@ jobs:
           eval $(docker run --rm -e KBC_DEVELOPERPORTAL_USERNAME -e KBC_DEVELOPERPORTAL_PASSWORD -e KBC_DEVELOPERPORTAL_URL quay.io/keboola/developer-portal-cli-v2:latest ecr:get-login $KBC_DEVELOPERPORTAL_VENDOR $KBC_DEVELOPERPORTAL_APP)
           docker push $REPOSITORY:test
           docker pull quay.io/keboola/syrup-cli:latest
+
+  tests-in-kbc:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Run KBC test jobs
-        run: |
-          docker run --rm -e KBC_STORAGE_TOKEN quay.io/keboola/syrup-cli:latest run-job $KBC_DEVELOPERPORTAL_APP 288409174 test
-      - name: Deploy
-        if: startsWith(github.ref, 'refs/tags/')
+        if: env.KBC_STORAGE_TOKEN && env.KBC_TEST_PROJECT_CONFIGS
+        uses: keboola/action-run-configs-parallel@master
+        with:
+          token: ${{ env.KBC_STORAGE_TOKEN }}
+          componentId: ${{ env.KBC_DEVELOPERPORTAL_APP }}
+          tag: ${{ needs.build.outputs.app_image_tag }}
+          configs: ${{ env.KBC_TEST_PROJECT_CONFIGS }}
+
+  deploy:
+    needs:
+      - build
+      - tests-in-kbc
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') && needs.build.outputs.is_semantic_tag == 'true'
+    steps:
+      -
+        name: Set tag in the Deloper Portal
         run: ./deploy.sh
