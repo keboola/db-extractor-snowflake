@@ -26,7 +26,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['database'] ?? null,
             $data['schema'] ?? null,
             $data['warehouse'] ?? null,
-            $data['role_name'] ?? null,
+            $data['roleName'] ?? null,
             $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
         );
     }
@@ -69,7 +69,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
     public function getRoleName(): string
     {
         if ($this->roleName === null) {
-            throw new PropertyNotSetException('Property "role_name" is not set.');
+            throw new PropertyNotSetException('Property "roleName" is not set.');
         }
 
         return $this->roleName;

@@ -8,7 +8,7 @@
       "#password": "%env(string:SNOWFLAKE_DB_PASSWORD)%",
       "database": "%env(string:SNOWFLAKE_DB_DATABASE)%",
       "schema": "%env(string:SNOWFLAKE_DB_SCHEMA)%",
-      "role_name": "%env(string:SNOWFLAKE_DB_ROLE_NAME)%"
+      "roleName": "%env(string:SNOWFLAKE_DB_ROLE_NAME)%"
     }
   }
 }

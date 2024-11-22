@@ -32,6 +32,6 @@ class SnowflakeDbNode extends DbNode
 
     private function addRoleNameNode(NodeBuilder $builder): void
     {
-        $builder->scalarNode('role_name');
+        $builder->scalarNode('roleName');
     }
 }
