@@ -105,6 +105,7 @@ jobs:
           -e SNOWFLAKE_DB_ROLE_NAME
           -e SNOWFLAKE_DB_PASSWORD
           -e KBC_RUNID
+          -e KBC_COMPONENT_RUN_MODE
           $APP_IMAGE
           composer ci
 
