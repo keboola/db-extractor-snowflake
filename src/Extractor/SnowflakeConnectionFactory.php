@@ -77,6 +77,10 @@ class SnowflakeConnectionFactory
             $dsn .= ';Warehouse=' . $this->quoteIdentifier($databaseConfig->getWarehouse());
         }
 
+        if ($databaseConfig->hasRoleName()) {
+            $dsn .= ';Role=' . $this->quoteIdentifier($databaseConfig->getRoleName());
+        }
+
         $dsn .= ';application=' . $this->quoteIdentifier(self::SNOWFLAKE_APPLICATION);
         return $dsn;
     }

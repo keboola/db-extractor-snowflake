@@ -12,6 +12,8 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
 {
     private ?string $warehouse;
 
+    private ?string $roleName;
+
     public static function fromArray(array $data): DatabaseConfig
     {
         $sslEnabled = !empty($data['ssl']) && !empty($data['ssl']['enabled']);
@@ -24,6 +26,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['database'] ?? null,
             $data['schema'] ?? null,
             $data['warehouse'] ?? null,
+            $data['roleName'] ?? null,
             $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
         );
     }
@@ -36,9 +39,11 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         ?string $database,
         ?string $schema,
         ?string $warehouse,
+        ?string $roleName,
         ?SSLConnectionConfig $sslConnectionConfig,
     ) {
         $this->warehouse = $warehouse;
+        $this->roleName = $roleName;
 
         parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig, []);
     }
@@ -54,6 +59,20 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             throw new PropertyNotSetException('Property "warehouse" is not set.');
         }
         return $this->warehouse;
+    }
+
+    public function hasRoleName(): bool
+    {
+        return $this->roleName !== null;
+    }
+
+    public function getRoleName(): string
+    {
+        if ($this->roleName === null) {
+            throw new PropertyNotSetException('Property "roleName" is not set.');
+        }
+
+        return $this->roleName;
     }
 
     public function getPassword(bool $escapeSemicolon = false): string
