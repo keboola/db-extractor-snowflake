@@ -95,7 +95,17 @@ jobs:
           tag_as_latest: true
       -
         name: Run tests
-        run: docker run ${{env.APP_IMAGE}} composer ci
+        run: docker run
+          -e SNOWFLAKE_DB_DATABASE
+          -e SNOWFLAKE_DB_HOST
+          -e SNOWFLAKE_DB_PORT
+          -e SNOWFLAKE_DB_SCHEMA
+          -e SNOWFLAKE_DB_USER
+          -e SNOWFLAKE_DB_WAREHOUSE
+          -e SNOWFLAKE_DB_ROLE_NAME
+          -e SNOWFLAKE_DB_PASSWORD
+          $APP_IMAGE
+          composer ci
 
   tests-in-kbc:
     needs: build
