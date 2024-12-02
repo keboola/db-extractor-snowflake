@@ -22,7 +22,7 @@
         "keboola/csv": "^3.2",
         "keboola/db-adapter-snowflake": "^1.4",
         "keboola/db-extractor-adapter": "^1.14",
-        "keboola/db-extractor-common": "^17.0",
+        "keboola/db-extractor-common": "^17.1",
         "keboola/db-extractor-config": "^1.15",
         "keboola/db-extractor-table-format": "^3.8",
         "keboola/php-component": "^10.1",
