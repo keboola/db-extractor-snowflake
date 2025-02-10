@@ -129,7 +129,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
             if ($this->databaseConfig->getLogLevel() === 'DEBUG') {
                 $this->logger->debug(
-                    sprintf('Snowsql log: %s', file_get_contents($this->snowSqlLogFile->getPathname()))
+                    sprintf('Snowsql log: %s', file_get_contents($this->snowSqlLogFile->getPathname())),
                 );
             }
             throw new Exception(sprintf(
