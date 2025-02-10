@@ -18,6 +18,7 @@ class SnowflakeDbNode extends DbNode
         $this->addSchemaNode($builder);
         $this->addWarehouseNode($builder);
         $this->addRoleNameNode($builder);
+        $this->addLogLevel($builder);
     }
 
     private function addSchemaNode(NodeBuilder $builder): void
@@ -33,5 +34,12 @@ class SnowflakeDbNode extends DbNode
     private function addRoleNameNode(NodeBuilder $builder): void
     {
         $builder->scalarNode('roleName');
+    }
+
+    private function addLogLevel(NodeBuilder $builder): void
+    {
+        $builder->enumNode('logLevel')
+            ->values(['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'])
+            ->defaultValue('INFO');
     }
 }

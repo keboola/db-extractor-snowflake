@@ -295,6 +295,10 @@ class SnowsqlExportAdapter implements ExportAdapter
             $cliConfig[] = sprintf('schemaname = "%s"', $databaseConfig->getSchema());
         }
 
+        if ($databaseConfig->getLogLevel()) {
+            $cliConfig[] = sprintf('log_level = "%s"', $databaseConfig->getLogLevel());
+        }
+
         $file = $this->tempDir->createFile('snowsql.config');
         file_put_contents($file->getPathname(), implode("\n", $cliConfig));
 
