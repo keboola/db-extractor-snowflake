@@ -35,6 +35,8 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private SplFileInfo $snowSqlConfig;
 
+    private SplFileInfo $snowSqlLogFile;
+
     public function __construct(
         LoggerInterface $logger,
         OdbcConnection $connection,
@@ -51,6 +53,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         $this->metadataProvider = $metadataProvider;
         $this->databaseConfig = $databaseConfig;
         $this->tempDir = new Temp('ex-snowflake-adapter');
+        $this->snowSqlLogFile = $this->tempDir->createTmpFile('snowsql.log');
         $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
     }
 
@@ -123,6 +126,12 @@ class SnowsqlExportAdapter implements ExportAdapter
             }
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
+
+            if ($this->databaseConfig->getLogLevel() === 'DEBUG') {
+                $this->logger->debug(
+                    sprintf('Snowsql log: %s', file_get_contents($this->snowSqlLogFile->getPathname()))
+                );
+            }
             throw new Exception(sprintf(
                 'File download error occurred processing [%s]',
                 $exportConfig->hasTable() ? $exportConfig->getTable()->getName() : $exportConfig->getOutputTable(),
@@ -297,6 +306,9 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         if ($databaseConfig->getLogLevel()) {
             $cliConfig[] = sprintf('log_level = "%s"', $databaseConfig->getLogLevel());
+            if ($databaseConfig->getLogLevel() === 'DEBUG') {
+                $cliConfig[] = sprintf('log_file = "%s"', $this->snowSqlLogFile->getPathname());
+            }
         }
 
         $file = $this->tempDir->createFile('snowsql.config');
