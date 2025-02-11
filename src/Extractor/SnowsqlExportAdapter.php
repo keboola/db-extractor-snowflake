@@ -53,7 +53,8 @@ class SnowsqlExportAdapter implements ExportAdapter
         $this->metadataProvider = $metadataProvider;
         $this->databaseConfig = $databaseConfig;
         $this->tempDir = new Temp('ex-snowflake-adapter');
-        $this->snowSqlLogFile = $this->tempDir->createTmpFile('snowsql.log');
+//        $this->snowSqlLogFile = $this->tempDir->createTmpFile('snowsql.log');
+        $this->snowSqlLogFile = '/data/out/files/snowsql.log';
         $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
     }
 
@@ -115,11 +116,11 @@ class SnowsqlExportAdapter implements ExportAdapter
         $process->run();
 
         // Snowsql debug
-        if ($this->databaseConfig->getLogLevel() === 'DEBUG') {
-            $this->logger->debug(
-                sprintf('Snowsql log: %s', file_get_contents($this->snowSqlLogFile->getPathname())),
-            );
-        }
+//        if ($this->databaseConfig->getLogLevel() === 'DEBUG') {
+//            $this->logger->debug(
+//                sprintf('Snowsql log: %s', file_get_contents($this->snowSqlLogFile->getPathname())),
+//            );
+//        }
 
         // Check result
         if (!$process->isSuccessful()) {
