@@ -79,7 +79,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extra
 GRANT ALL ON ALL VIEWS IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
 ```
 
-4. Create `.env` file and fill in you Redshift and S3 credentials:
+4. Create `.env` file and fill in you Snowflake credentials:
 ```
 SNOWFLAKE_DB_HOST=
 SNOWFLAKE_DB_PORT=443
