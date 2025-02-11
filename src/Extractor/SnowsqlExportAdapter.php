@@ -35,6 +35,8 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private SplFileInfo $snowSqlConfig;
 
+    private string $snowSqlLogFile;
+
     public function __construct(
         LoggerInterface $logger,
         OdbcConnection $connection,
@@ -51,6 +53,8 @@ class SnowsqlExportAdapter implements ExportAdapter
         $this->metadataProvider = $metadataProvider;
         $this->databaseConfig = $databaseConfig;
         $this->tempDir = new Temp('ex-snowflake-adapter');
+//        $this->snowSqlLogFile = $this->tempDir->createTmpFile('snowsql.log');
+        $this->snowSqlLogFile = '/data/out/files/snowsql.log';
         $this->snowSqlConfig = $this->createSnowSqlConfig($databaseConfig);
     }
 
@@ -111,6 +115,13 @@ class SnowsqlExportAdapter implements ExportAdapter
         $process->setTimeout(null);
         $process->run();
 
+        // Snowsql debug
+//        if ($this->databaseConfig->getLogLevel() === 'DEBUG') {
+//            $this->logger->debug(
+//                sprintf('Snowsql log: %s', file_get_contents($this->snowSqlLogFile->getPathname())),
+//            );
+//        }
+
         // Check result
         if (!$process->isSuccessful()) {
             // SnowSQL throws an error when there are no results,
@@ -123,6 +134,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             }
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
+
             throw new Exception(sprintf(
                 'File download error occurred processing [%s]',
                 $exportConfig->hasTable() ? $exportConfig->getTable()->getName() : $exportConfig->getOutputTable(),
@@ -280,6 +292,12 @@ class SnowsqlExportAdapter implements ExportAdapter
         $cliConfig[] = '';
         $cliConfig[] = '[options]';
         $cliConfig[] = 'exit_on_error = true';
+        if ($databaseConfig->getLogLevel() !== 'INFO') {
+            $cliConfig[] = sprintf('log_level = "%s"', $databaseConfig->getLogLevel());
+            if ($databaseConfig->getLogLevel() === 'DEBUG') {
+                $cliConfig[] = sprintf('log_file = "%s"', $this->snowSqlLogFile);
+            }
+        }
         $cliConfig[] = '';
         $cliConfig[] = '[connections.downloader]';
         $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($databaseConfig->getHost()));
