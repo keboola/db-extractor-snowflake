@@ -35,7 +35,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private SplFileInfo $snowSqlConfig;
 
-    private SplFileInfo $snowSqlLogFile;
+    private string $snowSqlLogFile;
 
     public function __construct(
         LoggerInterface $logger,
@@ -295,7 +295,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         if ($databaseConfig->getLogLevel() !== 'INFO') {
             $cliConfig[] = sprintf('log_level = "%s"', $databaseConfig->getLogLevel());
             if ($databaseConfig->getLogLevel() === 'DEBUG') {
-                $cliConfig[] = sprintf('log_file = "%s"', $this->snowSqlLogFile->getPathname());
+                $cliConfig[] = sprintf('log_file = "%s"', $this->snowSqlLogFile);
             }
         }
         $cliConfig[] = '';
