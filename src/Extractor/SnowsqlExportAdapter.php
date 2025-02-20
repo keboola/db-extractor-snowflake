@@ -100,6 +100,8 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private function runDownloadCommand(ExportConfig $exportConfig, string $csvFilePath): Process
     {
+        $csvFilePath = preg_replace('/(\.csv(\.gz)?)?$/', '', $csvFilePath);
+
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
         $this->logger->info('Downloading data from Snowflake.');
@@ -121,12 +123,12 @@ class SnowsqlExportAdapter implements ExportAdapter
             )) {
                 return $process;
             }
-            if (str_contains(
-                $process->getErrorOutput(),
-                'No such file or directory:',
-            )) {
-                return $process;
-            }
+            // if (str_contains(
+            //     $process->getErrorOutput(),
+            //     'No such file or directory:',
+            // )) {
+            //     return $process;
+            // }
 
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
@@ -263,9 +265,9 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         $sql[] = sprintf(
-            'GET @~/%s file://%s;',
+            'GET @~/%s file://%s/;',
             $exportConfig->getOutputTable(),
-            str_replace(['-', '.'], ['\-', '\.'], $outputDataDir),
+            rtrim($outputDataDir, '/'),
         );
 
         $snowSql = $this->tempDir->createTmpFile('snowsql.sql');
