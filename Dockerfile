@@ -1,8 +1,9 @@
 FROM php:8.2-cli-buster
 
-ARG SNOWFLAKE_ODBC_VERSION=3.4.1
-ARG SNOWFLAKE_SNOWSQL_VERSION=1.3.2
-ARG SNOWFLAKE_GPG_KEY=630D9F3CAB551AF3
+ARG SNOWFLAKE_ODBC_VERSION=3.5.0
+ARG SNOWFLAKE_SNOWSQL_VERSION=1.3.3
+ARG SNOWFLAKE_ODBC_GPG_KEY=5A125630709DD64B
+ARG SNOWFLAKE_SNOWSQL_GPG_KEY=2A3149C82551A34A
 ENV COMPOSER_ALLOW_SUPERUSER=1
 ENV DEBIAN_FRONTEND noninteractive
 ENV TMPDIR=/opt/snowsqltempdir
@@ -28,7 +29,8 @@ RUN set -x \
     && docker-php-source delete
 
 #snoflake download + verify package
-COPY driver/snowflake-policy.pol /etc/debsig/policies/$SNOWFLAKE_GPG_KEY/generic.pol
+COPY driver/snowflake-odbc-policy.pol /etc/debsig/policies/$SNOWFLAKE_ODBC_GPG_KEY/generic.pol
+COPY driver/snowflake-snowsql-policy.pol /etc/debsig/policies/$SNOWFLAKE_SNOWSQL_GPG_KEY/generic.pol
 COPY driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 ADD https://sfc-repo.azure.snowflakecomputing.com/odbc/linux/$SNOWFLAKE_ODBC_VERSION/snowflake-odbc-$SNOWFLAKE_ODBC_VERSION.x86_64.deb /tmp/snowflake-odbc.deb
 ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.3/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
@@ -43,14 +45,20 @@ RUN mkdir -p ~/.gnupg \
     && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf \
     && mkdir -p /etc/gnupg \
     && echo "allow-weak-digest-algos" >> /etc/gnupg/gpg.conf \
-    && mkdir -p /usr/share/debsig/keyrings/$SNOWFLAKE_GPG_KEY \
-    && if ! gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_GPG_KEY; then \
-        gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_GPG_KEY;  \
+    && mkdir -p /usr/share/debsig/keyrings/$SNOWFLAKE_ODBC_GPG_KEY \
+    && mkdir -p /usr/share/debsig/keyrings/$SNOWFLAKE_SNOWSQL_GPG_KEY \
+    && if ! gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_ODBC_GPG_KEY; then \
+      gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_ODBC_GPG_KEY;  \
     fi \
-    && gpg --export $SNOWFLAKE_GPG_KEY > /usr/share/debsig/keyrings/$SNOWFLAKE_GPG_KEY/debsig.gpg \
+    && if ! gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_SNOWSQL_GPG_KEY; then \
+      gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_SNOWSQL_GPG_KEY;  \
+    fi \
+    && gpg --export $SNOWFLAKE_ODBC_GPG_KEY > /usr/share/debsig/keyrings/$SNOWFLAKE_ODBC_GPG_KEY/debsig.gpg \
+    && gpg --export $SNOWFLAKE_SNOWSQL_GPG_KEY > /usr/share/debsig/keyrings/$SNOWFLAKE_SNOWSQL_GPG_KEY/debsig.gpg \
     && debsig-verify /tmp/snowflake-odbc.deb \
     && gpg --verify /tmp/snowsql-linux_x86_64.bash.sig /usr/bin/snowsql-linux_x86_64.bash \
-    && gpg --batch --delete-key --yes $SNOWFLAKE_GPG_KEY \
+    && gpg --batch --delete-key --yes $SNOWFLAKE_ODBC_GPG_KEY \
+    && gpg --batch --delete-key --yes $SNOWFLAKE_SNOWSQL_GPG_KEY \
     && dpkg -i /tmp/snowflake-odbc.deb \
     && SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash \
     && rm /tmp/snowflake-odbc.deb
