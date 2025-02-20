@@ -109,6 +109,11 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // Run
         @mkdir($csvFilePath, 0755, true);
+
+        $ls = Process::fromShellCommandline('ls -Rlas /data/');
+        $ls->run();
+        $this->logger->info($ls->getOutput());
+
         $process = Process::fromShellCommandline($command);
         $process->setTimeout(null);
         $process->run();
