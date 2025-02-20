@@ -100,7 +100,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private function runDownloadCommand(ExportConfig $exportConfig, string $csvFilePath): Process
     {
-        $csvFilePath = preg_replace('/(\.csv(\.gz)?)?$/', '', $csvFilePath);
+        $csvFilePath = 'test';
 
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
