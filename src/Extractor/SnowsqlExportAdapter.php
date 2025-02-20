@@ -100,8 +100,6 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private function runDownloadCommand(ExportConfig $exportConfig, string $csvFilePath): Process
     {
-        $csvFilePath = '/data/out/tables/test';
-
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
         $this->logger->info('Downloading data from Snowflake.');
@@ -109,11 +107,6 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // Run
         @mkdir($csvFilePath, 0755, true);
-
-        $ls = Process::fromShellCommandline('ls -Rlas /data/');
-        $ls->run();
-        $this->logger->info($ls->getOutput());
-
         $process = Process::fromShellCommandline($command);
         $process->setTimeout(null);
         $process->run();
@@ -128,13 +121,6 @@ class SnowsqlExportAdapter implements ExportAdapter
             )) {
                 return $process;
             }
-            // if (str_contains(
-            //     $process->getErrorOutput(),
-            //     'No such file or directory:',
-            // )) {
-            //     return $process;
-            // }
-
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
             throw new Exception(sprintf(
@@ -270,9 +256,9 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         $sql[] = sprintf(
-            'GET @~/%s file://%s/;',
+            'GET @~/%s file://%s;',
             $exportConfig->getOutputTable(),
-            rtrim($outputDataDir, '/'),
+            $outputDataDir,
         );
 
         $snowSql = $this->tempDir->createTmpFile('snowsql.sql');
