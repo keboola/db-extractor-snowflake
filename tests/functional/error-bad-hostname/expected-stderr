@@ -1,1 +1,1 @@
-Error connecting to DB: Couldn't resolve host name S1000
+Error connecting to DB: [Snowflake][Snowflake] (4)        REST request for URL *** failed: CURLerror (curl_easy_perform() failed) - code=6 msg='Could not resolve hostname' Verify that the hostnames and portnumbers in SYSTEM$ALLOWLIST are added to your firewall's allowed list. To further troubleshoot reference the following article : https://docs.snowflake.com/en/user-guide/client-connectivity-troubleshooting/error-messages#odbc-errors.      S1000
