@@ -111,6 +111,9 @@ class SnowsqlExportAdapter implements ExportAdapter
         $process->setTimeout(null);
         $process->run();
 
+        $this->logger->info($process->getOutput());
+        exit();
+
         // Check result
         if (!$process->isSuccessful()) {
             // SnowSQL throws an error when there are no results,
@@ -263,9 +266,12 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         $sql[] = sprintf(
-            'GET @~/%s file://%s;',
+            'LIST @~;',
+        );
+
+        $sql[] = sprintf(
+            'LIST @~/%s;',
             $exportConfig->getOutputTable(),
-            $outputDataDir,
         );
 
         $snowSql = $this->tempDir->createTmpFile('snowsql.sql');
