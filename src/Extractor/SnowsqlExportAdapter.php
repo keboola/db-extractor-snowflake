@@ -121,6 +121,13 @@ class SnowsqlExportAdapter implements ExportAdapter
             )) {
                 return $process;
             }
+            if (str_contains(
+                $process->getErrorOutput(),
+                'No such file or directory:',
+            )) {
+                return $process;
+            }
+
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
             throw new Exception(sprintf(
