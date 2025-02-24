@@ -81,6 +81,12 @@ class SnowflakeConnectionFactory
             $dsn .= ';Role=' . $this->quoteIdentifier($databaseConfig->getRoleName());
         }
 
+        if ($databaseConfig->hasKeyPair()) {
+            $dsn .= ';AUTHENTICATOR=SNOWFLAKE_JWT';
+            $dsn .= ';PRIV_KEY_FILE=' . $databaseConfig->getKeyPairPath();
+            $dsn .= ';UID=' . $databaseConfig->getUsername();
+        }
+
         $dsn .= ';application=' . $this->quoteIdentifier(self::SNOWFLAKE_APPLICATION);
         return $dsn;
     }
