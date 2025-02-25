@@ -54,4 +54,14 @@ class SnowflakeDatabaseConfigTest extends TestCase
             '{;AbcdEfgh12345}}6}',
         ];
     }
+
+    public function testLogLevel(): void
+    {
+        $config = $this->getConfig();
+        $config['parameters']['db']['logLevel'] = 'DEBUG';
+        /** @var SnowflakeDatabaseConfig $databaseConfig */
+        $databaseConfig = SnowflakeDatabaseConfig::fromArray($config['parameters']['db']);
+
+        Assert::assertEquals('DEBUG', $databaseConfig->getLogLevel());
+    }
 }

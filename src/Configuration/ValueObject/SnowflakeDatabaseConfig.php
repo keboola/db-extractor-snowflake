@@ -13,6 +13,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
     private ?string $warehouse;
 
     private ?string $roleName;
+    private ?string $logLevel;
 
     public static function fromArray(array $data): DatabaseConfig
     {
@@ -28,6 +29,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['warehouse'] ?? null,
             $data['roleName'] ?? null,
             $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
+            $data['logLevel'] ?? null,
         );
     }
 
@@ -41,9 +43,11 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         ?string $warehouse,
         ?string $roleName,
         ?SSLConnectionConfig $sslConnectionConfig,
+        ?string $logLevel,
     ) {
         $this->warehouse = $warehouse;
         $this->roleName = $roleName;
+        $this->logLevel = $logLevel;
 
         parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig, []);
     }
@@ -81,5 +85,10 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             return '{' . str_replace('}', '}}', parent::getPassword()) . '}';
         }
         return parent::getPassword();
+    }
+
+    public function getLogLevel(): ?string
+    {
+        return $this->logLevel;
     }
 }

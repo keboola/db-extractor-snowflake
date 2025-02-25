@@ -13,9 +13,6 @@ try {
     $app = new SnowflakeApplication($logger);
     $app->execute();
     exit(0);
-} catch (UserExceptionInterface $e) {
-    $logger->error($e->getMessage());
-    exit(1);
 } catch (Throwable $e) {
     $logger->critical(
         get_class($e) . ':' . $e->getMessage(),
@@ -27,5 +24,5 @@ try {
             'errPrevious' => is_object($e->getPrevious()) ? get_class($e->getPrevious()) : '',
         ],
     );
-    exit(2);
+    exit(0);
 }
