@@ -1,7 +1,7 @@
 # Snowflake DB Extractor
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/keboola/db-extractor-snowflake/blob/master/LICENSE.md)
 
-Docker application for exporting data from Snowflake Data Warehouse 
+This Docker application exports data from the Snowflake Data Warehouse. 
 
 ![extraction flow](https://github.com/keboola/db-extractor-snowflake/blob/master/docs/snowflake-ex-flow.png)
 
@@ -36,7 +36,7 @@ Docker application for exporting data from Snowflake Data Warehouse
 
 ### Development
 
-Required snowflake resource for extractor:
+Required Snowflake resources for the extractor:
 
 ```
 CREATE DATABASE "snowflake_extractor";
@@ -62,15 +62,16 @@ CREATE USER "snowflake_extractor"
 GRANT ROLE "snowflake_extractor" TO USER "snowflake_extractor";
 ```
 
-Note that `GRANT SELECT ON ALL *` queries will grant permissions to objects existing at the execution time only. New objects will need to be granted to the role as they are created.  
+Note that `GRANT SELECT ON ALL *` queries will grant permissions only to objects that exist at the time of execution. New objects must be granted permissions
+separately as they are created.  
 
 ## Running Tests
 
-1. Download Snowflake drivers
+1. Download the required Snowflake drivers:
  - snowflake-odbc-x86_64.deb
  - snowsql-linux_x86_64.bash
-2. Create snowflake resources (database, schema, role and user) [note that the test user/role must have permissions on the Public schema of the test database]
-3. Additional snowflake resource for extractor tests:
+2. Create Snowflake resources (database, schema, role, and user). **Note:** The test user/role must have permissions on the Public schema of the test database.
+3. Ensure additional Snowflake resources are available for extractor tests:
 ```
 GRANT ALL ON DATABASE "snowflake_extractor" TO ROLE "snowflake_extractor";
 GRANT ALL ON SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
@@ -79,7 +80,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extra
 GRANT ALL ON ALL VIEWS IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extractor";
 ```
 
-4. Create `.env` file and fill in you Redshift and S3 credentials:
+4. Create a `.env` file and fill in your Redshift and S3 credentials:
 ```
 SNOWFLAKE_DB_HOST=
 SNOWFLAKE_DB_PORT=443
@@ -91,7 +92,7 @@ SNOWFLAKE_DB_WAREHOUSE=
 SNOWFLAKE_DB_ROLE_NAME=
 KBC_RUNID=123456
 ```
-5. Install composer dependencies locally and load test fixtures to S3
+5. Install Composer dependencies locally and load test fixtures to S3:
 ```$xslt
 docker-compose run --rm dev composer install
 ```
@@ -101,11 +102,11 @@ docker-compose run --rm dev composer install
 docker-compose run --rm app composer ci
 ```
 
-Run single test example:
+To run a single test, use:
 ```
 docker-compose run --rm dev ./vendor/bin/phpunit --debug --filter testGetTables
 ```
 
 ## License
 
-MIT licensed, see [LICENSE](./LICENSE) file.
+MIT licensed, see the [LICENSE](./LICENSE) file.
