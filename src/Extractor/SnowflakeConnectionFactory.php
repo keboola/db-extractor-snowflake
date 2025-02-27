@@ -8,6 +8,7 @@ use InvalidArgumentException;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
+use Keboola\SnowflakeDbAdapter\Builder\DSNBuilder;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\Exception\CannotAccessObjectException;
 use Psr\Log\LoggerInterface;
@@ -90,7 +91,7 @@ class SnowflakeConnectionFactory
             $options['keyPairPath'] = $databaseConfig->getKeyPairPath();
         }
 
-        return (new Connection($options))->buildDsn();
+        return DSNBuilder::build($options);
     }
 
     /**
