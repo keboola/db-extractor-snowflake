@@ -1,5 +1,6 @@
 services:
   app: &base
+    platform: linux/amd64
     build:
       context: .
     image: keboola/ex-db-snowflake
