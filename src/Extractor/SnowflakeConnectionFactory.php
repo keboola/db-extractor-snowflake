@@ -68,6 +68,7 @@ class SnowflakeConnectionFactory
         $options = [
             'host' => $databaseConfig->getHost(),
             'user' => $databaseConfig->getUsername(),
+            'password' => $databaseConfig->getPassword(),
             'port' => $databaseConfig->getPort(),
             'database' => $databaseConfig->getDatabase(),
             'application' => self::SNOWFLAKE_APPLICATION,

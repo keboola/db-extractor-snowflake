@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b67caa45a2bafb3d3f804d1284f15c8",
+    "content-hash": "2ffc8a3ef4f203ab45f63322133ed5b5",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -171,16 +171,16 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "1.4.0",
+            "version": "dev-marek-CT-2045-key-pair",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "8d1548cc3724dc588b3fd38bb970072da6041158"
+                "reference": "770ffe806704bb1935f73857878f2368d84a1736"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/8d1548cc3724dc588b3fd38bb970072da6041158",
-                "reference": "8d1548cc3724dc588b3fd38bb970072da6041158",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/770ffe806704bb1935f73857878f2368d84a1736",
+                "reference": "770ffe806704bb1935f73857878f2368d84a1736",
                 "shasum": ""
             },
             "require": {
@@ -207,9 +207,9 @@
                 "MIT"
             ],
             "support": {
-                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.4.0"
+                "source": "https://github.com/keboola/db-adapter-snowflake/tree/marek-CT-2045-key-pair"
             },
-            "time": "2023-06-02T07:06:55+00:00"
+            "time": "2025-02-27T12:57:59+00:00"
         },
         {
             "name": "keboola/db-extractor-adapter",
@@ -4500,7 +4500,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "keboola/db-adapter-snowflake": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
