@@ -88,7 +88,7 @@ class SnowflakeConnectionFactory
         }
 
         if ($databaseConfig->hasKeyPair()) {
-            $options['keyPairPath'] = $databaseConfig->getKeyPairPath();
+            $options['keyPair'] = $databaseConfig->getKeyPair();
         }
 
         return DSNBuilder::build($options);

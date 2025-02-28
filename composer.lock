@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2ffc8a3ef4f203ab45f63322133ed5b5",
+    "content-hash": "dfdb79cbc3b1382af4ef700fa7b09822",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -175,16 +175,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "b790cd9e23daba240173f43979bc0cdca79a12be"
+                "reference": "aea1121c46fec02cf6015ccd6d89d858b50a704e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/b790cd9e23daba240173f43979bc0cdca79a12be",
-                "reference": "b790cd9e23daba240173f43979bc0cdca79a12be",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/aea1121c46fec02cf6015ccd6d89d858b50a704e",
+                "reference": "aea1121c46fec02cf6015ccd6d89d858b50a704e",
                 "shasum": ""
             },
             "require": {
                 "ext-odbc": "*",
+                "ext-openssl": "*",
                 "php": "^8.0"
             },
             "require-dev": {
@@ -209,7 +210,7 @@
             "support": {
                 "source": "https://github.com/keboola/db-adapter-snowflake/tree/marek-CT-2045-key-pair"
             },
-            "time": "2025-02-27T13:25:50+00:00"
+            "time": "2025-02-28T10:14:24+00:00"
         },
         {
             "name": "keboola/db-extractor-adapter",
@@ -4508,7 +4509,8 @@
     "platform": {
         "php": "^8.2",
         "ext-json": "*",
-        "ext-odbc": "*"
+        "ext-odbc": "*",
+        "ext-openssl": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

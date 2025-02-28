@@ -19,6 +19,7 @@
         "php": "^8.2",
         "ext-json": "*",
         "ext-odbc": "*",
+        "ext-openssl": "*",
         "keboola/csv": "^3.2",
         "keboola/db-adapter-snowflake": "dev-marek-CT-2045-key-pair",
         "keboola/db-extractor-adapter": "^1.14",
