@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4b67caa45a2bafb3d3f804d1284f15c8",
+    "content-hash": "dfdb79cbc3b1382af4ef700fa7b09822",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -171,20 +171,21 @@
         },
         {
             "name": "keboola/db-adapter-snowflake",
-            "version": "1.4.0",
+            "version": "dev-marek-CT-2045-key-pair",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-adapter-snowflake.git",
-                "reference": "8d1548cc3724dc588b3fd38bb970072da6041158"
+                "reference": "aea1121c46fec02cf6015ccd6d89d858b50a704e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/8d1548cc3724dc588b3fd38bb970072da6041158",
-                "reference": "8d1548cc3724dc588b3fd38bb970072da6041158",
+                "url": "https://api.github.com/repos/keboola/db-adapter-snowflake/zipball/aea1121c46fec02cf6015ccd6d89d858b50a704e",
+                "reference": "aea1121c46fec02cf6015ccd6d89d858b50a704e",
                 "shasum": ""
             },
             "require": {
                 "ext-odbc": "*",
+                "ext-openssl": "*",
                 "php": "^8.0"
             },
             "require-dev": {
@@ -207,9 +208,9 @@
                 "MIT"
             ],
             "support": {
-                "source": "https://github.com/keboola/db-adapter-snowflake/tree/1.4.0"
+                "source": "https://github.com/keboola/db-adapter-snowflake/tree/marek-CT-2045-key-pair"
             },
-            "time": "2023-06-02T07:06:55+00:00"
+            "time": "2025-02-28T10:14:24+00:00"
         },
         {
             "name": "keboola/db-extractor-adapter",
@@ -4500,13 +4501,16 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "keboola/db-adapter-snowflake": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2",
         "ext-json": "*",
-        "ext-odbc": "*"
+        "ext-odbc": "*",
+        "ext-openssl": "*"
     },
     "platform-dev": {},
     "plugin-api-version": "2.6.0"

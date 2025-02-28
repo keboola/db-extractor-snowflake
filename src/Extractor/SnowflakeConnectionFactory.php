@@ -8,6 +8,8 @@ use InvalidArgumentException;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
+use Keboola\SnowflakeDbAdapter\Builder\DSNBuilder;
+use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\Exception\CannotAccessObjectException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -64,25 +66,32 @@ class SnowflakeConnectionFactory
 
     protected function buildDsnString(SnowflakeDatabaseConfig $databaseConfig): string
     {
-        $dsn = 'Driver=SnowflakeDSIIDriver;Server=' . $databaseConfig->getHost();
-        $dsn .= ';Port=' . $databaseConfig->getPort();
-        $dsn .= ';Tracing=0';
-        $dsn .= ';Database=' . $this->quoteIdentifier($databaseConfig->getDatabase());
+        $options = [
+            'host' => $databaseConfig->getHost(),
+            'user' => $databaseConfig->getUsername(),
+            'password' => $databaseConfig->getPassword(),
+            'port' => $databaseConfig->getPort(),
+            'database' => $databaseConfig->getDatabase(),
+            'application' => self::SNOWFLAKE_APPLICATION,
+        ];
 
         if ($databaseConfig->hasSchema()) {
-            $dsn .= ';Schema=' . $this->quoteIdentifier($databaseConfig->getSchema());
+            $options['schema'] = $databaseConfig->getSchema();
         }
 
         if ($databaseConfig->hasWarehouse()) {
-            $dsn .= ';Warehouse=' . $this->quoteIdentifier($databaseConfig->getWarehouse());
+            $options['warehouse'] = $databaseConfig->getWarehouse();
         }
 
         if ($databaseConfig->hasRoleName()) {
-            $dsn .= ';Role=' . $this->quoteIdentifier($databaseConfig->getRoleName());
+            $options['roleName'] = $databaseConfig->getRoleName();
         }
 
-        $dsn .= ';application=' . $this->quoteIdentifier(self::SNOWFLAKE_APPLICATION);
-        return $dsn;
+        if ($databaseConfig->hasKeyPair()) {
+            $options['keyPair'] = $databaseConfig->getKeyPair();
+        }
+
+        return DSNBuilder::build($options);
     }
 
     /**

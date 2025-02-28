@@ -284,7 +284,15 @@ class SnowsqlExportAdapter implements ExportAdapter
         $cliConfig[] = '[connections.downloader]';
         $cliConfig[] = sprintf('accountname = "%s"', AccountUrlParser::parse($databaseConfig->getHost()));
         $cliConfig[] = sprintf('username = "%s"', $databaseConfig->getUsername());
-        $cliConfig[] = sprintf('password = "%s"', $databaseConfig->getPassword());
+
+        if (!empty($databaseConfig->getPassword())) {
+            $cliConfig[] = sprintf('password = "%s"', $databaseConfig->getPassword());
+        }
+
+        if ($databaseConfig->hasKeyPair()) {
+            $cliConfig[] = sprintf('private_key_path = "%s"', $databaseConfig->getKeyPairPath());
+        }
+
         $cliConfig[] = sprintf('dbname = "%s"', $databaseConfig->getDatabase());
 
         if ($databaseConfig->hasWarehouse()) {
