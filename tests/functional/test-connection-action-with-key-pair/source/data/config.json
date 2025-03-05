@@ -1,0 +1,13 @@
+{
+  "action": "testConnection",
+  "parameters": {
+    "db": {
+      "host": "%env(string:SNOWFLAKE_DB_HOST)%",
+      "port": "%env(string:SNOWFLAKE_DB_PORT)%",
+      "user": "%env(string:SNOWFLAKE_DB_USER)%",
+      "#keyPair": "%env(string:SNOWFLAKE_DB_KEY_PAIR)%",
+      "database": "%env(string:SNOWFLAKE_DB_DATABASE)%",
+      "schema": "%env(string:SNOWFLAKE_DB_SCHEMA)%"
+    }
+  }
+}

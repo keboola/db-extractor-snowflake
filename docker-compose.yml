@@ -1,5 +1,6 @@
 services:
   app: &base
+    platform: linux/amd64
     build:
       context: .
     image: keboola/ex-db-snowflake
@@ -15,6 +16,7 @@ services:
       - SNOWFLAKE_DB_SCHEMA
       - SNOWFLAKE_DB_WAREHOUSE
       - SNOWFLAKE_DB_ROLE_NAME
+      - SNOWFLAKE_DB_KEY_PAIR
 
   dev:
     <<: *base
