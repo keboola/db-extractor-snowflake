@@ -21,6 +21,16 @@ class SnowflakeUtilsTest extends TestCase
     public function getTestData(): iterable
     {
         yield [
+            '',
+            [null, null],
+        ];
+
+        yield [
+            '(FOO)',
+            [null, null],
+        ];
+
+        yield [
             'DATE',
             ['DATE', null],
         ];
@@ -32,6 +42,11 @@ class SnowflakeUtilsTest extends TestCase
 
         yield [
             'VARCHAR(16777216)',
+            ['VARCHAR', '16777216'],
+        ];
+
+        yield [
+            'VARCHAR(16777216) COLLATE \'en-ps\'',
             ['VARCHAR', '16777216'],
         ];
     }
