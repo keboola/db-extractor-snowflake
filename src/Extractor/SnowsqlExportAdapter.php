@@ -71,6 +71,8 @@ class SnowsqlExportAdapter implements ExportAdapter
         $res = $this->connection->query($copyCommand)->fetchAll();
         $rowCount = (int) ($res[0]['rows_unloaded'] ?? 0);
 
+        $this->logger->info(sprintf('%d rows copied to internal staging.', $rowCount));
+
         // Download CSV using snowsql
         $process = $this->runDownloadCommand($exportConfig, $csvFilePath);
 
