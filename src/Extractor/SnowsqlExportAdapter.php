@@ -224,7 +224,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             FROM (%s)
             FILE_FORMAT = (TYPE=CSV %s)
             HEADER = false
-            MAX_FILE_SIZE=200000000
+            MAX_FILE_SIZE=100000000
             OVERWRITE = TRUE
             ;
             ',
