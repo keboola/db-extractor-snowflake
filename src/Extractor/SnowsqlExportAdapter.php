@@ -258,7 +258,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         $sql[] = sprintf(
-            'GET @~/%s file://%s;',
+            'GET @~/%s file://%s -o parallel=10;',
             $exportConfig->getOutputTable(),
             $outputDataDir,
         );
@@ -270,7 +270,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // execute external
         return sprintf(
-            'snowsql --noup --config %s -o parallel=10 -c downloader -f %s',
+            'snowsql --noup --config %s -c downloader -f %s',
             $this->snowSqlConfig,
             $snowSql,
         );
