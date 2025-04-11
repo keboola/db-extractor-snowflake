@@ -270,7 +270,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
         // execute external
         return sprintf(
-            'snowsql --noup --config %s -o parallel=true -c downloader -f %s',
+            'snowsql --noup --config %s -o parallel=10 -c downloader -f %s',
             $this->snowSqlConfig,
             $snowSql,
         );
