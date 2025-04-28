@@ -16,7 +16,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
 
     private ?string $roleName;
 
-    private ?string $keyPair;
+    private ?string $privateKey;
 
     public static function fromArray(array $data): DatabaseConfig
     {
@@ -32,7 +32,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['warehouse'] ?? null,
             $data['roleName'] ?? null,
             $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
-            $data['#keyPair'] ?? null,
+            $data['#keyPair'] ?? $data['#privateKey'] ?? null,
         );
     }
 
@@ -46,19 +46,19 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         ?string $warehouse,
         ?string $roleName,
         ?SSLConnectionConfig $sslConnectionConfig,
-        ?string $keyPair,
+        ?string $privateKey,
     ) {
-        if (empty($password) && $keyPair === null) {
-            throw new PropertyNotSetException('Either "password" or "keyPair" must be provided.');
+        if (empty($password) && $privateKey === null) {
+            throw new PropertyNotSetException('Either "password" or "privateKey" must be provided.');
         }
 
-        if (!empty($password) && !empty($keyPair)) {
-            throw new UserException('Both "password" and "keyPair" cannot be set at the same time.');
+        if (!empty($password) && !empty($privateKey)) {
+            throw new UserException('Both "password" and "privateKey" cannot be set at the same time.');
         }
 
         $this->warehouse = $warehouse;
         $this->roleName = $roleName;
-        $this->keyPair = $keyPair;
+        $this->privateKey = $privateKey;
 
         parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig, []);
     }
@@ -98,23 +98,23 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
         return parent::getPassword();
     }
 
-    public function hasKeyPair(): bool
+    public function hasPrivateKey(): bool
     {
-        return $this->keyPair !== null;
+        return $this->privateKey !== null;
     }
 
-    public function getKeyPair(): string
+    public function getPrivateKey(): string
     {
-        if ($this->keyPair === null || $this->keyPair === '') {
-            throw new PropertyNotSetException('Property "keyPair" is not set.');
+        if ($this->privateKey === null || $this->privateKey === '') {
+            throw new PropertyNotSetException('Property "privateKey" is not set.');
         }
 
-        return $this->keyPair;
+        return $this->privateKey;
     }
 
-    public function getKeyPairPath(): string
+    public function getPrivateKeyPath(): string
     {
-        $privateKeyResource = openssl_pkey_get_private($this->getKeyPair());
+        $privateKeyResource = openssl_pkey_get_private($this->getPrivateKey());
         if (!$privateKeyResource) {
             throw new PrivateKeyIsNotValid();
         }

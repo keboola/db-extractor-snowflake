@@ -87,8 +87,8 @@ class SnowflakeConnectionFactory
             $options['roleName'] = $databaseConfig->getRoleName();
         }
 
-        if ($databaseConfig->hasKeyPair()) {
-            $options['keyPair'] = $databaseConfig->getKeyPair();
+        if ($databaseConfig->hasPrivateKey()) {
+            $options['privateKey'] = $databaseConfig->getPrivateKey();
         }
 
         return DSNBuilder::build($options);

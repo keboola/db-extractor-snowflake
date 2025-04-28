@@ -16,7 +16,7 @@ services:
       - SNOWFLAKE_DB_SCHEMA
       - SNOWFLAKE_DB_WAREHOUSE
       - SNOWFLAKE_DB_ROLE_NAME
-      - SNOWFLAKE_DB_KEY_PAIR
+      - SNOWFLAKE_DB_PRIVATE_KEY
 
   dev:
     <<: *base
