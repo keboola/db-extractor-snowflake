@@ -69,7 +69,7 @@ JSON;
         );
         $config['parameters']['db']['#password'] = $config['parameters']['db']['password'];
         unset($config['parameters']['db']['password']);
-        unset($config['parameters']['db']['keyPair']);
+        unset($config['parameters']['db']['privateKey']);
         return $config;
     }
 
@@ -103,7 +103,7 @@ JSON;
         );
         $config['parameters']['db']['#password'] = $config['parameters']['db']['password'];
         unset($config['parameters']['db']['password']);
-        unset($config['parameters']['db']['keyPair']);
+        unset($config['parameters']['db']['privateKey']);
         return $config;
     }
 }
