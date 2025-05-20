@@ -32,7 +32,7 @@ class SnowflakeDatabaseConfig extends DatabaseConfig
             $data['warehouse'] ?? null,
             $data['roleName'] ?? null,
             $sslEnabled ? SSLConnectionConfig::fromArray($data['ssl']) : null,
-            $data['#privateKey'] ?? $data['#keyPair'] ?? null,
+            $data['#privateKey'] ?? null,
         );
     }
 
