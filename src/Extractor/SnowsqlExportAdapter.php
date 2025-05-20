@@ -224,7 +224,7 @@ class SnowsqlExportAdapter implements ExportAdapter
             FROM (%s)
             FILE_FORMAT = (TYPE=CSV %s)
             HEADER = false
-            MAX_FILE_SIZE=50000000
+            MAX_FILE_SIZE=100000000
             OVERWRITE = TRUE
             ;
             ',
@@ -258,7 +258,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         $sql[] = sprintf(
-            'GET @~/%s file://%s;',
+            'GET @~/%s file://%s PARALLEL=10;',
             $exportConfig->getOutputTable(),
             $outputDataDir,
         );
