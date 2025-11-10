@@ -1,7 +1,7 @@
-FROM php:8.2-cli-bullseye
+FROM php:8.2-cli-trixie
 
-ARG SNOWFLAKE_ODBC_VERSION=3.5.0
-ARG SNOWFLAKE_SNOWSQL_VERSION=1.3.3
+ARG SNOWFLAKE_ODBC_VERSION=3.10.0
+ARG SNOWFLAKE_SNOWSQL_VERSION=1.4.0
 ARG SNOWFLAKE_ODBC_GPG_KEY=5A125630709DD64B
 ARG SNOWFLAKE_SNOWSQL_GPG_KEY=2A3149C82551A34A
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -33,8 +33,8 @@ COPY driver/snowflake-odbc-policy.pol /etc/debsig/policies/$SNOWFLAKE_ODBC_GPG_K
 COPY driver/snowflake-snowsql-policy.pol /etc/debsig/policies/$SNOWFLAKE_SNOWSQL_GPG_KEY/generic.pol
 COPY driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 ADD https://sfc-repo.azure.snowflakecomputing.com/odbc/linux/$SNOWFLAKE_ODBC_VERSION/snowflake-odbc-$SNOWFLAKE_ODBC_VERSION.x86_64.deb /tmp/snowflake-odbc.deb
-ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.3/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
-ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.3/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig /tmp/snowsql-linux_x86_64.bash.sig
+ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.4/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
+ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.4/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig /tmp/snowsql-linux_x86_64.bash.sig
 
 # snowflake - charset settings
 ENV LANG en_US.UTF-8
