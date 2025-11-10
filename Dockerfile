@@ -39,6 +39,7 @@ ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.4/linux_x8
 # snowflake - charset settings
 ENV LANG en_US.UTF-8
 ENV LC_ALL=C.UTF-8
+ENV LD_LIBRARY_PATH=/usr/lib/snowflake/odbc/lib:$LD_LIBRARY_PATH
 
 RUN mkdir -p ~/.gnupg \
     && chmod 700 ~/.gnupg \
@@ -60,6 +61,7 @@ RUN mkdir -p ~/.gnupg \
     && gpg --batch --delete-key --yes $SNOWFLAKE_ODBC_GPG_KEY \
     && gpg --batch --delete-key --yes $SNOWFLAKE_SNOWSQL_GPG_KEY \
     && dpkg -i /tmp/snowflake-odbc.deb \
+    && printf "[SnowflakeDSIIDriver]\nDescription=Snowflake ODBC Driver\nDriver=/usr/lib/snowflake/odbc/lib/libSnowflake.so\n" > /etc/odbcinst.ini \
     && SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash \
     && rm /tmp/snowflake-odbc.deb
 
