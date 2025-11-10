@@ -101,7 +101,7 @@ class SnowflakeMetadataProvider implements MetadataProvider
             // to solve Snowflake VARCHAR(0) issue for null columns
             // https://community.snowflake.com/s/case/500VI00000DZKyuYAH/inconsistency-in-describe-result-for-null-columns
             if ($type === 'VARCHAR' && ($length === '0' || $length > SnowflakeDatatype::MAX_VARCHAR_LENGTH)) {
-                $length = SnowflakeDatatype::MAX_VARCHAR_LENGTH;
+                $length = (string) SnowflakeDatatype::MAX_VARCHAR_LENGTH;
             }
 
             $builder = ColumnBuilder::create();
