@@ -1,44 +1,57 @@
-FROM php:8.2-cli-bullseye
+FROM php:8.2-cli-trixie
 
-ARG SNOWFLAKE_ODBC_VERSION=3.5.0
-ARG SNOWFLAKE_SNOWSQL_VERSION=1.3.3
+ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
+ARG DEBIAN_FRONTEND=noninteractive
+
+ARG SNOWFLAKE_ODBC_VERSION=3.10.0
+ARG SNOWFLAKE_SNOWSQL_VERSION=1.4.5
 ARG SNOWFLAKE_ODBC_GPG_KEY=5A125630709DD64B
 ARG SNOWFLAKE_SNOWSQL_GPG_KEY=2A3149C82551A34A
-ENV COMPOSER_ALLOW_SUPERUSER=1
-ENV DEBIAN_FRONTEND noninteractive
+
+ENV LANGUAGE=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 ENV TMPDIR=/opt/snowsqltempdir
+
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_PROCESS_TIMEOUT 3600
+
+WORKDIR /code/
+
+COPY docker/php-prod.ini /usr/local/etc/php/php.ini
+COPY docker/composer-install.sh /tmp/composer-install.sh
 
 RUN mkdir -p /opt/snowsqltempdir
 
-# Install Dependencies
-RUN apt-get update \
-  && apt-get install unzip git unixodbc unixodbc-dev libpq-dev debsig-verify libicu-dev -y
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        locales \
+        unzip \
+        unixodbc \
+        unixodbc-dev \
+        libpq-dev \
+        libicu-dev \
+        gpg \
+        debsig-verify \
+        dirmngr \
+        gpg-agent \
+    && rm -r /var/lib/apt/lists/* \
+    && sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
+    && locale-gen \
+    && chmod +x /tmp/composer-install.sh \
+    && /tmp/composer-install.sh
 
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install intl
 
-# Install PHP odbc extension
-# https://github.com/docker-library/php/issues/103
-RUN set -x \
-    && docker-php-source extract \
-    && cd /usr/src/php/ext/odbc \
-    && phpize \
-    && sed -ri 's@^ *test +"\$PHP_.*" *= *"no" *&& *PHP_.*=yes *$@#&@g' configure \
-    && ./configure --with-unixODBC=shared,/usr \
-    && docker-php-ext-install odbc \
-    && docker-php-source delete
+# SNOWFLAKE
+COPY docker/driver/snowflake-odbc-policy.pol /etc/debsig/policies/$SNOWFLAKE_ODBC_GPG_KEY/generic.pol
+COPY docker/driver/snowflake-snowsql-policy.pol /etc/debsig/policies/$SNOWFLAKE_SNOWSQL_GPG_KEY/generic.pol
+COPY docker/driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 
-#snoflake download + verify package
-COPY driver/snowflake-odbc-policy.pol /etc/debsig/policies/$SNOWFLAKE_ODBC_GPG_KEY/generic.pol
-COPY driver/snowflake-snowsql-policy.pol /etc/debsig/policies/$SNOWFLAKE_SNOWSQL_GPG_KEY/generic.pol
-COPY driver/simba.snowflake.ini /usr/lib/snowflake/odbc/lib/simba.snowflake.ini
 ADD https://sfc-repo.azure.snowflakecomputing.com/odbc/linux/$SNOWFLAKE_ODBC_VERSION/snowflake-odbc-$SNOWFLAKE_ODBC_VERSION.x86_64.deb /tmp/snowflake-odbc.deb
-ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.3/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
-ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.3/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig /tmp/snowsql-linux_x86_64.bash.sig
-
-# snowflake - charset settings
-ENV LANG en_US.UTF-8
-ENV LC_ALL=C.UTF-8
+ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.4/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash /usr/bin/snowsql-linux_x86_64.bash
+ADD https://sfc-repo.azure.snowflakecomputing.com/snowsql/bootstrap/1.4/linux_x86_64/snowsql-$SNOWFLAKE_SNOWSQL_VERSION-linux_x86_64.bash.sig /tmp/snowsql-linux_x86_64.bash.sig
 
 RUN mkdir -p ~/.gnupg \
     && chmod 700 ~/.gnupg \
@@ -48,10 +61,10 @@ RUN mkdir -p ~/.gnupg \
     && mkdir -p /usr/share/debsig/keyrings/$SNOWFLAKE_ODBC_GPG_KEY \
     && mkdir -p /usr/share/debsig/keyrings/$SNOWFLAKE_SNOWSQL_GPG_KEY \
     && if ! gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_ODBC_GPG_KEY; then \
-      gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_ODBC_GPG_KEY;  \
+        gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_ODBC_GPG_KEY;  \
     fi \
     && if ! gpg --keyserver hkp://keys.gnupg.net --recv-keys $SNOWFLAKE_SNOWSQL_GPG_KEY; then \
-      gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_SNOWSQL_GPG_KEY;  \
+        gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys $SNOWFLAKE_SNOWSQL_GPG_KEY;  \
     fi \
     && gpg --export $SNOWFLAKE_ODBC_GPG_KEY > /usr/share/debsig/keyrings/$SNOWFLAKE_ODBC_GPG_KEY/debsig.gpg \
     && gpg --export $SNOWFLAKE_SNOWSQL_GPG_KEY > /usr/share/debsig/keyrings/$SNOWFLAKE_SNOWSQL_GPG_KEY/debsig.gpg \
@@ -63,20 +76,44 @@ RUN mkdir -p ~/.gnupg \
     && SNOWSQL_DEST=/usr/bin SNOWSQL_LOGIN_SHELL=~/.profile bash /usr/bin/snowsql-linux_x86_64.bash \
     && rm /tmp/snowflake-odbc.deb
 
+RUN cat <<EOF > /etc/odbcinst.ini
+[ODBC Drivers]
+SnowflakeDSIIDriver=Installed
+
+[SnowflakeDSIIDriver]
+APILevel=1
+ConnectFunctions=YYY
+Description=Snowflake DSII
+Driver=/usr/lib/snowflake/odbc/lib/libSnowflake.so
+DriverODBCVer=${SNOWFLAKE_ODBC_VERSION}
+SQLLevel=1
+EOF
+
+# Snowflake ODBC
+# https://github.com/docker-library/php/issues/103#issuecomment-353674490
+RUN set -ex; \
+    docker-php-source extract; \
+    { \
+        echo '# https://github.com/docker-library/php/issues/103#issuecomment-353674490'; \
+        echo 'AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl'; \
+        echo; \
+        cat /usr/src/php/ext/odbc/config.m4; \
+    } > temp.m4; \
+    mv temp.m4 /usr/src/php/ext/odbc/config.m4; \
+    docker-php-ext-configure odbc --with-unixODBC=shared,/usr; \
+    docker-php-ext-install odbc; \
+    docker-php-source delete
 
 RUN snowsql -v $SNOWFLAKE_SNOWSQL_VERSION
 
-# install composer
-RUN cd \
-  && curl -sS https://getcomposer.org/installer | php \
-  && ln -s /root/composer.phar /usr/local/bin/composer
+## Composer - deps always cached unless changed
+# First copy only composer files
+COPY composer.* /code/
+# Download dependencies, but don't run scripts or init autoloaders as the app is missing
+RUN composer install $COMPOSER_FLAGS --no-scripts --no-autoloader
+# copy rest of the app
+COPY . /code/
+# run normal composer - all deps are cached already
+RUN composer install $COMPOSER_FLAGS
 
-ADD . /code
-WORKDIR /code
-
-RUN echo "memory_limit = -1" >> /usr/local/etc/php/conf.d/php.ini
-RUN echo "date.timezone = \"Europe/Prague\"" >> /usr/local/etc/php/conf.d/php.ini
-RUN composer install --no-interaction
-
-CMD php ./src/run.php
-
+CMD ["php", "/code/src/run.php"]
