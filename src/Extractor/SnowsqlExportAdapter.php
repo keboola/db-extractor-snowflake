@@ -136,7 +136,7 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     private function cleanupTableStage(string $tmpTableName): void
     {
-        $sql = sprintf('REMOVE @~/%s;', $tmpTableName);
+        $sql = sprintf('REMOVE @~/%s/;', $tmpTableName);
         $this->connection->query($sql);
     }
 
