@@ -258,7 +258,7 @@ class SnowsqlExportAdapter implements ExportAdapter
         }
 
         $sql[] = sprintf(
-            'GET @~/%s file://%s;',
+            'GET @~/%s/ file://%s;',
             $exportConfig->getOutputTable(),
             $outputDataDir,
         );
