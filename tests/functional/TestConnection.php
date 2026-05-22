@@ -15,7 +15,6 @@ class TestConnection
             'port' => (string) getenv('SNOWFLAKE_DB_PORT'),
             'user' => (string) getenv('SNOWFLAKE_DB_USER'),
             'privateKey' => (string) getenv('SNOWFLAKE_DB_PRIVATE_KEY'),
-            'password' => (string) getenv('SNOWFLAKE_DB_PASSWORD'),
             'database' => (string) getenv('SNOWFLAKE_DB_DATABASE'),
             'schema' => (string) getenv('SNOWFLAKE_DB_SCHEMA'),
             'warehouse' => (string) getenv('SNOWFLAKE_DB_WAREHOUSE'),
