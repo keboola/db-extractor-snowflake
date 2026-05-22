@@ -1,4 +1,4 @@
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection";AUTHENTICATOR=SNOWFLAKE_JWT;PRIV_KEY_FILE=%s;UID=%s".
 Exporting "auto-increment-timestamp" to "in.c-main.auto-increment-timestamp".
 0 rows copied to internal staging.
 Downloading data from Snowflake.
