@@ -195,18 +195,10 @@ class SnowflakeMetadataProvider implements MetadataProvider
 
     private function processColumnData(ColumnBuilder $columnBuilder, array $column, array $primaryKeys): void
     {
-        $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
-        if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
-            if (is_numeric($column['NUMERIC_SCALE'])) {
-                $length = $column['NUMERIC_PRECISION'] . ',' . $column['NUMERIC_SCALE'];
-            } else {
-                $length = $column['NUMERIC_PRECISION'];
-            }
-        }
         $columnBuilder
             ->setName($column['COLUMN_NAME'])
             ->setDefault($column['COLUMN_DEFAULT'])
-            ->setLength($length)
+            ->setLength(SnowflakeUtils::getColumnLength($column))
             ->setNullable(!(trim($column['IS_NULLABLE']) === 'NO'))
             ->setType($column['DATA_TYPE'])
             ->setOrdinalPosition((int) $column['ORDINAL_POSITION']);

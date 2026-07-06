@@ -251,6 +251,10 @@
                 "value": "TIMESTAMP_NTZ"
             },
             {
+                "key": "KBC.datatype.length",
+                "value": "9"
+            },
+            {
                 "key": "KBC.sourceName",
                 "value": "datetime"
             },
