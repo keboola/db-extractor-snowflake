@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
+use Exception;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Extractor\SnowflakeConnectionFactory;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Psr\Log\Test\TestLogger;
 use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Component\Process\Process;
 use Throwable;
 
@@ -326,5 +328,72 @@ class SnowsqlExportAdapterTest extends TestCase
                 // Ignore cleanup errors
             }
         }
+    }
+
+    public function testRunDownloadCommandRetriesTransientFailureThenSucceeds(): void
+    {
+        $adapter = $this->createTestableAdapter();
+        // Two transient failures, then success on the third attempt.
+        $adapter->failuresBeforeSuccess = 2;
+
+        $exportConfig = $this->createMock(ExportConfig::class);
+        $exportConfig->method('getOutputTable')->willReturn('my_table');
+
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'runDownloadCommand');
+        $method->setAccessible(true);
+        $result = $method->invoke($adapter, $exportConfig, '/tmp/output');
+
+        $this->assertInstanceOf(Process::class, $result);
+        $this->assertSame(3, $adapter->attemptCount);
+    }
+
+    public function testRunDownloadCommandRethrowsSameExceptionAfterExhaustingAttempts(): void
+    {
+        $adapter = $this->createTestableAdapter();
+        // Never succeeds, so every attempt throws.
+        $adapter->failuresBeforeSuccess = PHP_INT_MAX;
+
+        $exportConfig = $this->createMock(ExportConfig::class);
+        $exportConfig->method('getOutputTable')->willReturn('my_table');
+
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'runDownloadCommand');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke($adapter, $exportConfig, '/tmp/output');
+            $this->fail('Expected exception was not thrown after exhausting download attempts');
+        } catch (Exception $e) {
+            // The original, unchanged error message is preserved after retries are exhausted.
+            $this->assertStringContainsString(
+                'File download error occurred processing [my_table]',
+                $e->getMessage(),
+            );
+        }
+
+        $this->assertSame($adapter->maxAttempts(), $adapter->attemptCount);
+    }
+
+    private function createTestableAdapter(): TestableSnowsqlExportAdapter
+    {
+        $connection = $this->createMock(OdbcConnection::class);
+        $queryFactory = $this->createMock(SnowflakeQueryFactory::class);
+        $metadataProvider = $this->createMock(SnowflakeMetadataProvider::class);
+
+        $databaseConfig = $this->createMock(SnowflakeDatabaseConfig::class);
+        $databaseConfig->method('getHost')->willReturn('test.snowflakecomputing.com');
+        $databaseConfig->method('getUsername')->willReturn('testuser');
+        $databaseConfig->method('getPassword')->willReturn('testpass');
+        $databaseConfig->method('getDatabase')->willReturn('testdb');
+        $databaseConfig->method('hasWarehouse')->willReturn(false);
+        $databaseConfig->method('hasSchema')->willReturn(false);
+        $databaseConfig->method('hasPrivateKey')->willReturn(false);
+
+        return new TestableSnowsqlExportAdapter(
+            new NullLogger(),
+            $connection,
+            $queryFactory,
+            $metadataProvider,
+            $databaseConfig,
+        );
     }
 }

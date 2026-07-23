@@ -16,11 +16,21 @@ use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\DbExtractorConfig\Exception\InvalidArgumentException;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
+use Retry\BackOff\ExponentialBackOffPolicy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\RetryProxy;
 use SplFileInfo;
 use Symfony\Component\Process\Process;
 
 class SnowsqlExportAdapter implements ExportAdapter
 {
+    /**
+     * Number of attempts for the snowsql download.
+     * The COPY INTO to the internal stage runs before this and is not retried; only the
+     * GET download is repeated, which is idempotent (it re-downloads the same staged files).
+     */
+    protected const DOWNLOAD_MAX_ATTEMPTS = 5;
+
     protected SnowflakeQueryFactory $queryFactory;
 
     protected SnowflakeMetadataProvider $metadataProvider;
@@ -101,6 +111,32 @@ class SnowsqlExportAdapter implements ExportAdapter
     }
 
     private function runDownloadCommand(ExportConfig $exportConfig, string $csvFilePath): Process
+    {
+        // The staged files already exist (COPY INTO succeeded before this call), so the
+        // GET download is idempotent and safe to retry. This only smooths over transient
+        // blips reaching the stage (e.g. a 404 / connection reset from the blob storage
+        // provider while fetching a freshly-staged file); a persistent failure still
+        // exhausts the attempts and re-throws the identical exception below, unchanged.
+        $process = $this->createDownloadRetryProxy()->call(
+            function () use ($exportConfig, $csvFilePath): Process {
+                return $this->runDownloadCommandOnce($exportConfig, $csvFilePath);
+            },
+        );
+        assert($process instanceof Process);
+
+        return $process;
+    }
+
+    protected function createDownloadRetryProxy(): RetryProxy
+    {
+        return new RetryProxy(
+            new SimpleRetryPolicy(self::DOWNLOAD_MAX_ATTEMPTS),
+            new ExponentialBackOffPolicy(1000),
+            $this->logger,
+        );
+    }
+
+    protected function runDownloadCommandOnce(ExportConfig $exportConfig, string $csvFilePath): Process
     {
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
