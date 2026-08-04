@@ -174,6 +174,10 @@ class SnowsqlExportAdapter implements ExportAdapter
 
     protected function runDownloadCommandOnce(ExportConfig $exportConfig, string $csvFilePath): Process
     {
+        // Nothing is retryable until a failed attempt says otherwise, so an exception raised
+        // anywhere else in this method can never inherit a previous attempt's decision.
+        $this->downloadErrorIsRetryable = false;
+
         // Generate command
         $command = $this->generateDownloadSql($exportConfig, $csvFilePath);
         $this->logger->info('Downloading data from Snowflake.');
