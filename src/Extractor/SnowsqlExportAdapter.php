@@ -31,7 +31,7 @@ class SnowsqlExportAdapter implements ExportAdapter
      * The COPY INTO to the internal stage runs before this and is not retried; only the
      * GET download is repeated, which is idempotent (it re-downloads the same staged files).
      */
-    protected const DOWNLOAD_MAX_ATTEMPTS = 5;
+    protected const DOWNLOAD_MAX_ATTEMPTS = 3;
 
     /**
      * Snowsql reports every problem hit while reading the staged files from the blob storage with
