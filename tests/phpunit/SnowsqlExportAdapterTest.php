@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
-use Exception;
+use Keboola\CommonExceptions\UserExceptionInterface;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Extractor\SnowflakeConnectionFactory;
@@ -362,12 +362,14 @@ class SnowsqlExportAdapterTest extends TestCase
         try {
             $method->invoke($adapter, $exportConfig, '/tmp/output');
             $this->fail('Expected exception was not thrown after exhausting download attempts');
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             // The original, unchanged error message is preserved after retries are exhausted.
             $this->assertStringContainsString(
                 'File download error occurred processing [my_table]',
                 $e->getMessage(),
             );
+            // Still not a user error, so the job keeps ending with exactly the same exit code as before.
+            $this->assertNotInstanceOf(UserExceptionInterface::class, $e);
         }
 
         $this->assertSame($adapter->maxAttempts(), $adapter->attemptCount);
