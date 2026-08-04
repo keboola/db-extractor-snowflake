@@ -375,6 +375,67 @@ class SnowsqlExportAdapterTest extends TestCase
         $this->assertSame($adapter->maxAttempts(), $adapter->attemptCount);
     }
 
+    /**
+     * Anything other than a blob storage read error must keep failing on the very first attempt,
+     * so no failure that used to be reported immediately is now delayed by the retries.
+     */
+    public function testRunDownloadCommandDoesNotRetryNonTransientFailure(): void
+    {
+        $adapter = $this->createTestableAdapter();
+        $adapter->failuresBeforeSuccess = PHP_INT_MAX;
+        $adapter->simulateRetryableError = false;
+
+        $exportConfig = $this->createMock(ExportConfig::class);
+        $exportConfig->method('getOutputTable')->willReturn('my_table');
+
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'runDownloadCommand');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke($adapter, $exportConfig, '/tmp/output');
+            $this->fail('Expected exception was not thrown');
+        } catch (Throwable $e) {
+            $this->assertStringContainsString(
+                'File download error occurred processing [my_table]',
+                $e->getMessage(),
+            );
+        }
+
+        $this->assertSame(1, $adapter->attemptCount);
+    }
+
+    /**
+     * @dataProvider retryableDownloadErrorProvider
+     */
+    public function testIsRetryableDownloadError(string $errorOutput, bool $expected): void
+    {
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'isRetryableDownloadError');
+        $method->setAccessible(true);
+
+        $this->assertSame($expected, $method->invoke($this->createTestableAdapter(), $errorOutput));
+    }
+
+    public function retryableDownloadErrorProvider(): array
+    {
+        return [
+            'blob storage read error that ended a job with an internal error' => [
+                "253002 (n/a): While getting file(s) there was an error: 'HTTPError('404 Client "
+                    . "Error: Not Found for url: <url>')', this might be caused by your access to "
+                    . 'the blob storage provider, or by Snowflake.',
+                true,
+            ],
+            'empty stage is not a failure and must not be retried' => [
+                '253002 (n/a): While getting file(s) there was an error: the file does not exist',
+                false,
+            ],
+            'bad credentials must keep failing immediately' => [
+                '250001 (08001): Failed to connect to DB: Incorrect username or password was specified.',
+                false,
+            ],
+            'empty error output' => ['', false],
+        ];
+    }
+
     private function createTestableAdapter(): TestableSnowsqlExportAdapter
     {
         $connection = $this->createMock(OdbcConnection::class);

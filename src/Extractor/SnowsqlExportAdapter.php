@@ -16,11 +16,13 @@ use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 use Keboola\DbExtractorConfig\Exception\InvalidArgumentException;
 use Keboola\Temp\Temp;
 use Psr\Log\LoggerInterface;
+use Retry\BackOff\BackOffPolicyInterface;
 use Retry\BackOff\ExponentialBackOffPolicy;
-use Retry\Policy\SimpleRetryPolicy;
+use Retry\Policy\CallableRetryPolicy;
 use Retry\RetryProxy;
 use SplFileInfo;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class SnowsqlExportAdapter implements ExportAdapter
 {
@@ -30,6 +32,20 @@ class SnowsqlExportAdapter implements ExportAdapter
      * GET download is repeated, which is idempotent (it re-downloads the same staged files).
      */
     protected const DOWNLOAD_MAX_ATTEMPTS = 5;
+
+    /**
+     * Snowsql reports every problem hit while reading the staged files from the blob storage with
+     * this prefix, e.g. "253002 (n/a): While getting file(s) there was an error: 'HTTPError('404
+     * Client Error: Not Found for url: ...')'". The files were listed successfully a moment before,
+     * so being unable to read them is transient and worth retrying.
+     */
+    private const DOWNLOAD_RETRYABLE_ERROR = 'While getting file(s) there was an error';
+
+    /** Snowsql reuses the error above for an empty stage, which is not a failure at all. */
+    private const DOWNLOAD_NO_RESULTS_ERROR = 'While getting file(s) there was an error: the file does not exist';
+
+    /** Set by the last failed download attempt; drives the retry decision. */
+    protected bool $downloadErrorIsRetryable = false;
 
     protected SnowflakeQueryFactory $queryFactory;
 
@@ -130,10 +146,30 @@ class SnowsqlExportAdapter implements ExportAdapter
     protected function createDownloadRetryProxy(): RetryProxy
     {
         return new RetryProxy(
-            new SimpleRetryPolicy(self::DOWNLOAD_MAX_ATTEMPTS),
-            new ExponentialBackOffPolicy(1000),
+            new CallableRetryPolicy(
+                fn (Throwable $e): bool => $this->downloadErrorIsRetryable,
+                self::DOWNLOAD_MAX_ATTEMPTS,
+            ),
+            $this->createDownloadBackOffPolicy(),
             $this->logger,
         );
+    }
+
+    protected function createDownloadBackOffPolicy(): BackOffPolicyInterface
+    {
+        return new ExponentialBackOffPolicy(1000);
+    }
+
+    /**
+     * Only a failure reported by snowsql while reading the staged files from the blob storage is
+     * retried - see DOWNLOAD_RETRYABLE_ERROR. Every other download failure (bad credentials, an
+     * unparseable GET result, a missing file, ...) keeps failing on the first attempt, exactly as
+     * before, so nothing that used to fail fast is now slowed down by the retries.
+     */
+    protected function isRetryableDownloadError(string $errorOutput): bool
+    {
+        return str_contains($errorOutput, self::DOWNLOAD_RETRYABLE_ERROR)
+            && !str_contains($errorOutput, self::DOWNLOAD_NO_RESULTS_ERROR);
     }
 
     protected function runDownloadCommandOnce(ExportConfig $exportConfig, string $csvFilePath): Process
@@ -153,12 +189,10 @@ class SnowsqlExportAdapter implements ExportAdapter
         if (!$process->isSuccessful()) {
             // SnowSQL throws an error when there are no results,
             // but the expected behavior is to return process with empty output
-            if (str_contains(
-                $process->getErrorOutput(),
-                'While getting file(s) there was an error: the file does not exist',
-            )) {
+            if (str_contains($process->getErrorOutput(), self::DOWNLOAD_NO_RESULTS_ERROR)) {
                 return $process;
             }
+            $this->downloadErrorIsRetryable = $this->isRetryableDownloadError($process->getErrorOutput());
             $this->logger->error(sprintf('Snowsql error, process output %s', $process->getOutput()));
             $this->logger->error(sprintf('Snowsql error: %s', $process->getErrorOutput()));
             throw new Exception(sprintf(
