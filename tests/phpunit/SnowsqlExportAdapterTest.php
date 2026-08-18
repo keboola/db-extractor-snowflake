@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
+use Keboola\CommonExceptions\UserExceptionInterface;
 use Keboola\DbExtractor\Adapter\ODBC\OdbcConnection;
 use Keboola\DbExtractor\Configuration\ValueObject\SnowflakeDatabaseConfig;
 use Keboola\DbExtractor\Extractor\SnowflakeConnectionFactory;
@@ -18,6 +19,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Psr\Log\Test\TestLogger;
 use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Component\Process\Process;
 use Throwable;
 
@@ -326,5 +328,135 @@ class SnowsqlExportAdapterTest extends TestCase
                 // Ignore cleanup errors
             }
         }
+    }
+
+    public function testRunDownloadCommandRetriesTransientFailureThenSucceeds(): void
+    {
+        $adapter = $this->createTestableAdapter();
+        // Two transient failures, then success on the third attempt.
+        $adapter->failuresBeforeSuccess = 2;
+
+        $exportConfig = $this->createMock(ExportConfig::class);
+        $exportConfig->method('getOutputTable')->willReturn('my_table');
+
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'runDownloadCommand');
+        $method->setAccessible(true);
+        $result = $method->invoke($adapter, $exportConfig, '/tmp/output');
+
+        $this->assertInstanceOf(Process::class, $result);
+        $this->assertSame(3, $adapter->attemptCount);
+    }
+
+    public function testRunDownloadCommandRethrowsSameExceptionAfterExhaustingAttempts(): void
+    {
+        $adapter = $this->createTestableAdapter();
+        // Never succeeds, so every attempt throws.
+        $adapter->failuresBeforeSuccess = PHP_INT_MAX;
+
+        $exportConfig = $this->createMock(ExportConfig::class);
+        $exportConfig->method('getOutputTable')->willReturn('my_table');
+
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'runDownloadCommand');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke($adapter, $exportConfig, '/tmp/output');
+            $this->fail('Expected exception was not thrown after exhausting download attempts');
+        } catch (Throwable $e) {
+            // The original, unchanged error message is preserved after retries are exhausted.
+            $this->assertStringContainsString(
+                'File download error occurred processing [my_table]',
+                $e->getMessage(),
+            );
+            // Still not a user error, so the job keeps ending with exactly the same exit code as before.
+            $this->assertNotInstanceOf(UserExceptionInterface::class, $e);
+        }
+
+        $this->assertSame($adapter->maxAttempts(), $adapter->attemptCount);
+    }
+
+    /**
+     * Anything other than a blob storage read error must keep failing on the very first attempt,
+     * so no failure that used to be reported immediately is now delayed by the retries.
+     */
+    public function testRunDownloadCommandDoesNotRetryNonTransientFailure(): void
+    {
+        $adapter = $this->createTestableAdapter();
+        $adapter->failuresBeforeSuccess = PHP_INT_MAX;
+        $adapter->simulateRetryableError = false;
+
+        $exportConfig = $this->createMock(ExportConfig::class);
+        $exportConfig->method('getOutputTable')->willReturn('my_table');
+
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'runDownloadCommand');
+        $method->setAccessible(true);
+
+        try {
+            $method->invoke($adapter, $exportConfig, '/tmp/output');
+            $this->fail('Expected exception was not thrown');
+        } catch (Throwable $e) {
+            $this->assertStringContainsString(
+                'File download error occurred processing [my_table]',
+                $e->getMessage(),
+            );
+        }
+
+        $this->assertSame(1, $adapter->attemptCount);
+    }
+
+    /**
+     * @dataProvider retryableDownloadErrorProvider
+     */
+    public function testIsRetryableDownloadError(string $errorOutput, bool $expected): void
+    {
+        $method = new ReflectionMethod(SnowsqlExportAdapter::class, 'isRetryableDownloadError');
+        $method->setAccessible(true);
+
+        $this->assertSame($expected, $method->invoke($this->createTestableAdapter(), $errorOutput));
+    }
+
+    public function retryableDownloadErrorProvider(): array
+    {
+        return [
+            'blob storage read error that ended a job with an internal error' => [
+                "253002 (n/a): While getting file(s) there was an error: 'HTTPError('404 Client "
+                    . "Error: Not Found for url: <url>')', this might be caused by your access to "
+                    . 'the blob storage provider, or by Snowflake.',
+                true,
+            ],
+            'empty stage is not a failure and must not be retried' => [
+                '253002 (n/a): While getting file(s) there was an error: the file does not exist',
+                false,
+            ],
+            'bad credentials must keep failing immediately' => [
+                '250001 (08001): Failed to connect to DB: Incorrect username or password was specified.',
+                false,
+            ],
+            'empty error output' => ['', false],
+        ];
+    }
+
+    private function createTestableAdapter(): TestableSnowsqlExportAdapter
+    {
+        $connection = $this->createMock(OdbcConnection::class);
+        $queryFactory = $this->createMock(SnowflakeQueryFactory::class);
+        $metadataProvider = $this->createMock(SnowflakeMetadataProvider::class);
+
+        $databaseConfig = $this->createMock(SnowflakeDatabaseConfig::class);
+        $databaseConfig->method('getHost')->willReturn('test.snowflakecomputing.com');
+        $databaseConfig->method('getUsername')->willReturn('testuser');
+        $databaseConfig->method('getPassword')->willReturn('testpass');
+        $databaseConfig->method('getDatabase')->willReturn('testdb');
+        $databaseConfig->method('hasWarehouse')->willReturn(false);
+        $databaseConfig->method('hasSchema')->willReturn(false);
+        $databaseConfig->method('hasPrivateKey')->willReturn(false);
+
+        return new TestableSnowsqlExportAdapter(
+            new NullLogger(),
+            $connection,
+            $queryFactory,
+            $metadataProvider,
+            $databaseConfig,
+        );
     }
 }
