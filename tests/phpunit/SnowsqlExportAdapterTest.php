@@ -241,7 +241,7 @@ class SnowsqlExportAdapterTest extends TestCase
                 'host' => (string) getenv('SNOWFLAKE_DB_HOST'),
                 'port' => (string) getenv('SNOWFLAKE_DB_PORT'),
                 'user' => (string) getenv('SNOWFLAKE_DB_USER'),
-                '#password' => (string) getenv('SNOWFLAKE_DB_PASSWORD'),
+                '#privateKey' => (string) getenv('SNOWFLAKE_DB_PRIVATE_KEY'),
                 'database' => (string) getenv('SNOWFLAKE_DB_DATABASE'),
                 'schema' => $schema,
                 'warehouse' => (string) getenv('SNOWFLAKE_DB_WAREHOUSE'),

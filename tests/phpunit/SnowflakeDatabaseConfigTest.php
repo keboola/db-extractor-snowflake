@@ -20,6 +20,7 @@ class SnowflakeDatabaseConfigTest extends TestCase
     public function testPasswords(string $password, string $expectedPassword): void
     {
         $config = $this->getConfig();
+        unset($config['parameters']['db']['#privateKey']);
         $config['parameters']['db']['#password'] = $password;
         /** @var SnowflakeDatabaseConfig $databaseConfig */
         $databaseConfig = SnowflakeDatabaseConfig::fromArray($config['parameters']['db']);

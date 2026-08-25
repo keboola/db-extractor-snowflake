@@ -67,9 +67,9 @@ JSON;
             ),
             true,
         );
-        $config['parameters']['db']['#password'] = $config['parameters']['db']['password'];
-        unset($config['parameters']['db']['password']);
+        $config['parameters']['db']['#privateKey'] = $config['parameters']['db']['privateKey'];
         unset($config['parameters']['db']['privateKey']);
+        unset($config['parameters']['db']['password']);
         return $config;
     }
 
@@ -101,9 +101,9 @@ JSON;
             ),
             true,
         );
-        $config['parameters']['db']['#password'] = $config['parameters']['db']['password'];
-        unset($config['parameters']['db']['password']);
+        $config['parameters']['db']['#privateKey'] = $config['parameters']['db']['privateKey'];
         unset($config['parameters']['db']['privateKey']);
+        unset($config['parameters']['db']['password']);
         return $config;
     }
 }
