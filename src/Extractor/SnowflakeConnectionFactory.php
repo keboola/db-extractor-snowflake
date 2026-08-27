@@ -12,6 +12,10 @@ use Keboola\SnowflakeDbAdapter\Builder\DSNBuilder;
 use Keboola\SnowflakeDbAdapter\Connection;
 use Keboola\SnowflakeDbAdapter\Exception\CannotAccessObjectException;
 use Psr\Log\LoggerInterface;
+use Retry\BackOff\BackOffPolicyInterface;
+use Retry\BackOff\ExponentialBackOffPolicy;
+use Retry\Policy\CallableRetryPolicy;
+use Retry\RetryProxy;
 use Throwable;
 
 class SnowflakeConnectionFactory
@@ -23,6 +27,21 @@ class SnowflakeConnectionFactory
     private int $maxRetries;
 
     private const SNOWFLAKE_APPLICATION = 'Keboola_Connection';
+
+    /**
+     * Number of attempts for the "DESC USER" default-warehouse lookup.
+     * The lookup is a read-only statement, so repeating it has no side effects.
+     */
+    protected const WAREHOUSE_LOOKUP_MAX_ATTEMPTS = 3;
+
+    /**
+     * The Snowflake ODBC driver reports a failed HTTP call of its REST layer with the status code
+     * inlined in the message, e.g. "REST request failed: HTTP error (http error) - code=503 Verify
+     * that the hostnames and portnumbers in SYSTEM$ALLOWLIST are added to your firewall's allowed
+     * list." A 5xx comes from Snowflake (or the network in between), never from the statement
+     * itself, so the very same lookup is worth trying again.
+     */
+    private const WAREHOUSE_LOOKUP_RETRYABLE_PATTERN = '~\bcode=5\d\d\b~';
 
     public function __construct(LoggerInterface $logger, int $maxRetries)
     {
@@ -155,6 +174,52 @@ class SnowflakeConnectionFactory
      * @param resource $connection
      */
     protected function getUserDefaultWarehouse($connection, DatabaseConfig $databaseConfig): ?string
+    {
+        // "DESC USER" only reads metadata, so repeating it is side-effect free. This exists purely
+        // to smooth over a transient 5xx from the driver's REST layer, which used to escape as a
+        // raw ErrorException and end the job with an opaque internal error. A lookup that succeeds
+        // on the first attempt behaves exactly as before, and any other failure - or a 5xx that
+        // keeps repeating - still throws the identical exception, unchanged.
+        $warehouse = $this->createWarehouseLookupRetryProxy()->call(
+            fn (): ?string => $this->readUserDefaultWarehouse($connection, $databaseConfig),
+        );
+        assert($warehouse === null || is_string($warehouse));
+
+        return $warehouse;
+    }
+
+    protected function createWarehouseLookupRetryProxy(): RetryProxy
+    {
+        return new RetryProxy(
+            new CallableRetryPolicy(
+                fn (Throwable $e): bool => $this->isRetryableWarehouseLookupError($e),
+                self::WAREHOUSE_LOOKUP_MAX_ATTEMPTS,
+            ),
+            $this->createWarehouseLookupBackOffPolicy(),
+            $this->logger,
+        );
+    }
+
+    protected function createWarehouseLookupBackOffPolicy(): BackOffPolicyInterface
+    {
+        return new ExponentialBackOffPolicy(1000);
+    }
+
+    /**
+     * Only a server-side 5xx reported by the driver's REST layer is retried - see
+     * WAREHOUSE_LOOKUP_RETRYABLE_PATTERN. Every other failure (a missing user, an insufficient
+     * role, bad credentials, ...) keeps failing on the first attempt, exactly as before, so
+     * nothing that used to be reported immediately is now delayed by the retries.
+     */
+    protected function isRetryableWarehouseLookupError(Throwable $e): bool
+    {
+        return (bool) preg_match(self::WAREHOUSE_LOOKUP_RETRYABLE_PATTERN, $e->getMessage());
+    }
+
+    /**
+     * @param resource $connection
+     */
+    protected function readUserDefaultWarehouse($connection, DatabaseConfig $databaseConfig): ?string
     {
         $stmt = odbc_exec($connection, sprintf(
             'DESC USER %s;',
