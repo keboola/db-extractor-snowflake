@@ -70,7 +70,8 @@ class SnowflakeMetadataProviderTest extends TestCase
     private function getTableMetadata(string $tableName, bool $propagateDescriptions = true): Table
     {
         $dbConfig = TestConnection::getDbConfigArray();
-        $dbConfig['#password'] = $dbConfig['password'];
+        // Key-pair auth, the test user requires MFA for password logins
+        $dbConfig['#privateKey'] = $dbConfig['privateKey'];
         unset($dbConfig['password'], $dbConfig['privateKey']);
         $databaseConfig = SnowflakeDatabaseConfig::fromArray($dbConfig);
 
