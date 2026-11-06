@@ -22,10 +22,17 @@ class SnowflakeMetadataProvider implements MetadataProvider
 
     private DatabaseConfig $databaseConfig;
 
-    public function __construct(OdbcConnection $db, DatabaseConfig $databaseConfig)
-    {
+    /** If false, table and column COMMENTs are not propagated as Storage descriptions */
+    private bool $propagateDescriptions;
+
+    public function __construct(
+        OdbcConnection $db,
+        DatabaseConfig $databaseConfig,
+        bool $propagateDescriptions = true,
+    ) {
         $this->db = $db;
         $this->databaseConfig = $databaseConfig; // database is optional
+        $this->propagateDescriptions = $propagateDescriptions;
     }
 
     public function getTable(InputTable $table): Table
@@ -126,6 +133,12 @@ class SnowflakeMetadataProvider implements MetadataProvider
             ->setRowCount(isset($data['rows']) ? (int) $data['rows'] : 0)
             ->setDatatypeBackend(SnowflakeDatatype::METADATA_BACKEND)
         ;
+
+        if ($this->propagateDescriptions) {
+            // SHOW TABLES and SHOW VIEWS both return the COMMENT in "comment", empty string when unset,
+            // which the builder normalizes to "no description"
+            $builder->setDescription($data['comment'] ?? null);
+        }
     }
 
     private function queryColumns(array $queryTables): array
@@ -202,6 +215,10 @@ class SnowflakeMetadataProvider implements MetadataProvider
             ->setNullable(!(trim($column['IS_NULLABLE']) === 'NO'))
             ->setType($column['DATA_TYPE'])
             ->setOrdinalPosition((int) $column['ORDINAL_POSITION']);
+
+        if ($this->propagateDescriptions) {
+            $columnBuilder->setDescription($column['COMMENT'] ?? null);
+        }
 
         if (in_array($column['COLUMN_NAME'], $primaryKeys, true)) {
             $columnBuilder->setPrimaryKey(true);
