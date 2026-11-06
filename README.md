@@ -32,6 +32,20 @@ This Docker application exports data from the Snowflake Data Warehouse.
       }
     }
 
+## Table and column descriptions
+
+By default the extractor reads the `COMMENT` of the extracted table or view (`SHOW TABLES` /
+`SHOW VIEWS`) and of all its columns (`INFORMATION_SCHEMA.COLUMNS`) on every run, and writes the
+values to the description of the corresponding table and columns in Storage. Set
+`propagateDescriptions` to `false` in the row configuration to turn this off -- no descriptions
+are then written at all.
+
+A table, view or column without a `COMMENT`, or with an empty one, gets no description.
+
+Descriptions are only available when a table is configured via `table`. In advanced query mode
+(`query`) the column list comes from the query result itself, which carries no comments, so
+nothing is propagated.
+
 ## Snowflake Privileges Templates
 
 ### Development
