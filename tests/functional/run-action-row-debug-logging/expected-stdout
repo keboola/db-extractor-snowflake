@@ -1,5 +1,5 @@
 [%s] DEBUG: Component initialization completed [] []
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="COMPONENT_TESTING";Schema="COMPONENT_TEST";application="Keboola_Connection"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=kebooladev.snowflakecomputing.com;Port=443;Tracing=0;Database="COMPONENT_TESTING";Schema="COMPONENT_TEST";application="Keboola_Connection";AUTHENTICATOR=SNOWFLAKE_JWT;PRIV_KEY_FILE=%s;UID=%s".
 Exporting "sales" to "in.c-main.escaping".
 [%s] DEBUG: Running query "REMOVE @~/in.c-main.escaping/;". [] []
 [%s] DEBUG: Running query "             COPY INTO @~/in.c-main.escaping/part             FROM (SELECT * FROM "escaping")             FILE_FORMAT = (TYPE=CSV FIELD_DELIMITER = ',' FIELD_OPTIONALLY_ENCLOSED_BY = '"' ESCAPE_UNENCLOSED_FIELD = '\\' COMPRESSION = 'GZIP' NULL_IF=())             HEADER = false             MAX_FILE_SIZE=50000000             OVERWRITE = TRUE             ;             ". [] []

@@ -17,7 +17,7 @@ This Docker application exports data from the Snowflake Data Warehouse.
           "database": "SCHEMA",
           "warehouse": "WAREHOUSE",
           "user": "USERNAME",
-          "#password": "PASSWORD"
+          "#privateKey": "PRIVATE_KEY"
         },
         "tables": [
           {
@@ -85,7 +85,7 @@ GRANT ALL ON ALL VIEWS IN SCHEMA "snowflake_extractor" TO ROLE "snowflake_extrac
 SNOWFLAKE_DB_HOST=
 SNOWFLAKE_DB_PORT=443
 SNOWFLAKE_DB_USER=
-SNOWFLAKE_DB_PASSWORD=
+SNOWFLAKE_DB_PRIVATE_KEY=
 SNOWFLAKE_DB_DATABASE=
 SNOWFLAKE_DB_SCHEMA=
 SNOWFLAKE_DB_WAREHOUSE=

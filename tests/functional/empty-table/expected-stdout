@@ -1,1 +1,1 @@
-Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=%s;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection"".
+Creating ODBC connection to "Driver=SnowflakeDSIIDriver;Server=%s;Port=443;Tracing=0;Database="%s";Schema="%s";application="Keboola_Connection";AUTHENTICATOR=SNOWFLAKE_JWT;PRIV_KEY_FILE=%s;UID=%s".
