@@ -40,7 +40,10 @@ values to the description of the corresponding table and columns in Storage. Set
 `propagateDescriptions` to `false` in the row configuration to turn this off -- no descriptions
 are then written at all.
 
-A table, view or column without a `COMMENT`, or with an empty one, gets no description.
+A table, view or column without a `COMMENT`, or with an empty one, gets no description written.
+Storage output mapping only upserts descriptions, it never removes them: a description written by
+an earlier run stays in Storage even after the `COMMENT` is removed or emptied in Snowflake, or
+after `propagateDescriptions` is switched to `false`. Clear such a description in Storage manually.
 
 Descriptions are only available when a table is configured via `table`. In advanced query mode
 (`query`) the column list comes from the query result itself, which carries no comments, so
