@@ -1,0 +1,194 @@
+{
+    "destination": "in.c-main.comments",
+    "incremental": false,
+    "metadata": [
+        {
+            "key": "KBC.name",
+            "value": "comments"
+        },
+        {
+            "key": "KBC.sanitizedName",
+            "value": "comments"
+        },
+        {
+            "key": "KBC.schema",
+            "value": "replaceEnv"
+        },
+        {
+            "key": "KBC.catalog",
+            "value": "replaceEnv"
+        },
+        {
+            "key": "KBC.type",
+            "value": "TABLE"
+        },
+        {
+            "key": "KBC.rowCount",
+            "value": 2
+        },
+        {
+            "key": "KBC.datatype.backend",
+            "value": "snowflake"
+        }
+    ],
+    "columns": [
+        "id",
+        "name",
+        "note",
+        "empty_comment"
+    ],
+    "column_metadata": {
+        "id": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "NUMERIC"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "NUMBER"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "38,0"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "id"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "id"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 1
+            }
+        ],
+        "name": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "100"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "name"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "name"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 2
+            }
+        ],
+        "note": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "100"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "note"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "note"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 3
+            }
+        ],
+        "empty_comment": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.datatype.type",
+                "value": "TEXT"
+            },
+            {
+                "key": "KBC.datatype.length",
+                "value": "100"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "empty_comment"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "empty_comment"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 4
+            }
+        ]
+    }
+}

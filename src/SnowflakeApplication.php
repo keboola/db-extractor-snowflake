@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Keboola\DbExtractor;
 
 use Keboola\DbExtractor\Configuration\NodeDefinition\SnowflakeDbNode;
+use Keboola\DbExtractor\Configuration\SnowflakeConfigRowDefinition;
 use Keboola\DbExtractor\Configuration\SnowflakeTableNodeDecorator;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ActionConfigRowDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
-use Keboola\DbExtractorConfig\Configuration\ConfigRowDefinition;
 use Keboola\DbExtractorConfig\Exception\UserException as ConfigUserException;
 use Psr\Log\LoggerInterface;
 
@@ -27,7 +27,7 @@ class SnowflakeApplication extends Application
         try {
             if ($this->isRowConfiguration($config)) {
                 if ($action === 'run') {
-                    $configDefinition = new ConfigRowDefinition(
+                    $configDefinition = new SnowflakeConfigRowDefinition(
                         $dbNode,
                         null,
                         null,

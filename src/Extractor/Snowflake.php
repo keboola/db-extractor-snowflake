@@ -41,7 +41,13 @@ class Snowflake extends BaseExtractor
 
     public function createMetadataProvider(): SnowflakeMetadataProvider
     {
-        return new SnowflakeMetadataProvider($this->connection, $this->getDatabaseConfig());
+        return new SnowflakeMetadataProvider(
+            $this->connection,
+            $this->getDatabaseConfig(),
+            // Not declared for sync actions and legacy configs, both of which keep
+            // unknown keys, so reading it straight from parameters is safe
+            (bool) ($this->parameters['propagateDescriptions'] ?? true),
+        );
     }
 
     protected function getQueryFactory(): SnowflakeQueryFactory
